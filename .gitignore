@@ -12,6 +12,9 @@ obj/
 *.log
 *.tlog
 
+# Ignore build files
+backend/CineNiche/obj/
+
 # Ignore Node.js dependencies
 node_modules/
 npm-debug.log
