@@ -447,31 +447,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Kaitlyn\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "/Users/katherine.creer/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Kaitlyn\\Documents\\Winter 2025\\INTEX II\\backend\\CineNiche\\CineNiche.csproj",
+      "projectUniqueName": "/Users/katherine.creer/Library/CloudStorage/OneDrive-DomoInc/Desktop/INTEX2/Intex2/backend/CineNiche/CineNiche.csproj",
       "projectName": "CineNiche",
-      "projectPath": "C:\\Users\\Kaitlyn\\Documents\\Winter 2025\\INTEX II\\backend\\CineNiche\\CineNiche.csproj",
-      "packagesPath": "C:\\Users\\Kaitlyn\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Kaitlyn\\Documents\\Winter 2025\\INTEX II\\backend\\CineNiche\\obj\\",
+      "projectPath": "/Users/katherine.creer/Library/CloudStorage/OneDrive-DomoInc/Desktop/INTEX2/Intex2/backend/CineNiche/CineNiche.csproj",
+      "packagesPath": "/Users/katherine.creer/.nuget/packages/",
+      "outputPath": "/Users/katherine.creer/Library/CloudStorage/OneDrive-DomoInc/Desktop/INTEX2/Intex2/backend/CineNiche/obj/",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\Kaitlyn\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "/Users/katherine.creer/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -489,8 +482,7 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      },
-      "SdkAnalysisLevel": "9.0.100"
+      }
     },
     "frameworks": {
       "net8.0": {
@@ -520,7 +512,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.101/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.407/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
