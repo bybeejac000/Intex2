@@ -7,17 +7,18 @@ export default defineConfig({
   server: {
     port: 3000,
     headers: {
-      "Content-Security-Policy":
-        "default-src 'self'; " +
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' " +
-        "style-src 'self' 'unsafe-inline' fonts.googleapis.com " +
-        "img-src 'self' data:; " +
-        "frame-ancestors 'none'; " +
-        "font-src 'self' fonts.gstatic.com data:; " +
-        "connect-src 'self' https://localhost:5000; " +
-        "object-src 'none'; " +
-        "base-uri 'self'; " +
+      "Content-Security-Policy": [
+        "default-src 'self';",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval';",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;",
+        "font-src 'self' https://fonts.gstatic.com data:;",
+        "img-src 'self' data:;",
+        "connect-src 'self' https://localhost:5000;",
+        "frame-ancestors 'none';",
+        "object-src 'none';",
+        "base-uri 'self';",
         "form-action 'self';",
+      ].join(" "),
     },
   },
 });
