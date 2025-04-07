@@ -1,0 +1,151 @@
+.movies-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #0a1929;
+    overflow: hidden;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 70px;
+    background-color: #1a2937;
+    transition: width 0.3s ease;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    color: white;
+}
+
+.sidebar:hover {
+    width: 250px;
+}
+
+.sidebar:hover + .main-content {
+    margin-left: 250px;
+}
+
+.search-bar {
+    padding: 0 15px;
+    margin-bottom: 30px;
+}
+
+.nav-items {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 20px;
+    cursor: pointer;
+    color: #a0aec0;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+    color: white; /* Ensure text is visible */
+}
+
+.nav-item:hover {
+    background-color: #2d3748;
+    color: white;
+}
+
+.nav-item span {
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.expanded .nav-item span {
+    opacity: 1;
+}
+
+.expand-button {
+    margin-top: auto;
+    padding: 20px;
+    cursor: pointer;
+    color: #a0aec0;
+}
+
+.expand-button:hover {
+    color: white;
+}
+
+/* Main Content Styles */
+.main-content {
+    flex: 1;
+    padding: 30px;
+    margin-left: 70px;
+    transition: margin-left 0.3s ease;
+    overflow-y: auto;
+    max-height: 100vh;
+}
+
+.sidebar.expanded + .main-content {
+    margin-left: 250px;
+}
+
+.movie-section {
+    margin-bottom: 40px;
+}
+
+.movie-section h2 {
+    color: white;
+    margin-bottom: 20px;
+}
+
+.movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.movie-card {
+    background-color: #1a2937;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+.movie-card:hover {
+    transform: scale(1.05);
+}
+
+.movie-poster {
+    width: 100%;
+    padding-top: 150%; /* 2:3 aspect ratio */
+    background-color: #2d3748;
+}
+
+.movie-title {
+    color: white;
+    padding: 10px;
+    margin: 0;
+    text-align: center;
+}
+
+.see-more {
+    background-color: #1976d2;
+    border: none;
+    padding: 8px 20px;
+}
+
+.see-more:hover {
+    background-color: #1565c0;
+} 
+
+.fas.fa-search {
+    cursor: pointer;
+    color: #a0aec0;
+}
+
+.sidebar.expanded .fas.fa-search {
+    display: none;
+}
