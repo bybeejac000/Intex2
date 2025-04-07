@@ -1,0 +1,29 @@
+# Ignore Visual Studio & .NET build artifacts
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.csproj.user
+*.dbmdl
+*.jfm
+*.pdb
+*.log
+*.tlog
+
+# Ignore Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Ignore package lock files (optional, if you use npm)
+package-lock.json
+
+# Ignore environment variables
+.env
+.env.local
+
+# Ignore IDE settings
+.idea/
+.vscode/
