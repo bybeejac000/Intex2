@@ -9,10 +9,10 @@ const API_URL = "https://localhost:5000/CineNiche"; // Correct API URL
 
 // Default fetch options for all requests
 const defaultOptions = {
-  credentials: 'include' as RequestCredentials,
+  credentials: "include" as RequestCredentials,
   headers: {
-    'Content-Type': 'application/json'
-  }
+    "Content-Type": "application/json",
+  },
 };
 
 // Fetch movies with pagination and category filtering
@@ -114,7 +114,10 @@ export const deleteMovie = async (showId: string): Promise<void> => {
 // Fetch a single movie by ID
 export const fetchMovieById = async (movieId: string): Promise<Movie> => {
   try {
-    const response = await fetch(`${API_URL}/GetMovie/${movieId}`, defaultOptions);
+    const response = await fetch(
+      `${API_URL}/GetMovie/${movieId}`,
+      defaultOptions
+    );
     if (!response.ok) {
       throw new Error("Failed to fetch movie");
     }
