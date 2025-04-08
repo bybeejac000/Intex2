@@ -5,10 +5,6 @@ import NewMovieForm from "../components/NewMovieForm";
 import EditMovieForm from "../components/EditMovieForm";
 import Pagination from "../components/Pagination";
 import { Modal } from "bootstrap";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-
-
 
 const AdminMoviesPage = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -17,6 +13,8 @@ const AdminMoviesPage = () => {
   const [pageSize, setPageSize] = useState<number>(10);
   const [pageNum, setPageNum] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
+  //const [showForm, setShowForm] = useState(false);
+  const [editingMovie, setEditingMovie] = useState<Movie | null>(null);
   const [sortOrder, setSortOrder] = useState<string | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
@@ -60,36 +58,30 @@ const AdminMoviesPage = () => {
   if (error) return <p className="text-red-500">Error: {error}</p>;
 
   return (
-    <>
-    <Header />
-    <div className="container-fluid min-vh-100" style={{ backgroundColor: '#2d3748', paddingBottom: '100px', paddingTop: '75px', backgroundImage: 'linear-gradient(135deg, #000810 00%, #00294D 70%)' }}>
+    <div className="container-fluid min-vh-100" style={{ backgroundColor: '#F0F2F5' }}>
       <div className="d-flex justify-content-center align-items-center pt-5">
         <button 
-          className="btn btn-link text-light text-decoration-none me-3" 
+          className="btn btn-link text-dark text-decoration-none me-3" 
           onClick={() => window.history.back()}
           style={{ fontSize: '1.5rem' }}
         >
           ←
         </button>
-        <h1 className="mb-0" style={{ color: '#FFFFFF' }}>Administrator Database</h1>
+        <h1 className="mb-0">Administrator Database</h1>
       </div>
 
       <div className="text-center">
-        <h5 className="mt-3 mb-5" style={{ color: '#FFFFFF' }}>
+        <h5 className="mt-3 mb-5">
           Collection of all titles available on CineNiche with their respective information and reviews.
         </h5>
       </div>
       <button
-        className="btn"
+        className="btn btn-success"
         data-bs-toggle="modal"
         data-bs-target="#addMovieModal"
-        style={{ 
-          backgroundColor: '#1976d2',
-          color: 'white',
-          border: 'none'
-        }}
       >Add a Title</button>
-
+      <br />
+      <br />
       {/* Space before table */}
       <br />
       <br />
@@ -97,16 +89,16 @@ const AdminMoviesPage = () => {
       <div className="row">
         {/* Left Column - Filters */}
         <div className="col-md-3">
-          <div className="card shadow" style={{ backgroundColor: '#F0F2F5', boxShadow: '0 2px 4px rgba(0,0,0,0.08)' }}>
+          <div className="card shadow" style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 4px rgba(0,0,0,0.08)' }}>
             <div className="card-body">
-              <h3 className="card-title h5 mb-3" style={{ color: '#00294D' }}>Sort Options</h3>
+              <h3 className="card-title h5 mb-3">Sort Options</h3>
               <div className="d-grid gap-2 mb-4">
-                <button className="btn btn-outline-primary" onClick={() => setSortOrder(null)} style={{ borderColor: '#1976d2', color: '#1976d2' }}>Default Order</button>
-                <button className="btn btn-outline-primary" onClick={() => setSortOrder("asc")} style={{ borderColor: '#1976d2', color: '#1976d2' }}>Sort A → Z</button>
-                <button className="btn btn-outline-primary" onClick={() => setSortOrder("desc")} style={{ borderColor: '#1976d2', color: '#1976d2' }}>Sort Z → A</button>
+                <button className="btn btn-outline-primary" onClick={() => setSortOrder(null)}>Default Order</button>
+                <button className="btn btn-outline-primary" onClick={() => setSortOrder("asc")}>Sort A → Z</button>
+                <button className="btn btn-outline-primary" onClick={() => setSortOrder("desc")}>Sort Z → A</button>
               </div>
 
-              <h3 className="card-title h5 mb-3" style={{ color: '#00294D' }}>Filter by Categories</h3>
+              <h3 className="card-title h5 mb-3">Filter by Categories</h3>
               <div className="form-check mb-2">
                 <input
                   className="form-check-input"
@@ -167,7 +159,7 @@ const AdminMoviesPage = () => {
         {/* Right Column - Movie List */}
         <div className="col-md-9">
           {movies.map((m) => (
-            <div key={m.show_id} className="card mb-3 shadow" style={{ backgroundColor: '#F0F2F5', boxShadow: '0 2px 4px rgba(0,0,0,0.08)' }}>
+            <div key={m.show_id} className="card mb-3 shadow" style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 4px rgba(0,0,0,0.08)' }}>
               <div className="card-body">
                 <div className="row align-items-center">
                   <div className="col-md-6">
@@ -181,22 +173,18 @@ const AdminMoviesPage = () => {
                       className="btn btn-outline-info btn-sm me-2"
                       data-bs-toggle="modal"
                       data-bs-target={`#infoModal${m.show_id}`}
-                      style={{ borderColor: '#1976d2', color: '#1976d2' }}
                     >
                       All Information
                     </button>
                     <button
                       className="btn btn-outline-primary btn-sm me-2"
-                      data-bs-toggle="modal"
-                      data-bs-target={`#editMovieModal${m.show_id}`}
-                      style={{ borderColor: '#1976d2', color: '#1976d2' }}
+                      onClick={() => setEditingMovie(m)}
                     >
                       Edit
                     </button>
                     <button
                       className="btn btn-outline-danger btn-sm"
                       onClick={() => handleDelete(m.show_id)}
-                      style={{ borderColor: '#dc3545', color: '#dc3545' }}
                     >
                       Delete
                     </button>
@@ -221,9 +209,9 @@ const AdminMoviesPage = () => {
       {/* Add Movie Modal */}
       <div className="modal fade" id="addMovieModal" tabIndex={-1} aria-labelledby="addMovieModalLabel" aria-hidden="true">
         <div className="modal-dialog modal-lg">
-          <div className="modal-content" style={{ backgroundColor: '#F0F2F5' }}>
-            <div className="modal-header" style={{ backgroundColor: '#F0F2F5' }}>
-              <h5 className="modal-title" id="addMovieModalLabel" style={{ color: '#00294D' }}>Add New Title</h5>
+          <div className="modal-content" style={{ backgroundColor: '#FFFFFF' }}>
+            <div className="modal-header">
+              <h5 className="modal-title" id="addMovieModalLabel">Add New Movie</h5>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body">
@@ -256,8 +244,8 @@ const AdminMoviesPage = () => {
         <div key={`modal-${m.show_id}`} className="modal fade" id={`infoModal${m.show_id}`} tabIndex={-1} aria-hidden="true">
           <div className="modal-dialog modal-lg">
             <div className="modal-content" style={{ backgroundColor: '#FFFFFF' }}>
-              <div className="modal-header" style={{ backgroundColor: '#E8F0FE', borderBottom: '1px solid #1976d2' }}>
-                <h5 className="modal-title" style={{ color: '#00294D' }}>{m.title}</h5>
+              <div className="modal-header">
+                <h5 className="modal-title">{m.title}</h5>
                 <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div className="modal-body">
@@ -296,44 +284,19 @@ const AdminMoviesPage = () => {
         </div>
       ))}
 
-      {/* Edit Movie Modal */}
-      {movies.map((m) => (
-        <div key={`edit-modal-${m.show_id}`} className="modal fade" id={`editMovieModal${m.show_id}`} tabIndex={-1} aria-labelledby={`editMovieModalLabel${m.show_id}`} aria-hidden="true">
-          <div className="modal-dialog modal-lg">
-            <div className="modal-content" style={{ backgroundColor: '#F0F2F5' }}>
-              <div className="modal-header" style={{ backgroundColor: '#F0F2F5' }}>
-                <h5 className="modal-title" id={`editMovieModalLabel${m.show_id}`} style={{ color: '#00294D' }}>Edit Title</h5>
-                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div className="modal-body">
-                <EditMovieForm
-                  movie={m}
-                  onSuccess={() => {
-                    const modalElement = document.getElementById(`editMovieModal${m.show_id}`);
-                    if (modalElement) {
-                      const modal = Modal.getInstance(modalElement);
-                      modal?.hide();
-                    }
-                    fetchMovies(pageSize, pageNum, selectedCategories, sortOrder).then(
-                      (data) => setMovies(data.movies)
-                    );
-                  }}
-                  onCancel={() => {
-                    const modalElement = document.getElementById(`editMovieModal${m.show_id}`);
-                    if (modalElement) {
-                      const modal = Modal.getInstance(modalElement);
-                      modal?.hide();
-                    }
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      ))}
+      {editingMovie && (
+        <EditMovieForm
+          movie={editingMovie}
+          onSuccess={() => {
+            setEditingMovie(null);
+            fetchMovies(pageSize, pageNum, selectedCategories, sortOrder).then(
+              (data) => setMovies(data.movies)
+            );
+          }}
+          onCancel={() => setEditingMovie(null)}
+        />
+      )}
     </div>
-    <Footer />
-    </>
   );
 };
 

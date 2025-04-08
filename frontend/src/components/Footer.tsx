@@ -4,7 +4,7 @@ import { FaFacebook, FaInstagram, FaTwitter, FaReddit, FaTiktok } from 'react-ic
 function Footer() {
     return (
         <footer style={{
-            backgroundColor: '#010f1e',
+            backgroundColor: '#0a1929',
             color: 'white',
             padding: '1rem 2rem',
             position: 'fixed',
