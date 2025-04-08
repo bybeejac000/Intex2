@@ -13,7 +13,7 @@ function HomePage() {
         <>
         <Header />
         <div className="container-fluid p-0 min-vh-100" style={{ 
-            backgroundImage: 'linear-gradient(135deg, #000810 0%, #001d3c 100%)',
+            backgroundImage: 'linear-gradient(135deg, #000810 0%, #00294D 100%)',
             overflow: 'hidden',
             margin: 0,
             width: '100vw',

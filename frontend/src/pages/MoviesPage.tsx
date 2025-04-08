@@ -16,20 +16,20 @@ function MoviesPage() {
     <>
       <AuthorizeView>
         <Header />
-        <div
-          className="movies-container"
-          style={{
-            backgroundColor: "#0a1929",
-            overflow: "hidden",
+        <div className="movies-container" style={{
+            backgroundColor: '#0a1929',
+            backgroundImage: 'linear-gradient(135deg, #000810 0%, #00294D 100%)',
+            overflow: 'hidden',
             margin: 0,
-            width: "100vw",
-            height: "100vh",
-            marginTop: "65px",
-          }}
-        >
-          {/* Sidebar Navigation */}
-          <div
-            className={`sidebar ${isExpanded ? "expanded" : ""}`}
+            width: '100vw',
+            height: '100vh',
+            marginTop: '65px',
+            paddingBottom: '75px'
+        }}>
+
+            
+            {/* Sidebar Navigation */}
+            <div className={`sidebar ${isExpanded ? 'expanded' : ''}`}
             onMouseEnter={() => setIsExpanded(true)}
             onMouseLeave={() => setIsExpanded(false)}
           >
