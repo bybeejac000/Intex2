@@ -13,7 +13,7 @@ function HomePage() {
         <>
         <Header />
         <div className="container-fluid p-0 min-vh-100" style={{ 
-            backgroundColor: '#0a1929',
+            backgroundImage: 'linear-gradient(135deg, #000810 0%, #001d3c 100%)',
             overflow: 'hidden',
             margin: 0,
             width: '100vw',
@@ -29,7 +29,7 @@ function HomePage() {
                 <div className="col-md-8 d-flex flex-column justify-content-center align-items-center text-light" style={{ height: '100vh' }}>
                     <div className="text-center mb-5">
                         <h1 className="display-1 fw-light" style={{ color: '#ffffff' }}>CineNiche</h1>
-                        <p className="lead text-light-50">Subtitle Here</p>
+                        <p className="lead text-light-50">Subtitle Here: we need to explain the purpose of this site and fulfil the 413 requirements</p>
                     </div>
                     <div className="d-grid gap-3 col-md-6 mx-auto">
                         <button 
