@@ -1,5 +1,6 @@
 ﻿using CineNiche.Data;
 using LinqKit;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ namespace CineNiche.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Authorize]
     public class CineNicheController : ControllerBase
     {
         private MovieDbContext _movieContext;
