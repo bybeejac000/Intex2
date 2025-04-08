@@ -203,11 +203,11 @@ function RegistrationPage() {
                             <button 
                                 className="btn btn-link text-light text-decoration-none me-3" 
                                 onClick={() => window.history.back()}
-                                style={{ fontSize: '1.5rem' }}
+                                style={{ fontSize: '2.25rem' }}
                             >
                                 ←
                             </button>
-                            <h1 className="display-1 fw-light mb-4">Register for an Account</h1>
+                            <h1 className="display-1 fw-light mb-4" style={{paddingTop: "100px"}}>Register for an Account</h1>
                         </div>
                         <br />
                         <br />
@@ -236,7 +236,7 @@ function RegistrationPage() {
                             </div>
                             <div className="mt-3">
                                 <p>Step {step} of 8</p>
-                                <div className="progress">
+                                <div className="progress" style={{marginBottom: "100px"}}>
                                     <div className="progress-bar" role="progressbar" style={{ width: `${(step / 8) * 100}%` }} aria-valuenow={step} aria-valuemin={1} aria-valuemax={8}></div>
                                 </div>
                             </div>
