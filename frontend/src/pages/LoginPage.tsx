@@ -11,7 +11,7 @@ function LoginPage() {
         <>
             <Header />
             <div className="container-fluid p-0 min-vh-100" style={{
-                backgroundColor: '#0a1929',
+                backgroundImage: 'linear-gradient(135deg, #000810 0%, #003366 100%)',
                 overflow: 'hidden',
                 margin: 0,
                 width: '100vw',

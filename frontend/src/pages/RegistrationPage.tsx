@@ -34,9 +34,13 @@ function RegistrationPage() {
     const buttonStyle = {
         backgroundColor: '#1976d2',
         color: 'white',
-        padding: '15px 30px',
+        padding: '10px 20px',  // Adjusted padding to make it thinner
         fontSize: '1.2rem',
         height: '50px',
+        textAlign: 'center',   // Ensures the text is centered
+        display: 'inline-flex', // Makes the button inline so text can be centered
+        justifyContent: 'center', // Ensures the content is centered
+        alignItems: 'center',    // Ensures vertical alignment of text
     };
 
     const renderStep = () => {
@@ -121,8 +125,19 @@ function RegistrationPage() {
                         <button 
                             type="submit" 
                             className="btn btn-lg"
-                            style={buttonStyle}
-                        > Confirm and Register
+                            style={{
+                                backgroundColor: buttonStyle.backgroundColor,
+                                color: buttonStyle.color,
+                                padding: buttonStyle.padding,
+                                fontSize: buttonStyle.fontSize,
+                                height: buttonStyle.height,
+                                textAlign: "center" as const,
+                                display: buttonStyle.display,
+                                justifyContent: buttonStyle.justifyContent,
+                                alignItems: buttonStyle.alignItems,
+                                width: '300px'
+                            }}
+                        >Confirm and Register
                         </button>
                     </div>
                 );
@@ -151,13 +166,29 @@ function RegistrationPage() {
                     <div className="col-md-8 d-flex flex-column justify-content-center align-items-center text-light" style={{ height: '100vh' }}>
                         <div className="text-center mb-5">
                             <h1 className="display-1 fw-light mb-4">Register for an Account</h1>
+                            <br />
+                            <br />
+                            <br />
+                            <br />
                             <form className="d-flex flex-column gap-3" style={{ maxWidth: '300px', margin: '0 auto' }} onSubmit={handleSubmit}>
                                 {renderStep()}
                                 <div className="d-flex justify-content-center gap-3">
                                     {step === 7 && <button 
                                         type="submit" 
-                                        className="btn btn-sm"
-                                        style={buttonStyle} 
+                                        className="btn btn-lg"
+                                        style={{
+                                            backgroundColor: 'transparent',
+                                            border: '2px solid #1976d2',
+                                            color: '#1976d2',
+                                            padding: buttonStyle.padding,
+                                            fontSize: buttonStyle.fontSize,
+                                            height: buttonStyle.height,
+                                            textAlign: "center" as const,
+                                            display: buttonStyle.display,
+                                            justifyContent: buttonStyle.justifyContent,
+                                            alignItems: buttonStyle.alignItems,
+                                            width: '500px'
+                                        }}
                                         onClick={() => setStep(1)}
                                     >Go Back and Edit</button>}
                                     {step < 7 && <button type="button" className="btn btn-primary" onClick={handleNext}>Next</button>}
