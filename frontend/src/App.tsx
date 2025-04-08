@@ -5,8 +5,9 @@ import LoginPage from './pages/LoginPage';
 import RegistrationPage from './pages/RegistrationPage';
 import MoviesPage from './pages/MoviesPage';
 import ProfilePage from './pages/ProfilePage';
-
-
+import MovieDetailsPage from './pages/MovieDetailsPage';
+import AdminPage from './pages/AdminPage';
+import PrivacyPage from './pages/PrivacyPage';
 
 function App() {
   return (
@@ -17,6 +18,9 @@ function App() {
         <Route path="/registration" element={<RegistrationPage />} />
         <Route path="/movies" element={<MoviesPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/movie/:id" element={<MovieDetailsPage />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
       </Routes>
     </Router>
   )

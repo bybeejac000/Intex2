@@ -1,58 +1,76 @@
 .profile-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  background-color: var(--background-color);
-  color: var(--color);
-}
-
-.profile-details {
-  width: 100%;
-  max-width: 400px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.profile-field {
-  display: flex;
-  flex-direction: column;
-}
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+  }
+  
+  .profile-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 900px;
+    border: 1px solid #ccc;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+    margin-top: 20px;
+  }
+  
+  .profile-text {
+    flex: 1;
+    margin-right: 40px;
+  }
+  
+  .profile-photo-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .profile-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+    border: 2px solid #ddd;
+  }
 
 label {
   font-weight: bold;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
+  display: block;
 }
 
 input {
-  padding: 10px;
+  padding: 12px;
   border-radius: 5px;
   border: 1px solid #ccc;
   background-color: #f9f9f9;
+  width: 100%;
+  margin-bottom: 15px;
 }
 
 .profile-actions {
   display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
 }
 
-.profile-button {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  background-color: #1a1a1a;
-  color: #fff;
+.profile-button, .edit-photo-button {
+  padding: 12px 24px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
-  transition: border-color 0.25s;
+  width: 100%;
 }
 
-.profile-button:hover {
-  border-color: #646cff;
+.profile-button:hover, .edit-photo-button:hover {
+  background-color: #0056b3;
 } 
