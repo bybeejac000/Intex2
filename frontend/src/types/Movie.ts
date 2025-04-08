@@ -6,7 +6,7 @@ export interface Movie {
   cast: string;
   country: string;
   release_year: number;
-  rating: number;
+  rating: string;
   duration: string;
   description: string;
   action: number;
