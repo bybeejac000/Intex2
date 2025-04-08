@@ -1,5 +1,6 @@
 ﻿using CineNiche.Data;
 using LinqKit;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ namespace CineNiche.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Authorize]
     public class CineNicheController : ControllerBase
     {
         private MovieDbContext _movieContext;
@@ -20,10 +22,10 @@ namespace CineNiche.Controllers
         {
             var query = _movieContext.Titles.AsQueryable();
 
-            //apply category filtering
+            // Apply category filtering based on passed categories
             if (categories != null && categories.Any())
             {
-                var predicate = PredicateBuilder.New<Title>(false); // Starts with a false condition
+                var predicate = PredicateBuilder.New<Title>(false); // Start with false condition
 
                 foreach (var category in categories)
                 {
@@ -37,7 +39,7 @@ namespace CineNiche.Controllers
                 query = query.Where(predicate);
             }
 
-            //apply sorting
+            // Apply sorting based on sortOrder
             if (!string.IsNullOrEmpty(sortOrder))
             {
                 query = sortOrder.ToLower() == "desc"
@@ -46,19 +48,16 @@ namespace CineNiche.Controllers
             }
 
             var totalNumMovies = query.Count();
-
             var movies = query
                 .Skip((pageNum - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
 
-            var movieObject = new
+            return Ok(new
             {
                 Movies = movies,
                 TotalNumMovies = totalNumMovies
-            };
-
-            return Ok(movieObject);
+            });
         }
 
         [HttpGet("GetCategories")]

@@ -1,192 +1,340 @@
-import React, { useState, useEffect } from 'react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import { Table, Button, Modal, Form } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { useEffect, useState } from "react";
+import { Movie } from "../types/Movie";
+import { deleteMovie, fetchMovies } from "../api/MoviesAPI";
+import NewMovieForm from "../components/NewMovieForm";
+import EditMovieForm from "../components/EditMovieForm";
+import Pagination from "../components/Pagination";
+import { Modal } from "bootstrap";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
-interface Title {
-    show_id: string;
-    type: string;
-    title: string;
-    director: string;
-    cast: string;
-    country: string;
-    release_year: number;
-    rating: string;
-    duration: string;
-    description: string;
-    genres: string[];
-}
 
-const AddTitleModal: React.FC<{ show: boolean, handleClose: () => void }> = ({ show, handleClose }) => {
-    return (
-        <Modal show={show} onHide={handleClose} centered>
-            <Modal.Header closeButton>
-                <Modal.Title>Add a New Movie/TV Show</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Form>
-                    <Form.Group controlId="formTitle" style={{ paddingBottom: '10px' }}>
-                        <Form.Label>Title:</Form.Label>
-                        <Form.Control  type="text" placeholder="Enter title" />
-                    </Form.Group>
-                    <Form.Group controlId="formDirector" style={{ paddingBottom: '10px' }}>
-                        <Form.Label>Director:</Form.Label>
-                        <Form.Control type="text" placeholder="Enter director" />
-                    </Form.Group>
-                    <Form.Group controlId="formReleaseYear" style={{ paddingBottom: '10px' }}>
-                        <Form.Label>Release Year:</Form.Label>
-                        <Form.Control type="number" placeholder="Enter release year" />
-                    </Form.Group>
-                    <Form.Group controlId="formRating" style={{ paddingBottom: '10px' }}>
-                        <Form.Label>Rating:</Form.Label>
-                        <Form.Control type="text" placeholder="Enter rating" />
-                    </Form.Group>
-                    <Form.Group controlId="formDuration" style={{ paddingBottom: '10px' }}>
-                        <Form.Label>Duration:</Form.Label>
-                        <Form.Control type="text" placeholder="Enter duration" />
-                    </Form.Group>
-                    <Form.Group controlId="formGenres" style={{ paddingBottom: '10px' }}>
-                        <Form.Label>Genre:</Form.Label>
-                        <Form.Control type="text" placeholder="Enter genres" />
-                    </Form.Group>
-                </Form>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>
-                    Close
-                </Button>
-                <Button variant="primary" onClick={() => { /* Handle form submission */ }}>
-                    Save Changes
-                </Button>
-            </Modal.Footer>
-        </Modal>
+
+const AdminMoviesPage = () => {
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [pageNum, setPageNum] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [sortOrder, setSortOrder] = useState<string | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  // Fetch movies on page change, sort change, and page size change
+  useEffect(() => {
+    const loadMovies = async () => {
+      try {
+        const data = await fetchMovies(
+          pageSize,
+          pageNum,
+          selectedCategories,
+          sortOrder
+        );
+        setMovies(data.movies);
+        setTotalPages(Math.ceil(data.totalNumMovies / pageSize));
+      } catch (error) {
+        setError((error as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMovies();
+  }, [pageSize, pageNum, sortOrder, selectedCategories]);
+
+  const handleDelete = async (show_id: string) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this movie?"
     );
-};
+    if (!confirmDelete) return;
 
-export const AdminPage: React.FC = () => {
-    const [titles, setTitles] = useState<Title[]>([]);
-    const [showModal, setShowModal] = useState(false);
+    try {
+      await deleteMovie(show_id);
+      setMovies(movies.filter((m) => m.show_id !== show_id));
+    } catch (error) {
+      alert("Failed to delete movie. Please try again.");
+    }
+  };
 
-    useEffect(() => {
-        fetchTitles();
-    }, []);
+  if (loading) return <p>Loading Movies...</p>;
+  if (error) return <p className="text-red-500">Error: {error}</p>;
 
-    const fetchTitles = async () => {
-        try {
-            const response = await fetch('/api/titles');
-            const data = await response.json();
-            
-            // Transform the data to extract genres where value is 1
-            const transformedData = data.map((title: any) => {
-                const genres = [];
-                if (title.action === 1) genres.push('Action');
-                if (title.adventure === 1) genres.push('Adventure');
-                if (title.anime_series_international_tv_shows === 1) genres.push('Anime');
-                if (title.british_tv_shows_docuseries_international_tv_shows === 1) genres.push('British TV');
-                if (title.children === 1) genres.push('Children');
-                if (title.comedies === 1) genres.push('Comedy');
-                if (title.comedies_dramas_international_movies === 1) genres.push('Comedy Drama');
-                if (title.comedies_international_movies === 1) genres.push('International Comedy');
-                if (title.comedies_romantic_movies === 1) genres.push('Romantic Comedy');
-                if (title.crime_tv_shows_docuseries === 1) genres.push('Crime');
-                if (title.documentaries === 1) genres.push('Documentary');
-                if (title.documentaries_international_movies === 1) genres.push('International Documentary');
-                if (title.docuseries === 1) genres.push('Docuseries');
-                
-                return {
-                    ...title,
-                    genres
-                };
-            });
-            
-            setTitles(transformedData);
-        } catch (error) {
-            console.error('Error fetching titles:', error);
-        }
-    };
+  return (
+    <>
+    <Header />
+    <div className="container-fluid min-vh-100" style={{ backgroundColor: '#2d3748', paddingBottom: '100px', paddingTop: '75px', backgroundImage: 'linear-gradient(135deg, #000810 00%, #00294D 70%)' }}>
+      <div className="d-flex justify-content-center align-items-center pt-5">
+        <button 
+          className="btn btn-link text-light text-decoration-none me-3" 
+          onClick={() => window.history.back()}
+          style={{ fontSize: '1.5rem' }}
+        >
+          ←
+        </button>
+        <h1 className="mb-0" style={{ color: '#FFFFFF' }}>Administrator Database</h1>
+      </div>
 
-    const handleEdit = (showId: string) => {
-        // Implement edit functionality
-        console.log('Edit:', showId);
-    };
+      <div className="text-center">
+        <h5 className="mt-3 mb-5" style={{ color: '#FFFFFF' }}>
+          Collection of all titles available on CineNiche with their respective information and reviews.
+        </h5>
+      </div>
+      <button
+        className="btn"
+        data-bs-toggle="modal"
+        data-bs-target="#addMovieModal"
+        style={{ 
+          backgroundColor: '#1976d2',
+          color: 'white',
+          border: 'none'
+        }}
+      >Add a Title</button>
 
-    const handleDelete = async (showId: string) => {
-        if (window.confirm('Are you sure you want to delete this title?')) {
-            try {
-                await fetch(`/api/titles/${showId}`, {
-                    method: 'DELETE'
-                });
-                fetchTitles(); // Refresh the list
-            } catch (error) {
-                console.error('Error deleting title:', error);
-            }
-        }
-    };
+      {/* Space before table */}
+      <br />
+      <br />
 
-    const handleShowModal = () => setShowModal(true);
-    const handleCloseModal = () => setShowModal(false);
+      <div className="row">
+        {/* Left Column - Filters */}
+        <div className="col-md-3">
+          <div className="card shadow" style={{ backgroundColor: '#F0F2F5', boxShadow: '0 2px 4px rgba(0,0,0,0.08)' }}>
+            <div className="card-body">
+              <h3 className="card-title h5 mb-3" style={{ color: '#00294D' }}>Sort Options</h3>
+              <div className="d-grid gap-2 mb-4">
+                <button className="btn btn-outline-primary" onClick={() => setSortOrder(null)} style={{ borderColor: '#1976d2', color: '#1976d2' }}>Default Order</button>
+                <button className="btn btn-outline-primary" onClick={() => setSortOrder("asc")} style={{ borderColor: '#1976d2', color: '#1976d2' }}>Sort A → Z</button>
+                <button className="btn btn-outline-primary" onClick={() => setSortOrder("desc")} style={{ borderColor: '#1976d2', color: '#1976d2' }}>Sort Z → A</button>
+              </div>
 
-    return (
-        <div>
-            <Header />
-            <div className="container my-4">
-                <h1 className="mb-4">Movie Database Administration</h1>
-                <Button variant="primary" className="mb-3" onClick={handleShowModal}>
-                    Add New Title
-                </Button>
-                
-                <Table striped bordered hover responsive>
-                    <thead>
-                        <tr>
-                            <th>Show ID</th>
-                            <th>Type</th>
-                            <th>Title</th>
-                            <th>Director</th>
-                            <th>Release Year</th>
-                            <th>Rating</th>
-                            <th>Duration</th>
-                            <th>Genres</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {titles.map((title) => (
-                            <tr key={title.show_id}>
-                                <td>{title.show_id}</td>
-                                <td>{title.type}</td>
-                                <td>{title.title}</td>
-                                <td>{title.director || 'N/A'}</td>
-                                <td>{title.release_year}</td>
-                                <td>{title.rating || 'N/A'}</td>
-                                <td>{title.duration || 'N/A'}</td>
-                                <td>{title.genres.join(', ')}</td>
-                                <td>
-                                    <Button 
-                                        variant="warning" 
-                                        size="sm" 
-                                        className="me-2"
-                                        onClick={() => handleEdit(title.show_id)}
-                                    >
-                                        Edit
-                                    </Button>
-                                    <Button 
-                                        variant="danger" 
-                                        size="sm"
-                                        onClick={() => handleDelete(title.show_id)}
-                                    >
-                                        Delete
-                                    </Button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </Table>
+              <h3 className="card-title h5 mb-3" style={{ color: '#00294D' }}>Filter by Categories</h3>
+              <div className="form-check mb-2">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="actionCheck"
+                  checked={selectedCategories.includes("action")}
+                  onChange={() =>
+                    setSelectedCategories((prevCategories) =>
+                      prevCategories.includes("action")
+                        ? prevCategories.filter((cat) => cat !== "action")
+                        : [...prevCategories, "action"]
+                    )
+                  }
+                />
+                <label className="form-check-label" htmlFor="actionCheck">
+                  Action
+                </label>
+              </div>
+              <div className="form-check mb-2">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="comedyCheck"
+                  checked={selectedCategories.includes("comedy")}
+                  onChange={() =>
+                    setSelectedCategories((prevCategories) =>
+                      prevCategories.includes("comedy")
+                        ? prevCategories.filter((cat) => cat !== "comedy")
+                        : [...prevCategories, "comedy"]
+                    )
+                  }
+                />
+
+                <label className="form-check-label" htmlFor="comedyCheck">
+                  Comedy
+                </label>
+              </div>
+
+              <div className="mt-4">
+                <label className="form-label">Results per page:</label>
+                <select 
+                  className="form-select"
+                  value={pageSize} 
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setPageNum(1);
+                  }}
+                >
+                  <option value="5">5 per page</option>
+                  <option value="10">10 per page</option>
+                  <option value="20">20 per page</option>
+                </select>
+              </div>
             </div>
-            <Footer />
-            <AddTitleModal show={showModal} handleClose={handleCloseModal} />
+          </div>
         </div>
-    );
+
+        {/* Right Column - Movie List */}
+        <div className="col-md-9">
+          {movies.map((m) => (
+            <div key={m.show_id} className="card mb-3 shadow" style={{ backgroundColor: '#F0F2F5', boxShadow: '0 2px 4px rgba(0,0,0,0.08)' }}>
+              <div className="card-body">
+                <div className="row align-items-center">
+                  <div className="col-md-6">
+                    <h5 className="card-title mb-1">{m.title}</h5>
+                    <div className="text-muted small">
+                      {m.release_year} • {m.duration}
+                    </div>
+                  </div>
+                  <div className="col-md-6 text-md-end mt-3 mt-md-0">
+                    <button
+                      className="btn btn-outline-info btn-sm me-2"
+                      data-bs-toggle="modal"
+                      data-bs-target={`#infoModal${m.show_id}`}
+                      style={{ borderColor: '#1976d2', color: '#1976d2' }}
+                    >
+                      All Information
+                    </button>
+                    <button
+                      className="btn btn-outline-primary btn-sm me-2"
+                      data-bs-toggle="modal"
+                      data-bs-target={`#editMovieModal${m.show_id}`}
+                      style={{ borderColor: '#1976d2', color: '#1976d2' }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="btn btn-outline-danger btn-sm"
+                      onClick={() => handleDelete(m.show_id)}
+                      style={{ borderColor: '#dc3545', color: '#dc3545' }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          <div className="mt-4">
+            <Pagination
+              currentPage={pageNum}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              onPageChange={setPageNum}
+              onPageSizeChange={setPageSize}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Add Movie Modal */}
+      <div className="modal fade" id="addMovieModal" tabIndex={-1} aria-labelledby="addMovieModalLabel" aria-hidden="true">
+        <div className="modal-dialog modal-lg">
+          <div className="modal-content" style={{ backgroundColor: '#F0F2F5' }}>
+            <div className="modal-header" style={{ backgroundColor: '#F0F2F5' }}>
+              <h5 className="modal-title" id="addMovieModalLabel" style={{ color: '#00294D' }}>Add New Title</h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div className="modal-body">
+              <NewMovieForm
+                onSuccess={() => {
+                  const modalElement = document.getElementById('addMovieModal');
+                  if (modalElement) {
+                    const modal = Modal.getInstance(modalElement);
+                    modal?.hide();
+                  }
+                  fetchMovies(pageSize, pageNum, selectedCategories, sortOrder).then(
+                    (data) => setMovies(data.movies)
+                  );
+                }}
+                onCancel={() => {
+                  const modalElement = document.getElementById('addMovieModal');
+                  if (modalElement) {
+                    const modal = Modal.getInstance(modalElement);
+                    modal?.hide();
+                  }
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Info Modals */}
+      {movies.map((m) => (
+        <div key={`modal-${m.show_id}`} className="modal fade" id={`infoModal${m.show_id}`} tabIndex={-1} aria-hidden="true">
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content" style={{ backgroundColor: '#FFFFFF' }}>
+              <div className="modal-header" style={{ backgroundColor: '#E8F0FE', borderBottom: '1px solid #1976d2' }}>
+                <h5 className="modal-title" style={{ color: '#00294D' }}>{m.title}</h5>
+                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div className="modal-body">
+                <p><strong>Show ID:</strong> {m.show_id}</p>
+                <p><strong>Director:</strong> {m.director}</p>
+                <p><strong>Cast:</strong> {m.cast}</p>
+                <p><strong>Country:</strong> {m.country}</p>
+                <p><strong>Release Year:</strong> {m.release_year}</p>
+                <p><strong>Rating:</strong> {m.rating}</p>
+                <p><strong>Duration:</strong> {m.duration}</p>
+                <p><strong>Description:</strong> {m.description}</p>
+                <div><strong>Genre{"(s)"}:</strong>
+                  <ul className="list-unstyled mb-0">
+                    {Object.keys(m).map((key) => {
+                      if (
+                        key !== "show_id" &&
+                        key !== "title" &&
+                        key !== "director" &&
+                        key !== "cast" &&
+                        key !== "country" &&
+                        key !== "release_year" &&
+                        key !== "rating" &&
+                        key !== "duration"
+                      ) {
+                        return m[key as keyof Movie] === 1 ? (
+                          <li key={key} className="badge bg-secondary me-1 mb-1">{key}</li>
+                        ) : null;
+                      }
+                      return null;
+                    })}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+
+      {/* Edit Movie Modal */}
+      {movies.map((m) => (
+        <div key={`edit-modal-${m.show_id}`} className="modal fade" id={`editMovieModal${m.show_id}`} tabIndex={-1} aria-labelledby={`editMovieModalLabel${m.show_id}`} aria-hidden="true">
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content" style={{ backgroundColor: '#F0F2F5' }}>
+              <div className="modal-header" style={{ backgroundColor: '#F0F2F5' }}>
+                <h5 className="modal-title" id={`editMovieModalLabel${m.show_id}`} style={{ color: '#00294D' }}>Edit Title</h5>
+                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div className="modal-body">
+                <EditMovieForm
+                  movie={m}
+                  onSuccess={() => {
+                    const modalElement = document.getElementById(`editMovieModal${m.show_id}`);
+                    if (modalElement) {
+                      const modal = Modal.getInstance(modalElement);
+                      modal?.hide();
+                    }
+                    fetchMovies(pageSize, pageNum, selectedCategories, sortOrder).then(
+                      (data) => setMovies(data.movies)
+                    );
+                  }}
+                  onCancel={() => {
+                    const modalElement = document.getElementById(`editMovieModal${m.show_id}`);
+                    if (modalElement) {
+                      const modal = Modal.getInstance(modalElement);
+                      modal?.hide();
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+    <Footer />
+    </>
+  );
 };
 
-export default AdminPage;
+export default AdminMoviesPage;
