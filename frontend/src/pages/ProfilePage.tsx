@@ -2,13 +2,20 @@ import './ProfilePage.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-
 const ProfilePage = () => {
   return (
     <>
-    <Header />
-    <div className="profile-container">
-      <h1>My Profile</h1>
+      <Header />
+      <div className="profile-container" style={{ backgroundImage: 'linear-gradient(135deg, #000810 0%, #00294D 100%)' }}>
+        <div className="profile-header">
+          <button 
+            className="back-arrow-btn" 
+            onClick={() => window.history.back()}
+          >
+            ←
+          </button>
+          <h1 className="display-1 fw-light mb-4">My Profile</h1>
+        </div>
       <div className="profile-details">
         <div className="profile-text">
           <div className="profile-field">
@@ -34,8 +41,8 @@ const ProfilePage = () => {
           <button className="edit-photo-button">Edit</button>
         </div>
       </div>
-    </div>
-    <Footer />
+        </div>
+      <Footer />
     </>
   );
 };

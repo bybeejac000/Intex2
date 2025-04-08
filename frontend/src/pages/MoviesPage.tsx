@@ -9,8 +9,22 @@ import AuthorizeView from "../components/AuthorizeView";
 
 function MoviesPage() {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [visibleRows, setVisibleRows] = useState(1);
+  const [recommendationsRows, setRecommendationsRows] = useState(1);
+  const [popularRows, setPopularRows] = useState(1);
+  const [newReleasesRows, setNewReleasesRows] = useState(1);
+  const [allMoviesRows, setAllMoviesRows] = useState(1);
+  const [allTVShowsRows, setAllTVShowsRows] = useState(1);
   const navigate = useNavigate();
+
+  const handleClick = (id: string) => {
+    navigate(`/movie/${id}`);
+  };
+
+  const MoviePoster = ({ id }: { id: string }) => {
+    return (
+      <div className="movie-poster" onClick={() => handleClick(id)}></div>
+    );
+  };
 
   return (
     <>
@@ -204,71 +218,95 @@ function MoviesPage() {
             <section className="movie-section">
               <h2>(nameHere)'s Top Recommendations</h2>
               <div className="movie-grid">
-                {[...Array(visibleRows * 7)].map((_, i) => (
+                {[...Array(recommendationsRows * 7)].map((_, i) => (
                   <div key={i} className="movie-card">
-                    <div className="movie-poster"></div>
+                    <MoviePoster id={i.toString()} />
                     <p className="movie-title">Movie Title</p>
                   </div>
                 ))}
               </div>
               <button
                 className="btn btn-primary see-more"
-                onClick={() => setVisibleRows(visibleRows + 1)}
+                onClick={() => setRecommendationsRows(recommendationsRows + 1)}
               >
-                See more
+                See More Recommendations
               </button>
             </section>
 
             {/* Most Popular Section */}
             <section id="popular" className="movie-section">
-              <h2>Most Popular</h2>
+              <h2>Most Popular on CineNiche</h2>
               <div className="movie-grid">
-                {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                {[...Array(popularRows * 7)].map((_, i) => (
                   <div key={i} className="movie-card">
-                    <div className="movie-poster"></div>
+                    <MoviePoster id={i.toString()} />
                     <p className="movie-title">Movie Title</p>
                   </div>
                 ))}
               </div>
+              <button
+                className="btn btn-primary see-more"
+                onClick={() => setPopularRows(popularRows + 1)}
+              >
+                See More Popular Movies
+              </button>
             </section>
 
             {/* New Releases Section */}
             <section id="newReleases" className="movie-section">
               <h2>New Releases</h2>
               <div className="movie-grid">
-                {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                {[...Array(newReleasesRows * 7)].map((_, i) => (
                   <div key={i} className="movie-card">
-                    <div className="movie-poster"></div>
+                    <MoviePoster id={i.toString()} />
                     <p className="movie-title">Movie Title</p>
                   </div>
                 ))}
               </div>
+              <button
+                className="btn btn-primary see-more"
+                onClick={() => setNewReleasesRows(newReleasesRows + 1)}
+              >
+                See More New Releases
+              </button>
             </section>
 
             {/* All Movies Section */}
             <section id="allMovies" className="movie-section">
               <h2>All Movies</h2>
               <div className="movie-grid">
-                {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                {[...Array(allMoviesRows * 7)].map((_, i) => (
                   <div key={i} className="movie-card">
-                    <div className="movie-poster"></div>
+                    <MoviePoster id={i.toString()} />
                     <p className="movie-title">Movie Title</p>
                   </div>
                 ))}
               </div>
+              <button
+                className="btn btn-primary see-more"
+                onClick={() => setAllMoviesRows(allMoviesRows + 1)}
+              >
+                See More Movies
+              </button>
             </section>
 
             {/* All TV Shows Section */}
             <section id="allTVShows" className="movie-section">
               <h2>All TV Shows</h2>
               <div className="movie-grid">
-                {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                {[...Array(allTVShowsRows * 7)].map((_, i) => (
                   <div key={i} className="movie-card">
-                    <div className="movie-poster"></div>
+                    <MoviePoster id={i.toString()} />
                     <p className="movie-title">Movie Title</p>
                   </div>
                 ))}
               </div>
+              <button
+                className="btn btn-primary see-more"
+                onClick={() => setAllTVShowsRows(allTVShowsRows + 1)}
+              >
+                See More TV Shows
+              </button>
             </section>
           </div>
         </div>
@@ -276,6 +314,6 @@ function MoviesPage() {
       </AuthorizeView>
     </>
   );
-}
+};
 
 export default MoviesPage;

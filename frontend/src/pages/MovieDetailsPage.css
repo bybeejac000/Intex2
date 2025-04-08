@@ -1,0 +1,53 @@
+.movie-details-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    background-color: #0a1929;
+    color: #fff;
+}
+
+.movie-info {
+    flex: 1;
+    margin-right: 20px;
+}
+
+.movie-poster {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #333;
+    height: 400px;
+}
+
+.poster-placeholder {
+    color: #ccc;
+    font-size: 1.5rem;
+}
+
+.back-button {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    margin-top: 10px;
+    cursor: pointer;
+}
