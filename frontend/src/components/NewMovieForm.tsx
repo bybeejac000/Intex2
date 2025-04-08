@@ -17,7 +17,7 @@ const NewMovieForm = ({ onSuccess, onCancel }: NewMovieFormProps) => {
     cast: "",
     country: "",
     release_year: 0,
-    rating: 0,
+    rating: "",
     duration: "",
     description: "",
     action: 0,
@@ -55,30 +55,27 @@ const NewMovieForm = ({ onSuccess, onCancel }: NewMovieFormProps) => {
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value, type, checked } = e.target as HTMLInputElement;
 
-    if (type === "checkbox") {
-      setFormData({
-        ...formData,
-        [name]: checked ? 1 : 0, // Handle checkbox logic
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value, // Handle other input types
-      });
-    }
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: type === "checkbox" ? (checked ? 1 : 0) : value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("formData", formData);
 
     // Optional auto-generated ID
     if (!formData.show_id) {
       formData.show_id = `s${Date.now()}`; // e.g., s1712512219982
     }
+    console.log(formData.show_id);
 
     await addMovie(formData);
     onSuccess();
@@ -99,6 +96,14 @@ const NewMovieForm = ({ onSuccess, onCancel }: NewMovieFormProps) => {
         />
       </label> */}
 
+      <label>
+        Type:
+        <select name="type" value={formData.type} onChange={handleChange}>
+          <option value="">Select Type</option>
+          <option value="Movie">Movie</option>
+          <option value="TV Show">TV Show</option>
+        </select>
+      </label>
       <label>
         Title:
         <input
@@ -147,7 +152,7 @@ const NewMovieForm = ({ onSuccess, onCancel }: NewMovieFormProps) => {
       <label>
         Rating:
         <input
-          type="number"
+          type="text"
           name="rating"
           value={formData.rating}
           onChange={handleChange}
