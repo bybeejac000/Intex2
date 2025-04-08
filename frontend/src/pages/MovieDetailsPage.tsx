@@ -1,22 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Movie } from '../types/Movie';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-interface Movie {
-    id: number;
-    title: string;
-    description: string;
-    releaseDate: string;
-    director: string;
-    rating: number;
-    posterUrl: string;
-    genre: string;
-    duration: number;
-}
+const API_URL = "https://localhost:5000/CineNiche";
 
 function MovieDetailsPage() {
     const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
     const [movie, setMovie] = useState<Movie | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -24,7 +16,7 @@ function MovieDetailsPage() {
     useEffect(() => {
         const fetchMovieDetails = async () => {
             try {
-                const response = await fetch(`/api/movies/${id}`);
+                const response = await fetch(`${API_URL}/GetMovie/${id}`);
                 if (!response.ok) {
                     throw new Error('Movie not found');
                 }
@@ -41,41 +33,79 @@ function MovieDetailsPage() {
     }, [id]);
 
     if (loading) {
-        return <div>Loading...</div>;
+        return (
+            <>
+            <Header />
+            <div className="loading-spinner">
+                <div className="spinner-border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            <Footer />
+            </>
+        );
     }
 
     if (error) {
-        return <div>Error: {error}</div>;
+        return (
+            <>
+            <Header />
+            <div className="error-container">
+                <button className="back-button" onClick={() => navigate('/movies')}>
+                    ← Back
+                </button>
+                <h2>{error}</h2>
+            </div>
+            <Footer />
+            </>
+        );
     }
 
     if (!movie) {
-        return <div>Movie not found</div>;
+        return (
+            <>
+            <Header />
+            <div className="error-container">
+                <button className="back-button" onClick={() => navigate('/movies')}>
+                    ← Back
+                </button>
+                <h2>Movie not found</h2>
+            </div>
+            <Footer />
+            </>
+        );
     }
 
     return (
         <>
-            <Header />
-            <div className="movie-details-container">
-                <div className="movie-poster">
-                    <img src={movie.posterUrl} alt={movie.title} />
+        <Header />
+        <div className="movie-details-container">
+            <div className="movie-info">
+                <button className="back-button" onClick={() => navigate('/movies')}>
+                    ← Back
+                </button>
+                <h1>{movie.title}</h1>
+                <div className="movie-meta">
+                    <span>{movie.release_year}</span>
+                    <span>{movie.duration}</span>
+                    <span>{movie.type}</span>
+                    <span>★ {movie.rating}</span>
                 </div>
-                <div className="movie-info">
-                    <h1>{movie.title}</h1>
-                    <div className="movie-meta">
-                        <span>{movie.releaseDate}</span>
-                        <span>{movie.duration} min</span>
-                        <span>{movie.genre}</span>
-                        <span>★ {movie.rating}</span>
-                    </div>
-                    <div className="movie-director">
-                        <strong>Director:</strong> {movie.director}
-                    </div>
-                    <div className="movie-description">
-                        <p>{movie.description}</p>
-                    </div>
+                <div className="movie-director">
+                    <strong>Director:</strong> {movie.director}
+                </div>
+                <div className="movie-cast">
+                    <strong>Cast:</strong> {movie.cast}
+                </div>
+                <div className="movie-description">
+                    <p>{movie.description}</p>
+                </div>
+                <div className="movie-country">
+                    <strong>Country:</strong> {movie.country}
                 </div>
             </div>
-            <Footer />
+        </div>
+        <Footer />
         </>
     );
 }
