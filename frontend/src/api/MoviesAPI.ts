@@ -1,86 +1,107 @@
 import { Movie } from "../types/Movie";
 
-interface FetchMovieResponse {
-    movies: Movie[];
-    totalNumMovies: number;
+interface FetchMoviesResponse {
+  movies: Movie[];
+  totalNumMovies: number;
 }
 
-export const API_URL = 'needURLhere';
+const API_URL = "https://localhost:5000/CineNiche"; // Correct API URL
 
+// Fetch movies with pagination and category filtering
 export const fetchMovies = async (
-    pageSize: number,
-    pageNum: number,
-    
-): Promise<FetchMovieResponse> => {
-    try{
+  pageSize: number,
+  pageNum: number,
+  selectedCategories: string[],
+  sortOrder: string | null
+): Promise<FetchMoviesResponse> => {
+  try {
+    const categoryParams = selectedCategories
+      .map((cat) => `categories=${encodeURIComponent(cat)}`)
+      .join("&");
 
-    const response = await fetch(
-        `${API_URL}/AllMovies?pageSize=${pageSize}&pageNum=${pageNum}}`
-    );
+    let url = `${API_URL}/GetMovies?pageSize=${pageSize}&pageNum=${pageNum}${
+      selectedCategories.length ? `&${categoryParams}` : ""
+    }`;
+
+    if (sortOrder) {
+      url += `&sortOrder=${sortOrder}`;
+    }
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error("Failed to fetch movies");
+    }
+
+    const data = await response.json();
+    return {
+      movies: data.movies,
+      totalNumMovies: data.totalNumMovies,
+    };
+  } catch (error) {
+    console.error("Error fetching movies:", error);
+    throw error;
+  }
+};
+
+// Add a new movie
+export const addMovie = async (newMovie: Movie): Promise<Movie> => {
+  try {
+    const response = await fetch(`${API_URL}/AddMovie`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newMovie),
+    });
 
     if (!response.ok) {
-        throw new Error('Failed to fetch movies');
+      throw new Error("Failed to add movie");
     }
 
     return await response.json();
-    } 
-    catch (error) {
-    console.error('Error fetching movies:', error);
+  } catch (error) {
+    console.error("Error adding movie", error);
     throw error;
-    }
+  }
 };
 
-export const addMovie = async (newMovie: Movie): Promise<Movie> => {
-    try {
-        const response = await fetch(`${API_URL}/AddMovie`, {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/json',
-        },
-        body: 
-        JSON.stringify(newMovie)
-        });
+// Update an existing movie by its showId
+export const updateMovie = async (
+  showId: string,
+  updatedMovie: Movie
+): Promise<Movie> => {
+  try {
+    const response = await fetch(`${API_URL}/UpdateMovie/${showId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedMovie),
+    });
 
-        if (!response.ok) {
-            throw new Error('Failed to add movie');
-        }
-        return await response.json();
-        } catch (error) {
-            console.error('Error adding movie', error);
-            throw error;
-        }   
-    
+    if (!response.ok) {
+      throw new Error("Failed to update movie");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error updating movie:", error);
+    throw error;
+  }
 };
 
-export const updateMovie = async (movieId: number, movieBook: Movie) : Promise<Movie> => {
-    try {
-        const response = await fetch(`${API_URL}/UpdateMovie/${movieId}`, {
-            method: 'PUT',
-            headers: {
-            'Content-Type': 'application/json',},
-            body: JSON.stringify(movieBook)
-    }); 
-    return await response.json(); }
-    
-    catch (error) {
-        console.error("error updating movie:", error);
-        throw error;
+// Delete a movie by its showId
+export const deleteMovie = async (showId: string): Promise<void> => {
+  try {
+    const response = await fetch(`${API_URL}/DeleteMovie/${showId}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to delete movie");
     }
+  } catch (error) {
+    console.error("Error deleting movie:", error);
+    throw error;
+  }
 };
-
-export const deleteMovie = async (movieId: number): Promise<void>=> {
-    try {
-        const response = await fetch(`${API_URL}/DeleteMovie/${movieId}`,
-            {
-                method: 'DELETE'
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error('Failed to delete movie');
-        }
-    } catch (error) {
-        console.error('Error deleting movie:', error);
-        throw error;
-    }
-}
