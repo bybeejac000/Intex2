@@ -7,6 +7,14 @@ interface FetchMoviesResponse {
 
 const API_URL = "https://localhost:5000/CineNiche"; // Correct API URL
 
+// Default fetch options for all requests
+const defaultOptions = {
+  credentials: 'include' as RequestCredentials,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+};
+
 // Fetch movies with pagination and category filtering
 export const fetchMovies = async (
   pageSize: number,
@@ -27,7 +35,7 @@ export const fetchMovies = async (
       url += `&sortOrder=${sortOrder}`;
     }
 
-    const response = await fetch(url);
+    const response = await fetch(url, defaultOptions);
     if (!response.ok) {
       throw new Error("Failed to fetch movies");
     }
@@ -47,10 +55,8 @@ export const fetchMovies = async (
 export const addMovie = async (newMovie: Movie): Promise<Movie> => {
   try {
     const response = await fetch(`${API_URL}/AddMovie`, {
+      ...defaultOptions,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(newMovie),
     });
 
@@ -72,10 +78,8 @@ export const updateMovie = async (
 ): Promise<Movie> => {
   try {
     const response = await fetch(`${API_URL}/UpdateMovie/${showId}`, {
+      ...defaultOptions,
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(updatedMovie),
     });
 
@@ -94,6 +98,7 @@ export const updateMovie = async (
 export const deleteMovie = async (showId: string): Promise<void> => {
   try {
     const response = await fetch(`${API_URL}/DeleteMovie/${showId}`, {
+      ...defaultOptions,
       method: "DELETE",
     });
 
@@ -102,6 +107,20 @@ export const deleteMovie = async (showId: string): Promise<void> => {
     }
   } catch (error) {
     console.error("Error deleting movie:", error);
+    throw error;
+  }
+};
+
+// Fetch a single movie by ID
+export const fetchMovieById = async (movieId: string): Promise<Movie> => {
+  try {
+    const response = await fetch(`${API_URL}/GetMovie/${movieId}`, defaultOptions);
+    if (!response.ok) {
+      throw new Error("Failed to fetch movie");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching movie:", error);
     throw error;
   }
 };
