@@ -4,8 +4,6 @@
 # In[14]:
 
 
-get_ipython().system('jupyter nbconvert --to script "C:\\Users\\jakeb\\Downloads\\Machine Learning\\functions\\functions.ipynb"')
-
 
 # In[15]:
 
