@@ -82,134 +82,194 @@ const NewMovieForm = ({ onSuccess, onCancel }: NewMovieFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Add New Movie</h2>
+    <form onSubmit={handleSubmit} style={{ padding: '2rem' }}>
+      <h2 style={{ color: '#00294D', marginBottom: '2rem' }}>Add New Title</h2>
 
-      {/* <label>
-        Show ID:
-        <input
-          type="text"
-          name="show_id"
-          value={formData.show_id}
-          onChange={handleChange}
-          required
-        />
-      </label> */}
+      <div className="row g-3">
+        {/* Basic Information */}
+        <div className="col-md-6">
+          <div className="mb-3">
+            <label className="form-label" style={{ color: '#00294D', fontWeight: '500' }}>Type</label>
+            <select 
+              className="form-select" 
+              name="type" 
+              value={formData.type} 
+              onChange={handleChange}
+              style={{ backgroundColor: '#FFFFFF', border: 'none' }}
+            >
+              <option value="">Select Type</option>
+              <option value="Movie">Movie</option>
+              <option value="TV Show">TV Show</option>
+            </select>
+          </div>
 
-      <label>
-        Type:
-        <select name="type" value={formData.type} onChange={handleChange}>
-          <option value="">Select Type</option>
-          <option value="Movie">Movie</option>
-          <option value="TV Show">TV Show</option>
-        </select>
-      </label>
-      <label>
-        Title:
-        <input
-          type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-        />
-      </label>
-      <label>
-        Director:
-        <input
-          type="text"
-          name="director"
-          value={formData.director}
-          onChange={handleChange}
-        />
-      </label>
-      <label>
-        Cast:
-        <input
-          type="text"
-          name="cast"
-          value={formData.cast}
-          onChange={handleChange}
-        />
-      </label>
-      <label>
-        Country:
-        <input
-          type="text"
-          name="country"
-          value={formData.country}
-          onChange={handleChange}
-        />
-      </label>
-      <label>
-        Release Year:
-        <input
-          type="number"
-          name="release_year"
-          value={formData.release_year}
-          onChange={handleChange}
-        />
-      </label>
-      <label>
-        Rating:
-        <input
-          type="text"
-          name="rating"
-          value={formData.rating}
-          onChange={handleChange}
-        />
-      </label>
-      <label>
-        Duration (minutes):
-        <input
-          type="text"
-          name="duration"
-          value={formData.duration}
-          onChange={handleChange}
-        />
-      </label>
-      <label>
-        Description:
+          <div className="mb-3">
+            <label className="form-label" style={{ color: '#00294D', fontWeight: '500' }}>Title</label>
+            <input
+              type="text"
+              className="form-control"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              style={{ backgroundColor: '#FFFFFF', border: 'none' }}
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label" style={{ color: '#00294D', fontWeight: '500' }}>Director</label>
+            <input
+              type="text"
+              className="form-control"
+              name="director"
+              value={formData.director}
+              onChange={handleChange}
+              style={{ backgroundColor: '#FFFFFF', border: 'none' }}
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label" style={{ color: '#00294D', fontWeight: '500' }}>Cast</label>
+            <input
+              type="text"
+              className="form-control"
+              name="cast"
+              value={formData.cast}
+              onChange={handleChange}
+              style={{ backgroundColor: '#FFFFFF', border: 'none' }}
+            />
+          </div>
+        </div>
+
+        <div className="col-md-6">
+          <div className="mb-3">
+            <label className="form-label" style={{ color: '#00294D', fontWeight: '500' }}>Country</label>
+            <input
+              type="text"
+              className="form-control"
+              name="country"
+              value={formData.country}
+              onChange={handleChange}
+              style={{ backgroundColor: '#FFFFFF', border: 'none' }}
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label" style={{ color: '#00294D', fontWeight: '500' }}>Release Year</label>
+            <input
+              type="number"
+              className="form-control"
+              name="release_year"
+              value={formData.release_year || ''}
+              onChange={handleChange}
+              style={{ backgroundColor: '#FFFFFF', border: 'none' }}
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label" style={{ color: '#00294D', fontWeight: '500' }}>Rating</label>
+            <input
+              type="text"
+              className="form-control"
+              name="rating"
+              value={formData.rating}
+              onChange={handleChange}
+              style={{ backgroundColor: '#FFFFFF', border: 'none' }}
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label" style={{ color: '#00294D', fontWeight: '500' }}>Duration (minutes)</label>
+            <input
+              type="text"
+              className="form-control"
+              name="duration"
+              value={formData.duration}
+              onChange={handleChange}
+              style={{ backgroundColor: '#FFFFFF', border: 'none' }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label" style={{ color: '#00294D', fontWeight: '500' }}>Description</label>
         <textarea
+          className="form-control"
           name="description"
           value={formData.description}
           onChange={handleChange}
+          rows={4}
+          style={{ backgroundColor: '#FFFFFF', border: 'none' }}
         />
-      </label>
-
-      {/* Categories */}
-      <div className="categories">
-        {Object.keys(formData).map((key) => {
-          if (
-            key !== "show_id" &&
-            key !== "title" &&
-            key !== "director" &&
-            key !== "cast" &&
-            key !== "country" &&
-            key !== "release_year" &&
-            key !== "rating" &&
-            key !== "duration" &&
-            key !== "description"
-          ) {
-            return (
-              <label key={key}>
-                <input
-                  type="checkbox"
-                  name={key}
-                  checked={formData[key as keyof Movie] === 1}
-                  onChange={handleChange}
-                />
-                {key.replace(/_/g, " ").toUpperCase()}
-              </label>
-            );
-          }
-          return null;
-        })}
       </div>
 
-      <button type="submit">Add Movie</button>
-      <button type="button" onClick={onCancel}>
-        Cancel
-      </button>
+      {/* Categories */}
+      <div className="mb-4">
+        <h3 style={{ color: '#00294D', marginBottom: '1rem' }}>Categories</h3>
+        <div className="row g-2">
+          {Object.keys(formData)
+            .filter(key => 
+              key !== "show_id" &&
+              key !== "title" &&
+              key !== "director" &&
+              key !== "cast" &&
+              key !== "country" &&
+              key !== "release_year" &&
+              key !== "rating" &&
+              key !== "duration" &&
+              key !== "description" &&
+              key !== "type"
+            )
+            .map((key) => (
+              <div key={key} className="col-md-3 col-sm-4 col-6">
+                <div className="form-check">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    name={key}
+                    id={key}
+                    checked={formData[key as keyof Movie] === 1}
+                    onChange={handleChange}
+                    style={{ borderColor: '#1976d2' }}
+                  />
+                  <label 
+                    className="form-check-label" 
+                    htmlFor={key}
+                    style={{ color: '#00294D', fontWeight: '500', textAlign: 'left', paddingLeft: '10px', paddingTop: '2px' }}
+                  >
+                    {key.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
+                  </label>
+                </div>
+              </div>
+            ))}
+        </div>
+      </div>
+
+      <div className="d-flex justify-content-end gap-2">
+        <button 
+          type="button" 
+          className="btn" 
+          onClick={onCancel}
+          style={{ 
+            backgroundColor: '#FFFFFF', 
+            color: '#00294D',
+            border: '1px solid #FFFFFF'
+          }}
+        >
+          Cancel
+        </button>
+        <button 
+          type="submit" 
+          className="btn"
+          style={{ 
+            backgroundColor: '#1976d2', 
+            color: 'white',
+            border: 'none'
+          }}
+        >
+          Add Movie
+        </button>
+      </div>
     </form>
   );
 };

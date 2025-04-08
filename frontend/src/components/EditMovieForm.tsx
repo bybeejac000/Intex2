@@ -36,113 +36,127 @@ const EditMovieForm = ({ movie, onSuccess, onCancel }: EditMovieFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Edit Movie</h2>
-      <label>
-        Title:
+    <form onSubmit={handleSubmit} className="p-4">
+      <div className="mb-3">
+        <label htmlFor="title" className="form-label" style={{ color: '#00294D' }}>Title</label>
         <input
           type="text"
-          name="title"
+          className="form-control"
+          id="title"
           value={formData.title}
-          onChange={handleChange}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          required
+          style={{ backgroundColor: '#FFFFFF', borderColor: '#00294D' }}
         />
-      </label>
-      <label>
-        Director:
+      </div>
+
+      <div className="mb-3">
+        <label htmlFor="director" className="form-label" style={{ color: '#00294D' }}>Director</label>
         <input
           type="text"
-          name="director"
+          className="form-control"
+          id="director"
           value={formData.director}
-          onChange={handleChange}
+          onChange={(e) => setFormData({ ...formData, director: e.target.value })}
+          required
+          style={{ backgroundColor: '#FFFFFF', borderColor: '#00294D' }}
         />
-      </label>
-      <label>
-        Cast:
+      </div>
+
+      <div className="mb-3">
+        <label htmlFor="cast" className="form-label" style={{ color: '#00294D' }}>Cast</label>
         <input
           type="text"
-          name="cast"
+          className="form-control"
+          id="cast"
           value={formData.cast}
-          onChange={handleChange}
+          onChange={(e) => setFormData({ ...formData, cast: e.target.value })}
+          required
+          style={{ backgroundColor: '#FFFFFF', borderColor: '#00294D' }}
         />
-      </label>
-      <label>
-        Country:
+      </div>
+
+      <div className="mb-3">
+        <label htmlFor="country" className="form-label" style={{ color: '#00294D' }}>Country</label>
         <input
           type="text"
-          name="country"
+          className="form-control"
+          id="country"
           value={formData.country}
-          onChange={handleChange}
+          onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+          required
+          style={{ backgroundColor: '#FFFFFF', borderColor: '#00294D' }}
         />
-      </label>
-      <label>
-        Release Year:
-        <input
-          type="text"
-          name="release_year"
-          value={formData.release_year}
-          onChange={handleChange}
-        />
-      </label>
-      <label>
-        Rating:
+      </div>
+
+      <div className="mb-3">
+        <label htmlFor="release_year" className="form-label" style={{ color: '#00294D' }}>Release Year</label>
         <input
           type="number"
-          name="rating"
-          value={formData.rating}
-          onChange={handleChange}
+          className="form-control"
+          id="release_year"
+          value={formData.release_year}
+          onChange={(e) => setFormData({ ...formData, release_year: parseInt(e.target.value) })}
+          required
+          style={{ backgroundColor: '#FFFFFF', borderColor: '#00294D' }}
         />
-      </label>
-      <label>
-        Duration:
+      </div>
+
+      <div className="mb-3">
+        <label htmlFor="rating" className="form-label" style={{ color: '#00294D' }}>Rating</label>
         <input
           type="text"
-          name="duration"
-          value={formData.duration}
-          onChange={handleChange}
+          className="form-control"
+          id="rating"
+          value={formData.rating}
+          onChange={(e) => setFormData({ ...formData, rating: e.target.value })}
+          required
+          style={{ backgroundColor: '#FFFFFF', borderColor: '#00294D' }}
         />
-      </label>
-      <label>
-        Description:
-        <textarea
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-        />
-      </label>
-      {/* Category checkboxes */}
-      <label>
-        Action:
-        <input
-          type="checkbox"
-          name="action"
-          checked={formData.action === 1}
-          onChange={handleChange}
-        />
-      </label>
-      <label>
-        Adventure:
-        <input
-          type="checkbox"
-          name="adventure"
-          checked={formData.adventure === 1}
-          onChange={handleChange}
-        />
-      </label>
-      <label>
-        Comedy:
-        <input
-          type="checkbox"
-          name="comedies"
-          checked={formData.comedies === 1}
-          onChange={handleChange}
-        />
-      </label>
-      {/* Add more category checkboxes as needed */}
+      </div>
 
-      <button type="submit">Update Movie</button>
-      <button type="button" onClick={onCancel}>
-        Cancel
-      </button>
+      <div className="mb-3">
+        <label htmlFor="duration" className="form-label" style={{ color: '#00294D' }}>Duration</label>
+        <input
+          type="text"
+          className="form-control"
+          id="duration"
+          value={formData.duration}
+          onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+          required
+          style={{ backgroundColor: '#FFFFFF', borderColor: '#00294D' }}
+        />
+      </div>
+
+      <div className="mb-3">
+        <label htmlFor="description" className="form-label" style={{ color: '#00294D' }}>Description</label>
+        <textarea
+          className="form-control"
+          id="description"
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          required
+          style={{ backgroundColor: '#FFFFFF', borderColor: '#00294D' }}
+        />
+      </div>
+
+      <div className="d-flex justify-content-end">
+        <button
+          type="button"
+          className="btn btn-secondary me-2"
+          onClick={onCancel}
+          style={{ backgroundColor: '#6c757d', borderColor: '#6c757d' }}
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="btn btn-primary"
+          style={{ backgroundColor: '#1976d2', borderColor: '#1976d2' }}
+        >
+          Save Changes
+        </button>
+      </div>
     </form>
   );
 };

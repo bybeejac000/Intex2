@@ -54,9 +54,10 @@ const Pagination = ({
     <div className="d-flex justify-content-center align-items-center gap-3 mt-4">
       <div className="d-flex align-items-center">
         <button
-          className="btn btn-outline-primary me-2"
+          className="btn me-2"
           disabled={currentPage === 1}
           onClick={() => onPageChange(currentPage - 1)}
+          style={{ backgroundColor: '#F0F2F5', border: 'none' }}
         >
           Previous
         </button>
@@ -65,13 +66,12 @@ const Pagination = ({
           {getPageNumbers().map((pageNum, index) => (
             <button
               key={index}
-              className={`btn ${
-                pageNum === currentPage
-                  ? 'btn-primary'
-                  : pageNum === '...'
-                  ? 'btn-secondary disabled'
-                  : 'btn-outline-primary'
-              }`}
+              className="btn"
+              style={{
+                backgroundColor: pageNum === currentPage ? '#1976d2' : '#F0F2F5',
+                color: pageNum === currentPage ? 'white' : '#00294D',
+                border: 'none'
+              }}
               onClick={() => {
                 if (typeof pageNum === 'number') {
                   onPageChange(pageNum);
@@ -85,16 +85,17 @@ const Pagination = ({
         </div>
 
         <button
-          className="btn btn-outline-primary ms-2"
+          className="btn ms-2"
           disabled={currentPage === totalPages}
           onClick={() => onPageChange(currentPage + 1)}
+          style={{ backgroundColor: '#F0F2F5', border: 'none' }}
         >
           Next
         </button>
       </div>
 
       <div className="d-flex align-items-center ms-3">
-        <label className="me-2">
+        <label className="me-2" style={{ color: '#FFFFFF', fontWeight: '250', textAlign: 'center', display: 'block' }}>
           Results per page:
           <select
             className="form-select ms-2"

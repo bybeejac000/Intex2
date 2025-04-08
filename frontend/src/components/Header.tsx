@@ -28,7 +28,7 @@ function Header() {
 
     return (
         <header className="fixed-top" style={{
-            backgroundColor: '#0a1929',
+            backgroundColor: '#010f1e',
             padding: '1rem',
             borderBottom: '1px solid rgba(255,255,255,0.1)',
             zIndex: 1000
