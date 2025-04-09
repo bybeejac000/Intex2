@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -6,6 +6,8 @@ import "./MoviesPage.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import AuthorizeView from "../components/AuthorizeView";
+import { fetchMovies } from "../api/MoviesAPI";
+import { Movie } from "../types/Movie";
 
 function MoviesPage() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -14,15 +16,107 @@ function MoviesPage() {
   const [newReleasesRows, setNewReleasesRows] = useState(1);
   const [allMoviesRows, setAllMoviesRows] = useState(1);
   const [allTVShowsRows, setAllTVShowsRows] = useState(1);
+  
+  // Movie data state
+  const [recommendationsData, setRecommendationsData] = useState<Movie[]>([]);
+  const [popularData, setPopularData] = useState<Movie[]>([]);
+  const [newReleasesData, setNewReleasesData] = useState<Movie[]>([]);
+  const [allMoviesData, setAllMoviesData] = useState<Movie[]>([]);
+  const [allTVShowsData, setAllTVShowsData] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState(true);
+  
   const navigate = useNavigate();
 
-  const handleClick = (id: string) => {
-    navigate(`/movie/${id}`);
+  // Fetch data on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch recommendations (movies with high ratings)
+        const recommendationsResponse = await fetchMovies(7, 1, [], "rating_desc");
+        console.log("Recommendations data:", recommendationsResponse.movies);
+        setRecommendationsData(recommendationsResponse.movies);
+        
+        // Fetch popular movies
+        const popularResponse = await fetchMovies(7, 1, [], "popular");
+        console.log("Popular data:", popularResponse.movies);
+        setPopularData(popularResponse.movies);
+        
+        // Fetch new releases (sort by release year)
+        const newReleasesResponse = await fetchMovies(7, 1, [], "release_year_desc");
+        console.log("New releases data:", newReleasesResponse.movies);
+        setNewReleasesData(newReleasesResponse.movies);
+        
+        // Fetch all movies
+        const allMoviesResponse = await fetchMovies(7, 1, [], null);
+        console.log("All movies data:", allMoviesResponse.movies);
+        setAllMoviesData(allMoviesResponse.movies);
+        
+        // Fetch TV shows
+        const tvShowsResponse = await fetchMovies(7, 1, ["tv_shows"], null);
+        console.log("TV shows data:", tvShowsResponse.movies);
+        setAllTVShowsData(tvShowsResponse.movies);
+      } catch (error) {
+        console.error("Error loading movies:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadData();
+  }, []);
+
+  // Function to load more movies for a category
+  const loadMoreMovies = async (
+    category: string,
+    page: number,
+    setter: React.Dispatch<React.SetStateAction<Movie[]>>,
+    currentData: Movie[]
+  ) => {
+    try {
+      let sortOrder = null;
+      let categories: string[] = [];
+      
+      if (category === "recommendations") sortOrder = "rating_desc";
+      if (category === "popular") sortOrder = "popular";
+      if (category === "new_releases") sortOrder = "release_year_desc";
+      if (category === "tv_shows") categories = ["tv_shows"];
+      
+      const response = await fetchMovies(7, page, categories, sortOrder);
+      setter([...currentData, ...response.movies]);
+    } catch (error) {
+      console.error(`Error loading more ${category}:`, error);
+    }
   };
 
-  const MoviePoster = ({ id }: { id: string }) => {
+  const handleClick = (show_id: string) => {
+    console.log("Clicked on movie with show_id:", show_id);
+    console.log("Movie show_id type:", typeof show_id);
+    console.log("Navigating to:", `/movie/${show_id}`);
+    navigate(`/movie/${show_id}`);
+  };
+
+  const MoviePoster = ({ movie }: { movie: Movie }) => {
+    const title = movie.title.replace(/^#+/, ''); // Use replace with regex instead of trimStart
+    const imageUrl = `http://44.214.17.52/${encodeURIComponent(title)}.jpg`; // Use encodeURIComponent instead of Uri.EscapeDataString
+    console.log("Image URL:", imageUrl);
+    
     return (
-      <div className="movie-poster" onClick={() => handleClick(id)}></div>
+      <div className="movie-poster" onClick={() => handleClick(movie.show_id)}>
+        <img 
+          src={imageUrl}
+          alt={movie.title}
+          className="poster-image"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            borderRadius: '8px',
+            boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
+          }}
+        />
+      </div>
     );
   };
 
@@ -212,102 +306,153 @@ function MoviesPage() {
             </div>
           </div>
 
+
           {/* Main Content */}
           <div className="main-content">
-            {/* My Recommendations Section */}
-            <section className="movie-section">
-              <h2>(nameHere)'s Top Recommendations</h2>
-              <div className="movie-grid">
-                {[...Array(recommendationsRows * 7)].map((_, i) => (
-                  <div key={i} className="movie-card">
-                    <MoviePoster id={i.toString()} />
-                    <p className="movie-title">Movie Title</p>
-                  </div>
-                ))}
+            {loading ? (
+              <div className="loading-spinner">
+                <div className="spinner-border text-light" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
               </div>
-              <button
-                className="btn btn-primary see-more"
-                onClick={() => setRecommendationsRows(recommendationsRows + 1)}
-              >
-                See More Recommendations
-              </button>
-            </section>
+            ) : (
+              <>
+                {/* My Recommendations Section */}
+                <section id="recommendations" className="movie-section">
+                  <h2>(nameHere)'s Top Recommendations</h2>
+                  <div className="movie-grid">
+                    {recommendationsData.map((movie) => (
+                      <div key={movie.show_id} className="movie-card">
+                        <MoviePoster movie={movie} />
+                        <p className="movie-title">{movie.title}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    className="btn btn-primary see-more"
+                    onClick={() => {
+                      setRecommendationsRows(recommendationsRows + 1);
+                      loadMoreMovies(
+                        "recommendations", 
+                        recommendationsRows + 1, 
+                        setRecommendationsData,
+                        recommendationsData
+                      );
+                    }}
+                  >
+                    See More Recommendations
+                  </button>
+                </section>
 
-            {/* Most Popular Section */}
-            <section id="popular" className="movie-section">
-              <h2>Most Popular on CineNiche</h2>
-              <div className="movie-grid">
-                {[...Array(popularRows * 7)].map((_, i) => (
-                  <div key={i} className="movie-card">
-                    <MoviePoster id={i.toString()} />
-                    <p className="movie-title">Movie Title</p>
+                {/* Most Popular Section */}
+                <section id="popular" className="movie-section">
+                  <h2>Most Popular on CineNiche</h2>
+                  <div className="movie-grid">
+                    {popularData.map((movie) => (
+                      <div key={movie.show_id} className="movie-card">
+                        <MoviePoster movie={movie} />
+                        <p className="movie-title">{movie.title}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <button
-                className="btn btn-primary see-more"
-                onClick={() => setPopularRows(popularRows + 1)}
-              >
-                See More Popular Movies
-              </button>
-            </section>
+                  <button
+                    className="btn btn-primary see-more"
+                    onClick={() => {
+                      setPopularRows(popularRows + 1);
+                      loadMoreMovies(
+                        "popular", 
+                        popularRows + 1, 
+                        setPopularData,
+                        popularData
+                      );
+                    }}
+                  >
+                    See More Popular Movies
+                  </button>
+                </section>
 
-            {/* New Releases Section */}
-            <section id="newReleases" className="movie-section">
-              <h2>New Releases</h2>
-              <div className="movie-grid">
-                {[...Array(newReleasesRows * 7)].map((_, i) => (
-                  <div key={i} className="movie-card">
-                    <MoviePoster id={i.toString()} />
-                    <p className="movie-title">Movie Title</p>
+                {/* New Releases Section */}
+                <section id="newReleases" className="movie-section">
+                  <h2>New Releases</h2>
+                  <div className="movie-grid">
+                    {newReleasesData.map((movie) => (
+                      <div key={movie.show_id} className="movie-card">
+                        <MoviePoster movie={movie} />
+                        <p className="movie-title">{movie.title}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <button
-                className="btn btn-primary see-more"
-                onClick={() => setNewReleasesRows(newReleasesRows + 1)}
-              >
-                See More New Releases
-              </button>
-            </section>
+                  <button
+                    className="btn btn-primary see-more"
+                    onClick={() => {
+                      setNewReleasesRows(newReleasesRows + 1);
+                      loadMoreMovies(
+                        "new_releases", 
+                        newReleasesRows + 1, 
+                        setNewReleasesData,
+                        newReleasesData
+                      );
+                    }}
+                  >
+                    See More New Releases
+                  </button>
+                </section>
 
-            {/* All Movies Section */}
-            <section id="allMovies" className="movie-section">
-              <h2>All Movies</h2>
-              <div className="movie-grid">
-                {[...Array(allMoviesRows * 7)].map((_, i) => (
-                  <div key={i} className="movie-card">
-                    <MoviePoster id={i.toString()} />
-                    <p className="movie-title">Movie Title</p>
+                {/* All Movies Section */}
+                <section id="allMovies" className="movie-section">
+                  <h2>All Movies</h2>
+                  <div className="movie-grid">
+                    {allMoviesData.map((movie) => (
+                      <div key={movie.show_id} className="movie-card">
+                        <MoviePoster movie={movie} />
+                        <p className="movie-title">{movie.title}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <button
-                className="btn btn-primary see-more"
-                onClick={() => setAllMoviesRows(allMoviesRows + 1)}
-              >
-                See More Movies
-              </button>
-            </section>
+                  <button
+                    className="btn btn-primary see-more"
+                    onClick={() => {
+                      setAllMoviesRows(allMoviesRows + 1);
+                      loadMoreMovies(
+                        "all_movies", 
+                        allMoviesRows + 1, 
+                        setAllMoviesData,
+                        allMoviesData
+                      );
+                    }}
+                  >
+                    See More Movies
+                  </button>
+                </section>
 
-            {/* All TV Shows Section */}
-            <section id="allTVShows" className="movie-section">
-              <h2>All TV Shows</h2>
-              <div className="movie-grid">
-                {[...Array(allTVShowsRows * 7)].map((_, i) => (
-                  <div key={i} className="movie-card">
-                    <MoviePoster id={i.toString()} />
-                    <p className="movie-title">Movie Title</p>
+                {/* All TV Shows Section */}
+                <section id="allTVShows" className="movie-section">
+                  <h2>All TV Shows</h2>
+                  <div className="movie-grid">
+                    {allTVShowsData.map((movie) => (
+                      <div key={movie.show_id} className="movie-card">
+                        <MoviePoster movie={movie} />
+                        <p className="movie-title">{movie.title}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <button
-                className="btn btn-primary see-more"
-                onClick={() => setAllTVShowsRows(allTVShowsRows + 1)}
-              >
-                See More TV Shows
-              </button>
-            </section>
+                  <button
+                    className="btn btn-primary see-more"
+                    onClick={() => {
+                      setAllTVShowsRows(allTVShowsRows + 1);
+                      loadMoreMovies(
+                        "tv_shows", 
+                        allTVShowsRows + 1, 
+                        setAllTVShowsData,
+                        allTVShowsData
+                      );
+                    }}
+                  >
+                    See More TV Shows
+                  </button>
+                </section>
+              </>
+            )}
           </div>
         </div>
         <Footer />
