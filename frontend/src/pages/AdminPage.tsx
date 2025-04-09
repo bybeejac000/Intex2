@@ -19,6 +19,8 @@ const AdminMoviesPage = () => {
   const [totalPages, setTotalPages] = useState<number>(0);
   const [sortOrder, setSortOrder] = useState<string | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Fetch movies on page change, sort change, and page size change
   useEffect(() => {
@@ -28,7 +30,8 @@ const AdminMoviesPage = () => {
           pageSize,
           pageNum,
           selectedCategories,
-          sortOrder
+          sortOrder,
+          searchQuery
         );
         setMovies(data.movies);
         setTotalPages(Math.ceil(data.totalNumMovies / pageSize));
@@ -40,7 +43,7 @@ const AdminMoviesPage = () => {
     };
 
     loadMovies();
-  }, [pageSize, pageNum, sortOrder, selectedCategories]);
+  }, [pageSize, pageNum, sortOrder, selectedCategories, searchQuery]);
 
   const handleDelete = async (show_id: string) => {
     const confirmDelete = window.confirm(
@@ -54,6 +57,12 @@ const AdminMoviesPage = () => {
     } catch (error) {
       alert("Failed to delete movie. Please try again.");
     }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPageNum(1); // Reset to first page when searching
+    setSearchQuery(searchTerm); // Use the entered search term when submitting the form
   };
 
   if (loading) return <p>Loading Movies...</p>;
@@ -99,6 +108,39 @@ const AdminMoviesPage = () => {
         <div className="col-md-3">
           <div className="card shadow" style={{ backgroundColor: '#F0F2F5', boxShadow: '0 2px 4px rgba(0,0,0,0.08)' }}>
             <div className="card-body">
+              {/* Search Bar */}
+              <form onSubmit={handleSearch} className="mb-4">
+                <div className="input-group">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search titles..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  <button 
+                    className="btn btn-primary" 
+                    type="submit"
+                    style={{ backgroundColor: '#1976d2' }}
+                  >
+                    Search
+                  </button>
+                </div>
+                {searchTerm && (
+                  <button 
+                    type="button" 
+                    className="btn btn-sm btn-outline-secondary mt-2"
+                    onClick={() => {
+                      setSearchTerm("");
+                      setSearchQuery("");
+                      setPageNum(1);
+                    }}
+                  >
+                    Clear Search
+                  </button>
+                )}
+              </form>
+            
               <h3 className="card-title h5 mb-3" style={{ color: '#00294D' }}>Sort Options</h3>
               <div className="d-grid gap-2 mb-4">
                 <button className="btn btn-outline-primary" onClick={() => setSortOrder(null)} style={{ borderColor: '#1976d2', color: '#1976d2' }}>Default Order</button>
@@ -166,45 +208,49 @@ const AdminMoviesPage = () => {
 
         {/* Right Column - Movie List */}
         <div className="col-md-9">
-          {movies.map((m) => (
-            <div key={m.show_id} className="card mb-3 shadow" style={{ backgroundColor: '#F0F2F5', boxShadow: '0 2px 4px rgba(0,0,0,0.08)' }}>
-              <div className="card-body">
-                <div className="row align-items-center">
-                  <div className="col-md-6">
-                    <h5 className="card-title mb-1">{m.title}</h5>
-                    <div className="text-muted small">
-                      {m.release_year} • {m.duration}
+          {movies.length === 0 ? (
+            <div className="alert alert-info">No movies found. Try adjusting your search or filters.</div>
+          ) : (
+            movies.map((m) => (
+              <div key={m.show_id} className="card mb-3 shadow" style={{ backgroundColor: '#F0F2F5', boxShadow: '0 2px 4px rgba(0,0,0,0.08)' }}>
+                <div className="card-body">
+                  <div className="row align-items-center">
+                    <div className="col-md-6">
+                      <h5 className="card-title mb-1">{m.title}</h5>
+                      <div className="text-muted small">
+                        {m.release_year} • {m.duration}
+                      </div>
                     </div>
-                  </div>
-                  <div className="col-md-6 text-md-end mt-3 mt-md-0">
-                    <button
-                      className="btn btn-outline-info btn-sm me-2"
-                      data-bs-toggle="modal"
-                      data-bs-target={`#infoModal${m.show_id}`}
-                      style={{ borderColor: '#1976d2', color: '#1976d2' }}
-                    >
-                      All Information
-                    </button>
-                    <button
-                      className="btn btn-outline-primary btn-sm me-2"
-                      data-bs-toggle="modal"
-                      data-bs-target={`#editMovieModal${m.show_id}`}
-                      style={{ borderColor: '#1976d2', color: '#1976d2' }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="btn btn-outline-danger btn-sm"
-                      onClick={() => handleDelete(m.show_id)}
-                      style={{ borderColor: '#dc3545', color: '#dc3545' }}
-                    >
-                      Delete
-                    </button>
+                    <div className="col-md-6 text-md-end mt-3 mt-md-0">
+                      <button
+                        className="btn btn-outline-info btn-sm me-2"
+                        data-bs-toggle="modal"
+                        data-bs-target={`#infoModal${m.show_id}`}
+                        style={{ borderColor: '#1976d2', color: '#1976d2' }}
+                      >
+                        All Information
+                      </button>
+                      <button
+                        className="btn btn-outline-primary btn-sm me-2"
+                        data-bs-toggle="modal"
+                        data-bs-target={`#editMovieModal${m.show_id}`}
+                        style={{ borderColor: '#1976d2', color: '#1976d2' }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="btn btn-outline-danger btn-sm"
+                        onClick={() => handleDelete(m.show_id)}
+                        style={{ borderColor: '#dc3545', color: '#dc3545' }}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
 
           <div className="mt-4">
             <Pagination
@@ -234,7 +280,7 @@ const AdminMoviesPage = () => {
                     const modal = Modal.getInstance(modalElement);
                     modal?.hide();
                   }
-                  fetchMovies(pageSize, pageNum, selectedCategories, sortOrder).then(
+                  fetchMovies(pageSize, pageNum, selectedCategories, sortOrder, searchQuery).then(
                     (data) => setMovies(data.movies)
                   );
                 }}
@@ -314,7 +360,7 @@ const AdminMoviesPage = () => {
                       const modal = Modal.getInstance(modalElement);
                       modal?.hide();
                     }
-                    fetchMovies(pageSize, pageNum, selectedCategories, sortOrder).then(
+                    fetchMovies(pageSize, pageNum, selectedCategories, sortOrder, searchQuery).then(
                       (data) => setMovies(data.movies)
                     );
                   }}
