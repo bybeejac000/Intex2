@@ -230,6 +230,15 @@ namespace CineNiche.Controllers
             return Ok(existingMovie);  // Return the updated movie
         }
 
+        [HttpGet("GetId")]
+        public List<User> GetId(string email)
+        {
+            List<User> user_data = _movieContext.Users.Where((r) => r.email == email).ToList();
+
+            return user_data;
+        }
+
+
         [HttpDelete("DeleteMovie/{showId}")]
         public IActionResult DeleteMovie(string showId)
         {
