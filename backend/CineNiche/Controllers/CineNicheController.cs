@@ -159,5 +159,18 @@ namespace CineNiche.Controllers
             return NoContent();  // Return a No Content status to indicate successful deletion
         }
 
+        [HttpGet("GetMovie/{showId}")]
+        public IActionResult GetMovie(string showId)
+        {
+            var movie = _movieContext.Titles.FirstOrDefault(m => m.show_id == showId);
+
+            if (movie == null)
+            {
+                return NotFound(new { message = "Movie not found" });
+            }
+
+            return Ok(movie);
+        }
+
     }
 }
