@@ -25,6 +25,11 @@ function MoviesPage() {
   const [allTVShowsData, setAllTVShowsData] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   
+  // Search functionality
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState<Movie[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  
   const navigate = useNavigate();
 
   // Fetch data on component mount
@@ -90,10 +95,41 @@ function MoviesPage() {
     }
   };
 
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    if (e.target.value.length > 2) {
+      handleSearch(e.target.value);
+    } else if (e.target.value.length === 0) {
+      setSearchResults([]);
+      setIsSearching(false);
+    }
+  };
+
+  // Search for movies
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    try {
+      setIsSearching(true);
+      const response = await fetchMovies(10, 1, [], null, query);
+      setSearchResults(response.movies);
+    } catch (error) {
+      console.error("Error searching movies:", error);
+    }
+  };
+
   const handleClick = (show_id: string) => {
     console.log("Clicked on movie with show_id:", show_id);
     console.log("Movie show_id type:", typeof show_id);
     console.log("Navigating to:", `/movie/${show_id}`);
+    setSearchTerm("");
+    setSearchResults([]);
+    setIsSearching(false);
     navigate(`/movie/${show_id}`);
   };
 
@@ -139,7 +175,11 @@ function MoviesPage() {
             {/* Sidebar Navigation */}
             <div className={`sidebar ${isExpanded ? 'expanded' : ''}`}
             onMouseEnter={() => setIsExpanded(true)}
-            onMouseLeave={() => setIsExpanded(false)}
+            onMouseLeave={() => {
+              if (!isSearching) {
+                setIsExpanded(false);
+              }
+            }}
           >
             <div className="search-bar">
               {!isExpanded && (
@@ -150,9 +190,27 @@ function MoviesPage() {
                   type="text"
                   placeholder="Explore movies..."
                   className="form-control"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
                 />
               )}
             </div>
+
+            {/* Search Results */}
+            {isExpanded && searchResults.length > 0 && (
+              <div className="search-results">
+                {searchResults.map((movie) => (
+                  <div 
+                    key={movie.show_id} 
+                    className="search-result-item"
+                    onClick={() => handleClick(movie.show_id)}
+                  >
+                    <div className="search-result-title">{movie.title}</div>
+                    <div className="search-result-year">{movie.release_year}</div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div className="nav-items">
               <div
@@ -320,136 +378,206 @@ function MoviesPage() {
                 {/* My Recommendations Section */}
                 <section id="recommendations" className="movie-section">
                   <h2>(nameHere)'s Top Recommendations</h2>
-                  <div className="movie-grid">
-                    {recommendationsData.map((movie) => (
-                      <div key={movie.show_id} className="movie-card">
-                        <MoviePoster movie={movie} />
-                        <p className="movie-title">{movie.title}</p>
-                      </div>
-                    ))}
+                  <div className="movie-row-container">
+                    <div className="movie-grid">
+                      {recommendationsData.map((movie) => (
+                        <div key={movie.show_id} className="movie-card">
+                          <MoviePoster movie={movie} />
+                          <p className="movie-title">{movie.title}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div 
+                      className="movie-navigation-arrow"
+                      onClick={() => {
+                        setRecommendationsRows(recommendationsRows + 1);
+                        loadMoreMovies(
+                          "recommendations", 
+                          recommendationsRows + 1, 
+                          setRecommendationsData,
+                          recommendationsData
+                        );
+                      }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        fill="currentColor"
+                        className="bi bi-chevron-right"
+                        viewBox="0 0 16 16"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"
+                        />
+                      </svg>
+                    </div>
                   </div>
-                  <button
-                    className="btn btn-primary see-more"
-                    onClick={() => {
-                      setRecommendationsRows(recommendationsRows + 1);
-                      loadMoreMovies(
-                        "recommendations", 
-                        recommendationsRows + 1, 
-                        setRecommendationsData,
-                        recommendationsData
-                      );
-                    }}
-                  >
-                    See More Recommendations
-                  </button>
                 </section>
 
                 {/* Most Popular Section */}
                 <section id="popular" className="movie-section">
                   <h2>Most Popular on CineNiche</h2>
-                  <div className="movie-grid">
-                    {popularData.map((movie) => (
-                      <div key={movie.show_id} className="movie-card">
-                        <MoviePoster movie={movie} />
-                        <p className="movie-title">{movie.title}</p>
-                      </div>
-                    ))}
+                  <div className="movie-row-container">
+                    <div className="movie-grid">
+                      {popularData.map((movie) => (
+                        <div key={movie.show_id} className="movie-card">
+                          <MoviePoster movie={movie} />
+                          <p className="movie-title">{movie.title}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div 
+                      className="movie-navigation-arrow"
+                      onClick={() => {
+                        setPopularRows(popularRows + 1);
+                        loadMoreMovies(
+                          "popular", 
+                          popularRows + 1, 
+                          setPopularData,
+                          popularData
+                        );
+                      }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        fill="currentColor"
+                        className="bi bi-chevron-right"
+                        viewBox="0 0 16 16"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"
+                        />
+                      </svg>
+                    </div>
                   </div>
-                  <button
-                    className="btn btn-primary see-more"
-                    onClick={() => {
-                      setPopularRows(popularRows + 1);
-                      loadMoreMovies(
-                        "popular", 
-                        popularRows + 1, 
-                        setPopularData,
-                        popularData
-                      );
-                    }}
-                  >
-                    See More Popular Movies
-                  </button>
                 </section>
 
                 {/* New Releases Section */}
                 <section id="newReleases" className="movie-section">
                   <h2>New Releases</h2>
-                  <div className="movie-grid">
-                    {newReleasesData.map((movie) => (
-                      <div key={movie.show_id} className="movie-card">
-                        <MoviePoster movie={movie} />
-                        <p className="movie-title">{movie.title}</p>
-                      </div>
-                    ))}
+                  <div className="movie-row-container">
+                    <div className="movie-grid">
+                      {newReleasesData.map((movie) => (
+                        <div key={movie.show_id} className="movie-card">
+                          <MoviePoster movie={movie} />
+                          <p className="movie-title">{movie.title}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div 
+                      className="movie-navigation-arrow"
+                      onClick={() => {
+                        setNewReleasesRows(newReleasesRows + 1);
+                        loadMoreMovies(
+                          "new_releases", 
+                          newReleasesRows + 1, 
+                          setNewReleasesData,
+                          newReleasesData
+                        );
+                      }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        fill="currentColor"
+                        className="bi bi-chevron-right"
+                        viewBox="0 0 16 16"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"
+                        />
+                      </svg>
+                    </div>
                   </div>
-                  <button
-                    className="btn btn-primary see-more"
-                    onClick={() => {
-                      setNewReleasesRows(newReleasesRows + 1);
-                      loadMoreMovies(
-                        "new_releases", 
-                        newReleasesRows + 1, 
-                        setNewReleasesData,
-                        newReleasesData
-                      );
-                    }}
-                  >
-                    See More New Releases
-                  </button>
                 </section>
 
                 {/* All Movies Section */}
                 <section id="allMovies" className="movie-section">
                   <h2>All Movies</h2>
-                  <div className="movie-grid">
-                    {allMoviesData.map((movie) => (
-                      <div key={movie.show_id} className="movie-card">
-                        <MoviePoster movie={movie} />
-                        <p className="movie-title">{movie.title}</p>
-                      </div>
-                    ))}
+                  <div className="movie-row-container">
+                    <div className="movie-grid">
+                      {allMoviesData.map((movie) => (
+                        <div key={movie.show_id} className="movie-card">
+                          <MoviePoster movie={movie} />
+                          <p className="movie-title">{movie.title}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div 
+                      className="movie-navigation-arrow"
+                      onClick={() => {
+                        setAllMoviesRows(allMoviesRows + 1);
+                        loadMoreMovies(
+                          "all_movies", 
+                          allMoviesRows + 1, 
+                          setAllMoviesData,
+                          allMoviesData
+                        );
+                      }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        fill="currentColor"
+                        className="bi bi-chevron-right"
+                        viewBox="0 0 16 16"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"
+                        />
+                      </svg>
+                    </div>
                   </div>
-                  <button
-                    className="btn btn-primary see-more"
-                    onClick={() => {
-                      setAllMoviesRows(allMoviesRows + 1);
-                      loadMoreMovies(
-                        "all_movies", 
-                        allMoviesRows + 1, 
-                        setAllMoviesData,
-                        allMoviesData
-                      );
-                    }}
-                  >
-                    See More Movies
-                  </button>
                 </section>
 
                 {/* All TV Shows Section */}
                 <section id="allTVShows" className="movie-section">
                   <h2>All TV Shows</h2>
-                  <div className="movie-grid">
-                    {allTVShowsData.map((movie) => (
-                      <div key={movie.show_id} className="movie-card">
-                        <MoviePoster movie={movie} />
-                        <p className="movie-title">{movie.title}</p>
-                      </div>
-                    ))}
+                  <div className="movie-row-container">
+                    <div className="movie-grid">
+                      {allTVShowsData.map((movie) => (
+                        <div key={movie.show_id} className="movie-card">
+                          <MoviePoster movie={movie} />
+                          <p className="movie-title">{movie.title}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div 
+                      className="movie-navigation-arrow"
+                      onClick={() => {
+                        setAllTVShowsRows(allTVShowsRows + 1);
+                        loadMoreMovies(
+                          "tv_shows", 
+                          allTVShowsRows + 1, 
+                          setAllTVShowsData,
+                          allTVShowsData
+                        );
+                      }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        fill="currentColor"
+                        className="bi bi-chevron-right"
+                        viewBox="0 0 16 16"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"
+                        />
+                      </svg>
+                    </div>
                   </div>
-                  <button
-                    className="btn btn-primary see-more"
-                    onClick={() => {
-                      setAllTVShowsRows(allTVShowsRows + 1);
-                      loadMoreMovies(
-                        "tv_shows", 
-                        allTVShowsRows + 1, 
-                        setAllTVShowsData,
-                        allTVShowsData
-                      );
-                    }}
-                  >
-                    See More TV Shows
-                  </button>
                 </section>
               </>
             )}

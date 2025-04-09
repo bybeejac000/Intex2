@@ -20,7 +20,8 @@ export const fetchMovies = async (
   pageSize: number,
   pageNum: number,
   selectedCategories: string[],
-  sortOrder: string | null
+  sortOrder: string | null,
+  searchTerm: string = ""
 ): Promise<FetchMoviesResponse> => {
   try {
     const categoryParams = selectedCategories
@@ -33,6 +34,10 @@ export const fetchMovies = async (
 
     if (sortOrder) {
       url += `&sortOrder=${sortOrder}`;
+    }
+    
+    if (searchTerm.trim()) {
+      url += `&search=${encodeURIComponent(searchTerm.trim())}`;
     }
 
     const response = await fetch(url, defaultOptions);
@@ -110,7 +115,6 @@ export const deleteMovie = async (showId: string): Promise<void> => {
     throw error;
   }
 };
-
 // Fetch a single movie by ID
 export const fetchMovieById = async (movieId: string): Promise<Movie> => {
   try {
@@ -127,3 +131,4 @@ export const fetchMovieById = async (movieId: string): Promise<Movie> => {
     throw error;
   }
 };
+
