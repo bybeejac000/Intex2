@@ -189,7 +189,14 @@ const AdminMoviesPage = () => {
                     >
                       Sort Z → A
                     </button>
-                    {/* <button
+                    <br />
+                    <h3
+                    className="card-title h5 mb-3"
+                    style={{ color: "#00294D" }}
+                  >
+                    Business Analytics
+                  </h3>
+                    <button
                       className="btn btn-outline-primary"
                       onClick={() => setSortOrder("averagerating_asc")}
                       style={{ borderColor: "#1976d2", color: "#1976d2" }}
@@ -216,7 +223,7 @@ const AdminMoviesPage = () => {
                       style={{ borderColor: "#1976d2", color: "#1976d2" }}
                     >
                       Sort By Num Rating Desc
-                    </button> */}
+                    </button>
                   </div>
 
                   <h3
