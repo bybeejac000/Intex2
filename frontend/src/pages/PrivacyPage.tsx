@@ -37,7 +37,14 @@ const PrivacyPage = () =>
         const scrollToSection = (id: string) => {
             const element = document.getElementById(id);
             if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
+                const headerOffset = 80; // Adjust this value to match your header height
+                const elementPosition = element.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth',
+                });
             }
         };
 

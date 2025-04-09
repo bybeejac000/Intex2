@@ -6,7 +6,7 @@ import "./MoviesPage.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import AuthorizeView from "../components/AuthorizeView";
-import { fetchMovies } from "../api/MoviesAPI";
+import { fetchMovies, fetchMovieById } from "../api/MoviesAPI";
 import { Movie } from "../types/Movie";
 
 function MoviesPage() {
@@ -30,7 +30,54 @@ function MoviesPage() {
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   
+  // Category filtering
+  const [showCategoryFilter, setShowCategoryFilter] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  
+  // Recommendations paging
+  const [totalRecommendations, setTotalRecommendations] = useState<string[]>([]);
+  const [recommendationsLoaded, setRecommendationsLoaded] = useState(7);
+  const [hasMoreRecommendations, setHasMoreRecommendations] = useState(true);
+  
   const navigate = useNavigate();
+
+  // Available categories
+  const categories = [
+    "action", "adventure", "comedies", "documentaries", 
+    "dramas", "horror_movies", "family_movies", "thrillers"
+  ];
+
+  // Handle category selection
+  const toggleCategory = (category: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(cat => cat !== category) 
+        : [...prev, category]
+    );
+  };
+  
+  // Apply category filters and reload movies
+  const applyFilters = async () => {
+    setLoading(true);
+    try {
+      // Refetch all movies with selected categories
+      const allMoviesResponse = await fetchMovies(7, 1, selectedCategories, null);
+      setAllMoviesData(allMoviesResponse.movies);
+      
+      // Update other sections with category filters
+      const popularResponse = await fetchMovies(7, 1, selectedCategories, "popular");
+      setPopularData(popularResponse.movies);
+      
+      const newReleasesResponse = await fetchMovies(7, 1, selectedCategories, "release_year_desc");
+      setNewReleasesData(newReleasesResponse.movies);
+      
+    } catch (error) {
+      console.error("Error applying filters:", error);
+    } finally {
+      setLoading(false);
+      setShowCategoryFilter(false);
+    }
+  };
 
   // Fetch data on component mount
   useEffect(() => {
@@ -38,10 +85,32 @@ function MoviesPage() {
       try {
         setLoading(true);
         
-        // Fetch recommendations (movies with high ratings)
-        const recommendationsResponse = await fetchMovies(7, 1, [], "rating_desc");
-        console.log("Recommendations data:", recommendationsResponse.movies);
-        setRecommendationsData(recommendationsResponse.movies);
+        // Fetch personalized recommendations from recommendation API (get 50 max)
+        const recommendationsResponse = await fetch(`http://44.214.17.52:5000/recommend_user?user_id=199&num=50`);
+        const recommendationsData = await recommendationsResponse.json();
+        const recommendedShowIds = recommendationsData.results;
+        
+        // Store all recommendation IDs for later paging
+        setTotalRecommendations(recommendedShowIds);
+        
+        // Only fetch details for the first 7 recommendations initially
+        const initialShowIds = recommendedShowIds.slice(0, 7);
+        
+        // Fetch full details for each recommended movie
+        const recommendedMovies: Movie[] = [];
+        for (const showId of initialShowIds) {
+          try {
+            const movieDetails = await fetchMovieById(showId);
+            recommendedMovies.push(movieDetails);
+          } catch (error) {
+            console.error(`Error fetching details for movie ${showId}:`, error);
+          }
+        }
+        console.log("Recommendations data:", recommendedMovies);
+        setRecommendationsData(recommendedMovies);
+        
+        // Set if we have more recommendations to load
+        setHasMoreRecommendations(recommendedShowIds.length > 7);
         
         // Fetch popular movies
         const popularResponse = await fetchMovies(7, 1, [], "popular");
@@ -154,6 +223,40 @@ function MoviesPage() {
         />
       </div>
     );
+  };
+
+  // Function to load more recommendations
+  const loadMoreRecommendations = async () => {
+    if (!hasMoreRecommendations) return;
+    
+    try {
+      // Calculate the next batch (next 7 or remaining if less than 7)
+      const end = Math.min(recommendationsLoaded + 7, totalRecommendations.length);
+      const nextBatch = totalRecommendations.slice(recommendationsLoaded, end);
+      
+      // Fetch details for each recommendation in the next batch
+      const newRecommendations: Movie[] = [];
+      for (const showId of nextBatch) {
+        try {
+          const movieDetails = await fetchMovieById(showId);
+          newRecommendations.push(movieDetails);
+        } catch (error) {
+          console.error(`Error fetching details for movie ${showId}:`, error);
+        }
+      }
+      
+      // Add new recommendations to the existing data
+      setRecommendationsData(current => [...current, ...newRecommendations]);
+      
+      // Update how many we've loaded
+      setRecommendationsLoaded(end);
+      
+      // Check if we have more to load
+      setHasMoreRecommendations(end < totalRecommendations.length);
+      
+    } catch (error) {
+      console.error("Error loading more recommendations:", error);
+    }
   };
 
   return (
@@ -309,6 +412,64 @@ function MoviesPage() {
                 </svg>
                 {isExpanded && <span>TV Shows</span>}
               </div>
+              
+              {/* Category Filter Button */}
+              <div
+                className="nav-item"
+                onClick={() => setShowCategoryFilter(!showCategoryFilter)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  fill="currentColor"
+                  className="bi bi-filter"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                </svg>
+                {isExpanded && <span>Filter by Category</span>}
+              </div>
+              
+              {/* Category Filter Dropdown */}
+              {isExpanded && showCategoryFilter && (
+                <div className="category-filter">
+                  <div className="category-list">
+                    {categories.map(category => (
+                      <div key={category} className="category-item">
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={selectedCategories.includes(category)}
+                            onChange={() => toggleCategory(category)}
+                          />
+                          <span>{category.replace(/_/g, ' ')}</span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="filter-actions">
+                    <button 
+                      className="apply-filter"
+                      onClick={applyFilters}
+                    >
+                      Apply Filters
+                    </button>
+                    <button 
+                      className="clear-filter"
+                      onClick={() => {
+                        setSelectedCategories([]);
+                        setShowCategoryFilter(false);
+                      }}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="profile-nav-item">
               <div className="nav-item" onClick={() => navigate("/profile")}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -326,41 +487,6 @@ function MoviesPage() {
                 </svg>
                 {isExpanded && <span>My Profile</span>}
               </div>
-            </div>
-
-            <div
-              className="expand-button"
-              onClick={() => setIsExpanded(!isExpanded)}
-            >
-              {isExpanded ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  fill="currentColor"
-                  className="bi bi-chevron-left"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  fill="currentColor"
-                  className="bi bi-chevron-right"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"
-                  />
-                </svg>
-              )}
             </div>
           </div>
 
@@ -387,32 +513,26 @@ function MoviesPage() {
                         </div>
                       ))}
                     </div>
-                    <div 
-                      className="movie-navigation-arrow"
-                      onClick={() => {
-                        setRecommendationsRows(recommendationsRows + 1);
-                        loadMoreMovies(
-                          "recommendations", 
-                          recommendationsRows + 1, 
-                          setRecommendationsData,
-                          recommendationsData
-                        );
-                      }}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        fill="currentColor"
-                        className="bi bi-chevron-right"
-                        viewBox="0 0 16 16"
+                    {hasMoreRecommendations && (
+                      <div 
+                        className="movie-navigation-arrow"
+                        onClick={loadMoreRecommendations}
                       >
-                        <path
-                          fillRule="evenodd"
-                          d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"
-                        />
-                      </svg>
-                    </div>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          fill="currentColor"
+                          className="bi bi-chevron-right"
+                          viewBox="0 0 16 16"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"
+                          />
+                        </svg>
+                      </div>
+                    )}
                   </div>
                 </section>
 
