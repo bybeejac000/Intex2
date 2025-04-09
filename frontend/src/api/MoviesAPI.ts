@@ -37,7 +37,7 @@ export const fetchMovies = async (
     }
 
     if (searchTerm.trim()) {
-      url += `&search=${encodeURIComponent(searchTerm.trim())}`;
+      url += `&searchTerm=${encodeURIComponent(searchTerm.trim())}`;
     }
 
     const response = await fetch(url, defaultOptions);
