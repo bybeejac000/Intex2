@@ -22,6 +22,13 @@ function MovieDetailsPage() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loadingRecommendations, setLoadingRecommendations] = useState(false);
   const [showRecommendations, setShowRecommendations] = useState(false);
+  
+  // Rating state
+  const [showRatingPopup, setShowRatingPopup] = useState(false);
+  const [userRating, setUserRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [submittingRating, setSubmittingRating] = useState(false);
+  const [ratingSubmitted, setRatingSubmitted] = useState(false);
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -105,6 +112,118 @@ function MovieDetailsPage() {
     );
   };
 
+  // Star Rating Component
+  const StarRating = () => {
+    const stars = [1, 2, 3, 4, 5];
+    
+    const handleRatingSubmit = async () => {
+      if (userRating === 0) return;
+      
+      setSubmittingRating(true);
+      try {
+        // API call to submit rating
+        const response = await fetch('http://44.214.17.52:5000/ratings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            show_id: id,
+            rating: userRating,
+            // Add user info if available
+            user_id: localStorage.getItem('userId') || 'anonymous',
+          }),
+        });
+        
+        if (response.ok) {
+          setRatingSubmitted(true);
+          // Update local rating display
+          if (movie) {
+            const newNumRatings = (movie.numRatings || 0) + 1;
+            const newAvgRating = (((movie.averageRating || 0) * (movie.numRatings || 0)) + userRating) / newNumRatings;
+            setMovie({
+              ...movie,
+              numRatings: newNumRatings,
+              averageRating: newAvgRating
+            });
+          }
+          
+          // Hide rating component after delay
+          setTimeout(() => {
+            setShowRatingPopup(false);
+            setRatingSubmitted(false);
+          }, 2000);
+        } else {
+          throw new Error('Failed to submit rating');
+        }
+      } catch (err) {
+        console.error('Error submitting rating:', err);
+      } finally {
+        setSubmittingRating(false);
+      }
+    };
+    
+    return (
+      <div className="rating-component mt-3 mb-3 p-3">
+        {ratingSubmitted ? (
+          <div className="rating-success text-center">
+            <h5>Thank you for your rating!</h5>
+            <div className="stars-display">
+              {stars.map(star => (
+                <span key={star} style={{ color: star <= userRating ? '#FFD700' : '#ccc', fontSize: '1.8rem', padding: '0 5px' }}>★</span>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <>
+            <h5 className="mb-1 text-center">Rate "{movie?.title}"</h5>
+            <div className="stars-container d-flex justify-content-center mb-3">
+              {stars.map(star => (
+                <span 
+                  key={star}
+                  style={{ 
+                    cursor: 'pointer', 
+                    color: star <= (hoverRating || userRating) ? '#FFD700' : '#ccc',
+                    fontSize: '2rem',
+                    padding: '0 5px'
+                  }}
+                  onClick={() => setUserRating(star)}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onMouseLeave={() => setHoverRating(0)}
+                >
+                  ★
+                </span>
+              ))}
+            </div>
+            <div className="d-flex justify-content-center">
+              <button 
+                className="btn btn-secondary me-2"
+                onClick={() => setShowRatingPopup(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn btn-primary"
+                onClick={handleRatingSubmit}
+                disabled={userRating === 0 || submittingRating}
+                style={{ backgroundColor: '#1976d2' }}
+              >
+                {submittingRating ? (
+                  <span>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Submitting...
+                  </span>
+                ) : (
+                  'Submit'
+                )}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <>
@@ -176,227 +295,150 @@ function MovieDetailsPage() {
         <div
           className="movie-details-container"
           style={{
-            backgroundColor: "#0a1929",
             backgroundImage:
               "linear-gradient(135deg, #000810 0%, #00294D 100%)",
             color: "white",
-            padding: "80px 20px",
+            padding: "100px 20px",
             minHeight: "100vh",
             display: "flex",
             flexDirection: "column",
           }}
         >
           <div className="container">
-            <div className="row justify-content-center">
-              <div className="col-12 col-md-10 col-lg-8">
-                <div className="row">
-                  <div className="col-md-4 d-flex justify-content-center mb-4 position-relative">
-                    <button
-                      className="btn btn-link text-light text-decoration-none position-absolute"
-                      onClick={() => window.history.back()}
-                      style={{
-                        fontSize: "3rem",
-                        paddingRight: "100px",
-                        marginRight: "100px",
-                        lineHeight: 2,
-                        top: 0,
-                        left: -80,
-                        zIndex: 10,
-                      }}
-                    >
-                      ←
-                    </button>
-                    <img
-                      src={imageUrl}
-                      alt={movie.title}
-                      className="movie-poster-large img-fluid"
-                      style={{
-                        maxWidth: "260px",
-                        height: "400px",
-                        maxHeight: "500px",
-                        objectFit: "cover",
-                        borderRadius: "8px",
-                        boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
-                      }}
-                    />
-                  </div>
-                  <div className="col-md-8 text-center text-md-start ps-md-5">
-                    <div className="d-flex align-items-center mb-3">
-                      <h1 className="display-4 mb-0">{movie.title}</h1>
-                    </div>
-                    <div className="movie-meta d-flex flex-wrap justify-content-center justify-content-md-start gap-2 mb-4 mt-3">
-                      <span className="badge bg-secondary">
-                        {movie.release_year}
-                      </span>
-                      <span className="badge bg-secondary">
-                        {movie.duration}
-                      </span>
-                      <span className="badge bg-secondary">{movie.type}</span>
-                      <span className="badge bg-warning text-dark">
-                        ★ {movie.rating}
-                      </span>
-                      {/* Average Rating */}
-                      <span className="badge bg-info text-dark">
-                        ★ {movie.averageRating}
-                      </span>{" "}
-                      {/* Number of Ratings */}
-                      <span className="badge bg-info text-dark">
-                        {movie.numRatings} ratings
-                      </span>{" "}
-                    </div>
-
-                    {/* Genres Section */}
-                    <div className="movie-genres mb-3">
-                      <strong>Genre:</strong>
-                      <div className="d-flex flex-wrap gap-1 mt-1">
-                        {Object.keys(movie).map((key) => {
-                          if (
-                            key !== "show_id" &&
-                            key !== "type" &&
-                            key !== "title" &&
-                            key !== "director" &&
-                            key !== "cast" &&
-                            key !== "country" &&
-                            key !== "release_year" &&
-                            key !== "rating" &&
-                            key !== "duration" &&
-                            key !== "description" &&
-                            movie[key as keyof Movie] === 1
-                          ) {
-                            return (
-                              <span key={key} className="badge bg-secondary">
-                                {key.replace(/_/g, " ")}
-                              </span>
-                            );
-                          }
-                          return null;
-                        })}
-                      </div>
-                    </div>
-
-                    <div className="movie-director mb-3">
-                      <strong>Director:</strong> {movie.director}
-                    </div>
-                    <div className="movie-cast mb-3">
-                      <strong>Cast:</strong> {movie.cast}
-                    </div>
-                    <div className="movie-description mb-3">
-                      <strong>Description:</strong> {movie.description}
-                    </div>
-                    <div className="movie-country mb-3">
-                      <strong>Country:</strong> {movie.country}
-                    </div>
-
-                    {/* Recommendation Button */}
-                    <div className="mt-4">
-                      <button
-                        className="btn btn-primary"
-                        onClick={fetchRecommendations}
-                        disabled={loadingRecommendations}
-                      >
-                        {loadingRecommendations ? (
-                          <span>
-                            <span
-                              className="spinner-border spinner-border-sm me-2"
-                              role="status"
-                              aria-hidden="true"
-                            ></span>
-                            Loading recommendations...
-                          </span>
-                        ) : (
-                          "Want to watch more movies like this one?"
-                        )}
-                      </button>
-                    </div>
-                  </div>
+            <div className="row justify-content-start">
+              <div className="col-md-3 text-center">
+                <img
+                  src={imageUrl}
+                  alt={movie.title}
+                  className="movie-poster-large"
+                  style={{ 
+                    maxWidth: "300px", 
+                    height: "450px", 
+                    maxHeight: "500px", 
+                    borderRadius: "8px" 
+                  }}
+                />
+                <div className="mt-3">
+                  <button className="btn btn-primary w-100 mb-2">Play Now</button>
+                  <button 
+                    className="btn btn-primary w-100"
+                    onClick={() => setShowRatingPopup(!showRatingPopup)}
+                  >
+                    Leave a Rating
+                  </button>
+                  {showRatingPopup && <StarRating />}
                 </div>
-
-                {/* Recommendations Section */}
-                {showRecommendations && (
-                  <div className="row mt-5">
-                    <div className="col-12">
-                      <h3 className="mb-4" style={{ fontWeight: 300 }}>
-                        Because you liked <strong>{movie.title}</strong>, you
-                        might also like:
-                      </h3>
-
+              </div>
+              
+              <div className="col-md-5 text-start">
+                <button
+                  className="btn btn-link text-light text-decoration-none"
+                  onClick={() => window.history.back()}
+                  style={{ 
+                    fontSize: "3rem", 
+                    marginBottom: "1rem",
+                    position: "fixed",
+                    left: "175px",
+                    top: "125px",
+                    zIndex: 1000
+                  }}
+                >
+                  ←
+                </button>
+                <h1 className="display-4 mb-3">{movie.title}</h1>
+                <div className="movie-meta d-flex flex-wrap gap-2 mb-4">
+                  <span className="badge bg-secondary">{movie.type}</span>
+                  <span className="badge bg-secondary">{movie.release_year}</span>
+                  <span className="badge bg-secondary">{movie.duration}</span>
+                  <span className="badge bg-warning">{movie.rating}</span>
+                  <span className="badge" style={{ backgroundColor: "#1976d2" }}>★ {movie.averageRating} from {movie.numRatings} ratings</span>
+                </div>
+                
+                <p><strong>Description:</strong> {movie.description}</p>
+                
+                <div className="movie-director mb-3">
+                  <strong>Director:</strong> {movie.director}
+                </div>
+                <div className="movie-cast mb-3">
+                  <strong>Cast:</strong> {movie.cast}
+                </div>
+                
+                <button
+                  className="btn btn-primary mt-3"
+                  onClick={fetchRecommendations}
+                  disabled={loadingRecommendations}
+                  style={{ display: showRecommendations ? 'none' : 'block', backgroundColor: "transparent", color: "#1976d2" }}
+                >
+                  {loadingRecommendations ? (
+                    <span>
+                      <span
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      Loading...
+                    </span>
+                  ) : (
+                    "Want to find movies like this?"
+                  )}
+                </button>
+              </div>
+              
+              <div className="col-md-4">
+                <div className="d-flex">
+                  {showRecommendations && (
+                    <div className="recommendations-panel" style={{ 
+                      maxHeight: "80vh", 
+                      overflowY: "auto", 
+                      flex: 1,
+                      scrollbarWidth: "thin",
+                      scrollbarColor: "#1976d2 transparent"
+                    }}>
+                      <style>
+                        {`
+                          .recommendations-panel::-webkit-scrollbar {
+                            width: 8px;
+                          }
+                          .recommendations-panel::-webkit-scrollbar-track {
+                            background: transparent;
+                          }
+                          .recommendations-panel::-webkit-scrollbar-thumb {
+                            background-color: #1976d2;
+                            border-radius: 20px;
+                          }
+                        `}
+                      </style>
+                      <h4 className="mb-3" style={{ fontWeight: "300" }}>Since you enjoyed <strong>{movie.title}</strong>, try watching...</h4>
                       {loadingRecommendations ? (
                         <div className="d-flex justify-content-center my-5">
-                          <div
-                            className="spinner-border text-primary"
-                            role="status"
-                          >
-                            <span className="visually-hidden">
-                              Loading recommendations...
-                            </span>
+                          <div className="spinner-border text-primary" role="status">
+                            <span className="visually-hidden">Loading recommendations...</span>
                           </div>
                         </div>
                       ) : recommendations.length > 0 ? (
-                        <div className="row g-4 justify-content-center">
+                        <div className="recommended-movies">
                           {recommendations.map((rec, index) => (
-                            <div
-                              className="col-6 col-sm-4 col-md-3 col-lg-2"
-                              key={index}
+                            <div 
+                              key={index} 
+                              className="recommendation-item d-flex flex-column align-items-center mb-3"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => handleRecommendationClick(rec.title)}
                             >
-                              <div
-                                className="recommendation-item d-flex flex-column align-items-center"
-                                style={{ cursor: "pointer" }}
-                                onClick={() =>
-                                  handleRecommendationClick(rec.title)
-                                }
-                              >
-                                <div
-                                  className="poster-container"
-                                  style={{
-                                    position: "relative",
-                                    width: "100%",
-                                    paddingBottom: "150%", // 2:3 aspect ratio
-                                    overflow: "hidden",
-                                    borderRadius: "8px",
-                                    marginBottom: "10px",
-                                    backgroundColor: "#1a2638",
-                                    opacity: 1, // Ensure no fading effect here
-                                  }}
-                                >
-                                  <img
-                                    src={`http://44.214.17.52/${encodeURIComponent(
-                                      rec.title
-                                    )}.jpg`}
-                                    alt={rec.title}
-                                    style={{
-                                      position: "absolute",
-                                      top: 0,
-                                      left: 0,
-                                      width: "100%",
-                                      height: "100%",
-                                      objectFit: "cover",
-                                      opacity: 1, // Ensure no fading effect on the image itself
-                                    }}
-                                    onError={(e) => {
-                                      // Fallback image if the movie image fails to load
-                                      (e.target as HTMLImageElement).src =
-                                        "https://via.placeholder.com/150x225?text=No+Image";
-                                    }}
-                                  />
-                                </div>
-                                <h6
-                                  className="movie-title text-center mb-0"
-                                  style={{
-                                    fontSize: "0.9rem",
-                                    fontWeight: 400,
-                                    width: "100%",
-                                    overflow: "visible",
-                                    wordBreak: "normal",
-                                    whiteSpace: "normal",
-                                    textAlign: "center",
-                                    lineHeight: "1.2",
-                                    minHeight: "2.4rem", // Enough space for 2 lines of text
-                                    maxWidth: "100%",
-                                  }}
-                                >
-                                  {rec.title}
-                                </h6>
-                              </div>
+                              <img 
+                                src={`http://44.214.17.52/${encodeURIComponent(rec.title)}.jpg`}
+                                alt={rec.title}
+                                style={{ 
+                                  width: "150px", 
+                                  height: "200px", 
+                                  objectFit: "cover",
+                                  borderRadius: "4px",
+                                  marginBottom: "8px"
+                                }}
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = "https://via.placeholder.com/100x150?text=No+Image";
+                                }}
+                              />
+                              <h6 className="text-center mt-1" style={{ fontSize: "0.9rem", width: "100%" }}>{rec.title}</h6>
                             </div>
                           ))}
                         </div>
@@ -404,12 +446,13 @@ function MovieDetailsPage() {
                         <p>No recommendations found.</p>
                       )}
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
+        
         <Footer />
       </AuthorizeView>
     </>
