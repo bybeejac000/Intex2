@@ -11,7 +11,7 @@ import { Movie } from "../types/Movie";
 
 function MoviesPage() {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [recommendationsRows, setRecommendationsRows] = useState(1);
+//   const [recommendationsRows, setRecommendationsRows] = useState(1);
   const [popularRows, setPopularRows] = useState(1);
   const [newReleasesRows, setNewReleasesRows] = useState(1);
   const [allMoviesRows, setAllMoviesRows] = useState(1);

@@ -257,44 +257,6 @@
     border-radius: 3px;
 }
 
-/* Movie row navigation arrow */
-.movie-row-container {
-    position: relative;
-    width: 100%;
-    padding-right: 30px; /* Add padding to the container to make room for the arrow */
-    overflow: hidden; /* Ensure the container doesn't show overflow */
-}
-
-.movie-navigation-arrow {
-    position: absolute;
-    right: 0px;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: white;
-    color: #1976d2;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    z-index: 10;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.movie-navigation-arrow:hover {
-    background-color: white;
-    transform: translateY(-50%) scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-}
-
-.movie-grid-wrapper {
-    position: relative;
-    width: 100%;
-}
-
 /* Category Filter Styles */
 .category-filter {
     background-color: rgba(30, 45, 61, 0.95);
@@ -373,4 +335,42 @@
 .category-list::-webkit-scrollbar-thumb {
     background-color: #1976d2;
     border-radius: 3px;
+}
+
+/* Movie row navigation arrow */
+.movie-row-container {
+    position: relative;
+    width: 100%;
+    padding-right: 30px; /* Add padding to the container to make room for the arrow */
+    overflow: hidden; /* Ensure the container doesn't show overflow */
+}
+
+.movie-navigation-arrow {
+    position: absolute;
+    right: 0px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: white;
+    color: #1976d2;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.movie-navigation-arrow:hover {
+    background-color: white;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.movie-grid-wrapper {
+    position: relative;
+    width: 100%;
 }
