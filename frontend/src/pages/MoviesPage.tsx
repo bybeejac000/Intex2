@@ -24,6 +24,7 @@ function MoviesPage() {
   const [allMoviesData, setAllMoviesData] = useState<Movie[]>([]);
   const [allTVShowsData, setAllTVShowsData] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState<string>('');
 
   // Search functionality
   const [searchTerm, setSearchTerm] = useState("");
@@ -106,6 +107,10 @@ function MoviesPage() {
     const loadData = async () => {
       try {
         setLoading(true);
+        
+        // Get user name from localStorage
+        const firstName = localStorage.getItem("userFirstName") || "";
+        setUserName(firstName);
 
         // Fetch personalized recommendations from recommendation API (get 50 max)
         const recommendationsResponse = await fetch(
@@ -540,7 +545,7 @@ function MoviesPage() {
               <>
                 {/* My Recommendations Section */}
                 <section id="recommendations" className="movie-section">
-                  <h2>(nameHere)'s Top Recommendations</h2>
+                  <h2>{userName ? `${userName}'s` : "(nameHere)'s"} Top Recommendations</h2>
                   <div className="movie-row-container">
                     <div className="movie-grid">
                       {recommendationsData.map((movie) => (

@@ -5,6 +5,7 @@ const UserContext = createContext<User | null>(null);
 
 interface User {
   email: string;
+  id?: string;
 }
 
 function AuthorizeView(props: { children: React.ReactNode }) {
@@ -31,8 +32,14 @@ function AuthorizeView(props: { children: React.ReactNode }) {
         const data = await response.json();
 
         if (data.email) {
-          setUser({ email: data.email });
+          setUser({ email: data.email, id: data.id });
           setAuthorized(true);
+          
+          // Store user data in localStorage if we have the ID
+          if (data.id) {
+            localStorage.setItem('userId', data.id);
+            localStorage.setItem('userEmail', data.email);
+          }
         } else {
           throw new Error("Invalid user session");
         }
