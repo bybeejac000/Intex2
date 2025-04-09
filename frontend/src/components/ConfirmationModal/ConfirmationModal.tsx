@@ -14,7 +14,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ message, onConfir
     setAnimateOut(true);
     setTimeout(() => {
       onConfirm();
-    }, 200); // duration should match animation duration
+    }, 200);
   };
 
   const handleCancel = () => {

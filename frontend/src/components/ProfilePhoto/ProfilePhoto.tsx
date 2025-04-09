@@ -2,13 +2,8 @@ import React from 'react';
 import './ProfilePhoto.css';
 
 /**
- * We have 6 images total (indices 0–5):
- * 0: default (some fallback icon or default avatar)
- * 1: green
- * 2: pink
- * 3: blue
- * 4: purple
- * 5: white
+ * We have 6 images (indices 0–5):
+ * 0: default, 1: green, 2: pink, 3: blue, 4: purple, 5: white.
  */
 const profileImagePaths = [
   '/images/profile_pictures/default.png', // 0
@@ -20,26 +15,18 @@ const profileImagePaths = [
 ];
 
 interface ProfilePhotoProps {
-  pictureId: number;      // which picture to show
-  size?: number;          // optional size override (defaults to 180)
+  pictureId: number;
+  size?: number;
 }
 
-const ProfilePhoto: React.FC<ProfilePhotoProps> = ({
-  pictureId,
-  size = 180
-}) => {
-  // gracefully handle out-of-range indices by defaulting to 0
+const ProfilePhoto: React.FC<ProfilePhotoProps> = ({ pictureId, size = 180 }) => {
   const src = profileImagePaths[pictureId] || profileImagePaths[0];
-
   return (
     <img
       src={src}
       alt="User Profile"
       className="profile-photo"
-      style={{
-        width: size,
-        height: size
-      }}
+      style={{ width: size, height: size }}
     />
   );
 };

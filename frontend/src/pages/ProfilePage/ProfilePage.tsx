@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import ProfilePhoto from '../../components/ProfilePhoto/ProfilePhoto';
@@ -7,47 +8,110 @@ import NotificationModal from '../../components/NotificationModal/NotificationMo
 import './ProfilePage.css';
 
 const ProfilePage: React.FC = () => {
-  // Local state for profile fields.
-  const [firstName, setFirstName] = useState('John');
-  const [lastName, setLastName] = useState('Doe');
-  const [email] = useState('john.doe@example.com'); // read-only
+  const navigate = useNavigate();
 
-  // Editing states for name fields.
-  const [isEditingFirstName, setIsEditingFirstName] = useState(false);
-  const [isEditingLastName, setIsEditingLastName] = useState(false);
-
-  // Profile picture state.
+  // Profile fields.
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [profilePictureId, setProfilePictureId] = useState<number>(0);
   const [showPhotoSelector, setShowPhotoSelector] = useState(false);
 
-  // Confirmation modal states.
+  // Modal states.
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const [show2FAConfirmation, setShow2FAConfirmation] = useState(false);
   const [showChangeEmailConfirmation, setShowChangeEmailConfirmation] = useState(false);
   const [showChangePasswordConfirmation, setShowChangePasswordConfirmation] = useState(false);
-
-  // Notification modals (one-button) for email and password.
   const [showEmailSentNotification, setShowEmailSentNotification] = useState(false);
   const [showPasswordSentNotification, setShowPasswordSentNotification] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
-  // Save logic for name fields.
-  const saveFirstName = () => {
+  // Editing states.
+  const [isEditingFirstName, setIsEditingFirstName] = useState(false);
+  const [isEditingLastName, setIsEditingLastName] = useState(false);
+
+  // Fetch profile data on mount.
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch('https://localhost:5000/account/me', {
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to fetch user data');
+      const data = await response.json();
+      setFirstName(data.firstName || '');
+      setLastName(data.lastName || '');
+      setEmail(data.email || '');
+      setTwoFactorEnabled(data.twoFactorEnabled || false);
+      setProfilePictureId(data.profilePictureId || 0);
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+    }
+  };
+
+  // Save functions.
+  const saveFirstName = async () => {
     setIsEditingFirstName(false);
-    // TODO: Send update to backend.
-  };
-  const saveLastName = () => {
-    setIsEditingLastName(false);
-    // TODO: Send update to backend.
+    try {
+      const payload = { firstName };
+      const res = await fetch('https://localhost:5000/account/updateProfile', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('Profile update failed');
+      console.log('First name updated.');
+    } catch (error) {
+      console.error(error);
+      alert('Error updating first name.');
+    }
   };
 
-  // Photo selection logic.
+  const saveLastName = async () => {
+    setIsEditingLastName(false);
+    try {
+      const payload = { lastName };
+      const res = await fetch('https://localhost:5000/account/updateProfile', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('Profile update failed');
+      console.log('Last name updated.');
+    } catch (error) {
+      console.error(error);
+      alert('Error updating last name.');
+    }
+  };
+
+  // Update profile picture.
   const handleEditPhoto = () => {
     setShowPhotoSelector(!showPhotoSelector);
   };
-  const handleSelectPicture = (idx: number) => {
+  const handleSelectPicture = async (idx: number) => {
     setProfilePictureId(idx);
     setShowPhotoSelector(false);
+    try {
+      const payload = { ProfilePictureId: idx };
+      const res = await fetch('https://localhost:5000/account/updateProfile', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('Failed to update profile picture');
+      console.log('Profile picture updated.');
+    } catch (error) {
+      console.error(error);
+      alert('Error updating profile picture.');
+    }
   };
 
   // Action button handlers.
@@ -64,14 +128,40 @@ const ProfilePage: React.FC = () => {
     setShowResetConfirmation(true);
   };
 
+  // Logout.
   const handleLogOutClick = () => {
     setShowLogoutConfirmation(true);
   };
+  const performLogOut = async () => {
+    setLoggingOut(true);
+    try {
+      const response = await fetch('https://localhost:5000/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Logout failed');
+      setShowLogoutConfirmation(false);
+      window.location.href = '/';
+    } catch (error) {
+      console.error(error);
+      alert('Error logging out.');
+      setLoggingOut(false);
+    }
+  };
 
-  const performLogOut = () => {
-    setShowLogoutConfirmation(false);
-    // TODO: Implement actual logout logic.
-    console.log("User logged out.");
+  // Toggle 2FA.
+  const toggle2FA = async () => {
+    try {
+      const response = await fetch('https://localhost:5000/account/toggle2FA', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Toggle 2FA failed');
+      const data = await response.json();
+      setTwoFactorEnabled(data.twoFactorEnabled);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleBack = () => {
@@ -83,16 +173,13 @@ const ProfilePage: React.FC = () => {
       <Header />
       <div className="profile-container">
         <div className="profile-header">
-          <button className="back-arrow-btn" onClick={handleBack}>
-            ←
-          </button>
+          <button className="back-arrow-btn" onClick={handleBack}>←</button>
           <h1 className="profile-title">My Profile</h1>
         </div>
 
         <div className="profile-details">
-          {/* Left side: Editable fields */}
+          {/* Left: Editable fields */}
           <div className="profile-text">
-            {/* First Name */}
             <div className="profile-field">
               <label>First Name</label>
               <div className="field-with-check">
@@ -111,7 +198,6 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Last Name */}
             <div className="profile-field">
               <label>Last Name</label>
               <div className="field-with-check">
@@ -130,14 +216,13 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Email: display only */}
             <div className="profile-field">
               <label>Email</label>
               <div className="email-display">{email}</div>
             </div>
           </div>
 
-          {/* Right side: Profile Photo and Edit dropdown */}
+          {/* Right: Profile Photo */}
           <div className="profile-photo-section">
             <ProfilePhoto pictureId={profilePictureId} size={180} />
             <button className="edit-photo-button" onClick={handleEditPhoto}>
@@ -151,11 +236,7 @@ const ProfilePage: React.FC = () => {
               >
                 <div className="photo-grid">
                   {[0, 1, 2, 3, 4, 5].map((idx) => (
-                    <div
-                      key={idx}
-                      className="photo-option"
-                      onClick={() => handleSelectPicture(idx)}
-                    >
+                    <div key={idx} className="photo-option" onClick={() => handleSelectPicture(idx)}>
                       <ProfilePhoto pictureId={idx} size={80} />
                     </div>
                   ))}
@@ -165,10 +246,12 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Row of four secondary action buttons (centered) */}
+        {/* Secondary action buttons */}
         <div className="profile-actions">
           <button className="secondary-button" onClick={handleEnable2FA}>
-            2 Factor Authentication
+            {twoFactorEnabled
+              ? "✔ 2 Factor Authentication Enabled"
+              : "2 Factor Authentication"}
           </button>
           <button className="secondary-button" onClick={handleChangeEmail}>
             Change Email
@@ -181,38 +264,38 @@ const ProfilePage: React.FC = () => {
           </button>
         </div>
 
-        {/* Log Out button on its own centered row */}
+        {/* Log Out button */}
         <div className="logout-row">
-          <button className="profile-button" onClick={handleLogOutClick}>
+          <button className="profile-button" onClick={handleLogOutClick} disabled={loggingOut}>
             Log Out
           </button>
         </div>
 
-        {/* Confirmation modal for 2 Factor Authentication */}
+        {/* Modals */}
         {show2FAConfirmation && (
           <ConfirmationModal
-            message={`Enable 2 factor authentication using email ${email}?`}
-            onConfirm={() => {
-              // TODO: implement enabling 2FA logic
+            message={
+              twoFactorEnabled
+                ? "Disable 2 factor authentication?"
+                : `Enable 2 factor authentication using email ${email}?`
+            }
+            onConfirm={async () => {
+              await toggle2FA();
               setShow2FAConfirmation(false);
             }}
             onCancel={() => setShow2FAConfirmation(false)}
           />
         )}
-
-        {/* Confirmation modal for reset preferences */}
         {showResetConfirmation && (
           <ConfirmationModal
             message="Would you like to reset your preferences?"
             onConfirm={() => {
-              // TODO: implement reset preferences logic
               setShowResetConfirmation(false);
+              // TODO: implement reset preferences logic
             }}
             onCancel={() => setShowResetConfirmation(false)}
           />
         )}
-
-        {/* Confirmation modal for logout */}
         {showLogoutConfirmation && (
           <ConfirmationModal
             message="Are you sure you want to log out?"
@@ -220,8 +303,6 @@ const ProfilePage: React.FC = () => {
             onCancel={() => setShowLogoutConfirmation(false)}
           />
         )}
-
-        {/* Confirmation modal for change email */}
         {showChangeEmailConfirmation && (
           <ConfirmationModal
             message="Would you like to change your email?"
@@ -232,16 +313,12 @@ const ProfilePage: React.FC = () => {
             onCancel={() => setShowChangeEmailConfirmation(false)}
           />
         )}
-
-        {/* Notification modal: email sent */}
         {showEmailSentNotification && (
           <NotificationModal
             message={`An email was sent to ${email} to change your email.`}
             onOk={() => setShowEmailSentNotification(false)}
           />
         )}
-
-        {/* Confirmation modal for change password */}
         {showChangePasswordConfirmation && (
           <ConfirmationModal
             message="Would you like to change your password?"
@@ -252,8 +329,6 @@ const ProfilePage: React.FC = () => {
             onCancel={() => setShowChangePasswordConfirmation(false)}
           />
         )}
-
-        {/* Notification modal: password sent */}
         {showPasswordSentNotification && (
           <NotificationModal
             message={`An email was sent to ${email} to change your password.`}

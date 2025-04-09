@@ -3,14 +3,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using CineNiche.Data;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-//using CineNiche.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -28,7 +25,7 @@ builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier;
-    options.ClaimsIdentity.UserNameClaimType = ClaimTypes.Email; // Ensure email is stored in claims
+    options.ClaimsIdentity.UserNameClaimType = ClaimTypes.Email;
 });
 
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, CustomUserClaimsPrincipalFactory>();
@@ -36,7 +33,7 @@ builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, CustomU
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
-    options.Cookie.SameSite = SameSiteMode.None; // change after adding https for production
+    options.Cookie.SameSite = SameSiteMode.None;
     options.Cookie.Name = ".AspNetCore.Identity.Application";
     options.LoginPath = "/login";
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
@@ -47,15 +44,15 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000") // Replace with your frontend URL
-                .AllowCredentials() // Required to allow cookies
-                .AllowAnyMethod()
-                .AllowAnyHeader();
+            policy.WithOrigins("http://localhost:3000")
+                  .AllowCredentials()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
         });
 });
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -64,7 +61,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -75,7 +71,6 @@ app.MapPost("/logout", async (HttpContext context, SignInManager<ApplicationUser
 {
     await signInManager.SignOutAsync();
 
-    // Ensure authentication cookie is removed
     context.Response.Cookies.Delete(".AspNetCore.Identity.Application", new CookieOptions
     {
         HttpOnly = true,
@@ -86,7 +81,6 @@ app.MapPost("/logout", async (HttpContext context, SignInManager<ApplicationUser
     return Results.Ok(new { message = "Logout successful" });
 }).RequireAuthorization();
 
-
 app.MapGet("/pingauth", (ClaimsPrincipal user) =>
 {
     if (!user.Identity?.IsAuthenticated ?? false)
@@ -94,8 +88,8 @@ app.MapGet("/pingauth", (ClaimsPrincipal user) =>
         return Results.Unauthorized();
     }
 
-    var email = user.FindFirstValue(ClaimTypes.Email) ?? "unknown@example.com"; // Ensure it's never null
-    return Results.Json(new { email = email }); // Return as JSON
+    var email = user.FindFirstValue(ClaimTypes.Email) ?? "unknown@example.com";
+    return Results.Json(new { email = email });
 }).RequireAuthorization();
 
 app.Run();
