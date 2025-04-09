@@ -10,7 +10,7 @@ namespace CineNiche.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<Title> Titles { get; set; }
-        public DbSet<Rating> Rating { get; set; }
+        public DbSet<Rating> Ratings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

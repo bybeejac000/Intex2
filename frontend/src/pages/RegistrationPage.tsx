@@ -23,6 +23,11 @@ function RegistrationPage() {
   };
 
   const handleNext = () => {
+    // Check password length on step 7
+    if (step === 7 && formData.password.length < 15) {
+      alert("Password must be at least 15 characters long");
+      return;
+    }
     if (step < 8) setStep(step + 1);
   };
 
@@ -170,11 +175,15 @@ function RegistrationPage() {
               type="password"
               name="password"
               placeholder="Password"
-              className="form-control form-control-lg"
+              className={`form-control form-control-lg ${formData.password.length > 0 ? 
+                (formData.password.length >= 15 ? 'is-valid' : 'is-invalid') : ''}`}
               value={formData.password}
               onChange={handleChange}
             />
-            <p>Password must contain at least 15 characters</p>
+            <p className={formData.password.length > 0 && formData.password.length < 15 ? 'text-danger' : ''}>
+              *Password must contain at least 15 characters 
+              {formData.password.length > 0 && ` (${formData.password.length}/15)`}
+            </p>
           </div>
         );
       case 8:
@@ -234,18 +243,17 @@ function RegistrationPage() {
           </div>
                     {/* Right side - 2/3 of the screen */}
                     <div className="col-md-8 d-flex flex-column justify-content-center align-items-center text-light" style={{ height: '100vh' }}>
-                        <div className="text-center mb-5 d-flex align-items-center justify-content-center">
+                        <div className="text-center mb-5 d-flex align-items-center justify-content-center" style={{ paddingTop: "100px" }}>
                             <button 
                                 className="btn btn-link text-light text-decoration-none me-3" 
                                 onClick={() => window.history.back()}
-                                style={{ fontSize: '2.25rem' }}
+                                style={{ fontSize: '2.25rem', paddingBottom: '38px' }}
                             >
                                 ←
                             </button>
-                            <h1 className="display-1 fw-light mb-4" style={{paddingTop: "100px"}}>Register for an Account</h1>
+                            <h1 className="display-1 fw-light mb-4">Register for an Account</h1>
                         </div>
-                        <br />
-                        <br />
+                        
                         <form className="d-flex flex-column gap-3" style={{ maxWidth: '300px', margin: '0 auto' }} onSubmit={handleSubmit}>
                             {renderStep()}
                             <div className="d-flex justify-content-center gap-3">
@@ -279,61 +287,6 @@ function RegistrationPage() {
                     </div>
                 </div>
             </div>
-            <br />
-            <br />
-            <form
-              className="d-flex flex-column gap-3"
-              style={{ maxWidth: "300px", margin: "0 auto" }}
-              onSubmit={handleSubmit}
-            >
-              {renderStep()}
-              <div className="d-flex justify-content-center gap-3">
-                {step === 8 && (
-                  <button
-                    type="submit"
-                    className="btn btn-lg"
-                    style={{
-                      backgroundColor: "transparent",
-                      border: "2px solid #1976d2",
-                      color: "#1976d2",
-                      padding: buttonStyle.padding,
-                      fontSize: buttonStyle.fontSize,
-                      height: buttonStyle.height,
-                      textAlign: "center" as const,
-                      display: buttonStyle.display,
-                      justifyContent: buttonStyle.justifyContent,
-                      alignItems: buttonStyle.alignItems,
-                      width: "500px",
-                    }}
-                    onClick={() => setStep(1)}
-                  >
-                    Go Back and Edit
-                  </button>
-                )}
-                {step < 8 && (
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={handleNext}
-                  >
-                    Next
-                  </button>
-                )}
-              </div>
-              <div className="mt-3">
-                <p>Step {step} of 8</p>
-                <div className="progress">
-                  <div
-                    className="progress-bar"
-                    role="progressbar"
-                    style={{ width: `${(step / 8) * 100}%` }}
-                    aria-valuenow={step}
-                    aria-valuemin={1}
-                    aria-valuemax={8}
-                  ></div>
-                </div>
-              </div>
-            </form>
       <Footer />
     </>
   );

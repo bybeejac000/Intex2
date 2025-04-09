@@ -121,7 +121,7 @@ function LoginPage() {
                                     placeholder="Password"
                                     className="form-control form-control-lg"
                                 />
-                                <div className="form-check mb-3">
+                                <div className="form-check mb-3" style={{ textAlign: 'left', width: '100%' }}>
                                     <input
                                         className="form-check-input"
                                         type="checkbox"
@@ -131,7 +131,7 @@ function LoginPage() {
                                         checked={rememberme}
                                         onChange={handleChange}
                                     />
-                                    <label className="form-check-label" htmlFor="rememberme">
+                                    <label className="form-check-label" htmlFor="rememberme" style={{ fontSize: '1.1rem' }}>
                                         Remember password
                                     </label>
                                 </div>

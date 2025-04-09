@@ -20,7 +20,8 @@ export const fetchMovies = async (
   pageSize: number,
   pageNum: number,
   selectedCategories: string[],
-  sortOrder: string | null
+  sortOrder: string | null,
+  searchTerm: string = ""
 ): Promise<FetchMoviesResponse> => {
   try {
     const categoryParams = selectedCategories
@@ -35,9 +36,23 @@ export const fetchMovies = async (
       url += `&sortOrder=${sortOrder}`;
     }
 
+    if (searchTerm.trim()) {
+      url += `&searchTerm=${encodeURIComponent(searchTerm.trim())}`;
+    }
+
     const response = await fetch(url, defaultOptions);
     if (!response.ok) {
-      throw new Error("Failed to fetch movies");
+      const errMsg =
+        response.status === 401 ? "Unauthorized" : "Failed to fetch movies";
+      throw new Error(errMsg);
+    }
+
+    if (response.status === 401) {
+      console.warn("User not authorized, redirecting...");
+      return {
+        movies: [],
+        totalNumMovies: 0,
+      }; // or throw custom error if you want logic to redirect
     }
 
     const data = await response.json();
@@ -110,7 +125,6 @@ export const deleteMovie = async (showId: string): Promise<void> => {
     throw error;
   }
 };
-
 // Fetch a single movie by ID
 export const fetchMovieById = async (movieId: string): Promise<Movie> => {
   try {
