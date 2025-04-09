@@ -7,7 +7,8 @@ import Pagination from "../components/Pagination";
 import { Modal } from "bootstrap";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import AuthorizeView from "../components/AuthorizeView";
+
+
 
 const AdminMoviesPage = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -60,473 +61,278 @@ const AdminMoviesPage = () => {
 
   return (
     <>
-      <AuthorizeView>
-        <Header />
-        <div
-          className="container-fluid min-vh-100"
-          style={{
-            backgroundColor: "#2d3748",
-            paddingBottom: "100px",
-            paddingTop: "75px",
-            backgroundImage:
-              "linear-gradient(135deg, #000810 00%, #00294D 70%)",
-          }}
+    <Header />
+    <div className="container-fluid min-vh-100" style={{ backgroundColor: '#2d3748', paddingBottom: '100px', paddingTop: '75px', backgroundImage: 'linear-gradient(135deg, #000810 00%, #00294D 70%)' }}>
+      <div className="d-flex justify-content-center align-items-center pt-5">
+        <button 
+          className="btn btn-link text-light text-decoration-none me-3" 
+          onClick={() => window.history.back()}
+          style={{ fontSize: '1.5rem' }}
         >
-          <div className="d-flex justify-content-center align-items-center pt-5">
-            <button
-              className="btn btn-link text-light text-decoration-none me-3"
-              onClick={() => window.history.back()}
-              style={{ fontSize: "1.5rem" }}
-            >
-              ←
-            </button>
-            <h1 className="mb-0" style={{ color: "#FFFFFF" }}>
-              Administrator Database
-            </h1>
+          ←
+        </button>
+        <h1 className="mb-0" style={{ color: '#FFFFFF' }}>Administrator Database</h1>
+      </div>
+
+      <div className="text-center">
+        <h5 className="mt-3 mb-5" style={{ color: '#FFFFFF' }}>
+          Collection of all titles available on CineNiche with their respective information and reviews.
+        </h5>
+      </div>
+      <button
+        className="btn"
+        data-bs-toggle="modal"
+        data-bs-target="#addMovieModal"
+        style={{ 
+          backgroundColor: '#1976d2',
+          color: 'white',
+          border: 'none'
+        }}
+      >Add a Title</button>
+
+      {/* Space before table */}
+      <br />
+      <br />
+
+      <div className="row">
+        {/* Left Column - Filters */}
+        <div className="col-md-3">
+          <div className="card shadow" style={{ backgroundColor: '#F0F2F5', boxShadow: '0 2px 4px rgba(0,0,0,0.08)' }}>
+            <div className="card-body">
+              <h3 className="card-title h5 mb-3" style={{ color: '#00294D' }}>Sort Options</h3>
+              <div className="d-grid gap-2 mb-4">
+                <button className="btn btn-outline-primary" onClick={() => setSortOrder(null)} style={{ borderColor: '#1976d2', color: '#1976d2' }}>Default Order</button>
+                <button className="btn btn-outline-primary" onClick={() => setSortOrder("asc")} style={{ borderColor: '#1976d2', color: '#1976d2' }}>Sort A → Z</button>
+                <button className="btn btn-outline-primary" onClick={() => setSortOrder("desc")} style={{ borderColor: '#1976d2', color: '#1976d2' }}>Sort Z → A</button>
+              </div>
+
+              <h3 className="card-title h5 mb-3" style={{ color: '#00294D' }}>Filter by Categories</h3>
+              <div className="form-check mb-2">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="actionCheck"
+                  checked={selectedCategories.includes("action")}
+                  onChange={() =>
+                    setSelectedCategories((prevCategories) =>
+                      prevCategories.includes("action")
+                        ? prevCategories.filter((cat) => cat !== "action")
+                        : [...prevCategories, "action"]
+                    )
+                  }
+                />
+                <label className="form-check-label" htmlFor="actionCheck">
+                  Action
+                </label>
+              </div>
+              <div className="form-check mb-2">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="comedyCheck"
+                  checked={selectedCategories.includes("comedy")}
+                  onChange={() =>
+                    setSelectedCategories((prevCategories) =>
+                      prevCategories.includes("comedy")
+                        ? prevCategories.filter((cat) => cat !== "comedy")
+                        : [...prevCategories, "comedy"]
+                    )
+                  }
+                />
+
+                <label className="form-check-label" htmlFor="comedyCheck">
+                  Comedy
+                </label>
+              </div>
+
+              <div className="mt-4">
+                <label className="form-label">Results per page:</label>
+                <select 
+                  className="form-select"
+                  value={pageSize} 
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setPageNum(1);
+                  }}
+                >
+                  <option value="5">5 per page</option>
+                  <option value="10">10 per page</option>
+                  <option value="20">20 per page</option>
+                </select>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <div className="text-center">
-            <h5 className="mt-3 mb-5" style={{ color: "#FFFFFF" }}>
-              Collection of all titles available on CineNiche with their
-              respective information and reviews.
-            </h5>
-          </div>
-          <button
-            className="btn"
-            data-bs-toggle="modal"
-            data-bs-target="#addMovieModal"
-            style={{
-              backgroundColor: "#1976d2",
-              color: "white",
-              border: "none",
-            }}
-          >
-            Add a Title
-          </button>
-
-          {/* Space before table */}
-          <br />
-          <br />
-
-          <div className="row">
-            {/* Left Column - Filters */}
-            <div className="col-md-3">
-              <div
-                className="card shadow"
-                style={{
-                  backgroundColor: "#F0F2F5",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.08)",
-                }}
-              >
-                <div className="card-body">
-                  <h3
-                    className="card-title h5 mb-3"
-                    style={{ color: "#00294D" }}
-                  >
-                    Sort Options
-                  </h3>
-                  <div className="d-grid gap-2 mb-4">
-                    <button
-                      className="btn btn-outline-primary"
-                      onClick={() => setSortOrder(null)}
-                      style={{ borderColor: "#1976d2", color: "#1976d2" }}
-                    >
-                      Default Order
-                    </button>
-                    <button
-                      className="btn btn-outline-primary"
-                      onClick={() => setSortOrder("asc")}
-                      style={{ borderColor: "#1976d2", color: "#1976d2" }}
-                    >
-                      Sort A → Z
-                    </button>
-                    <button
-                      className="btn btn-outline-primary"
-                      onClick={() => setSortOrder("desc")}
-                      style={{ borderColor: "#1976d2", color: "#1976d2" }}
-                    >
-                      Sort Z → A
-                    </button>
-                    <button
-                      className="btn btn-outline-primary"
-                      onClick={() => setSortOrder("averagerating_asc")}
-                      style={{ borderColor: "#1976d2", color: "#1976d2" }}
-                    >
-                      Sort By Avg Rating Asc
-                    </button>
-                    <button
-                      className="btn btn-outline-primary"
-                      onClick={() => setSortOrder("averagerating_desc")}
-                      style={{ borderColor: "#1976d2", color: "#1976d2" }}
-                    >
-                      Sort By Avg Rating Desc
-                    </button>
-                    <button
-                      className="btn btn-outline-primary"
-                      onClick={() => setSortOrder("numratings_asc")}
-                      style={{ borderColor: "#1976d2", color: "#1976d2" }}
-                    >
-                      Sort By Num Rating Asc
-                    </button>
-                    <button
-                      className="btn btn-outline-primary"
-                      onClick={() => setSortOrder("numratings_desc")}
-                      style={{ borderColor: "#1976d2", color: "#1976d2" }}
-                    >
-                      Sort By Num Rating Desc
-                    </button>
+        {/* Right Column - Movie List */}
+        <div className="col-md-9">
+          {movies.map((m) => (
+            <div key={m.show_id} className="card mb-3 shadow" style={{ backgroundColor: '#F0F2F5', boxShadow: '0 2px 4px rgba(0,0,0,0.08)' }}>
+              <div className="card-body">
+                <div className="row align-items-center">
+                  <div className="col-md-6">
+                    <h5 className="card-title mb-1">{m.title}</h5>
+                    <div className="text-muted small">
+                      {m.release_year} • {m.duration}
+                    </div>
                   </div>
-
-                  <h3
-                    className="card-title h5 mb-3"
-                    style={{ color: "#00294D" }}
-                  >
-                    Filter by Categories
-                  </h3>
-                  <div className="form-check mb-2">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      id="actionCheck"
-                      checked={selectedCategories.includes("action")}
-                      onChange={() =>
-                        setSelectedCategories((prevCategories) =>
-                          prevCategories.includes("action")
-                            ? prevCategories.filter((cat) => cat !== "action")
-                            : [...prevCategories, "action"]
-                        )
-                      }
-                    />
-                    <label className="form-check-label" htmlFor="actionCheck">
-                      Action
-                    </label>
-                  </div>
-                  <div className="form-check mb-2">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      id="comedyCheck"
-                      checked={selectedCategories.includes("comedy")}
-                      onChange={() =>
-                        setSelectedCategories((prevCategories) =>
-                          prevCategories.includes("comedy")
-                            ? prevCategories.filter((cat) => cat !== "comedy")
-                            : [...prevCategories, "comedy"]
-                        )
-                      }
-                    />
-
-                    <label className="form-check-label" htmlFor="comedyCheck">
-                      Comedy
-                    </label>
-                  </div>
-
-                  <div className="mt-4">
-                    <label className="form-label">Results per page:</label>
-                    <select
-                      className="form-select"
-                      value={pageSize}
-                      onChange={(e) => {
-                        setPageSize(Number(e.target.value));
-                        setPageNum(1);
-                      }}
+                  <div className="col-md-6 text-md-end mt-3 mt-md-0">
+                    <button
+                      className="btn btn-outline-info btn-sm me-2"
+                      data-bs-toggle="modal"
+                      data-bs-target={`#infoModal${m.show_id}`}
+                      style={{ borderColor: '#1976d2', color: '#1976d2' }}
                     >
-                      <option value="5">5 per page</option>
-                      <option value="10">10 per page</option>
-                      <option value="20">20 per page</option>
-                    </select>
+                      All Information
+                    </button>
+                    <button
+                      className="btn btn-outline-primary btn-sm me-2"
+                      data-bs-toggle="modal"
+                      data-bs-target={`#editMovieModal${m.show_id}`}
+                      style={{ borderColor: '#1976d2', color: '#1976d2' }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="btn btn-outline-danger btn-sm"
+                      onClick={() => handleDelete(m.show_id)}
+                      style={{ borderColor: '#dc3545', color: '#dc3545' }}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
+          ))}
 
-            {/* Right Column - Movie List */}
-            <div className="col-md-9">
-              {movies.map((m) => (
-                <div
-                  key={m.show_id}
-                  className="card mb-3 shadow"
-                  style={{
-                    backgroundColor: "#F0F2F5",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.08)",
-                  }}
-                >
-                  <div className="card-body">
-                    <div className="row align-items-center">
-                      <div className="col-md-6">
-                        <h5 className="card-title mb-1">{m.title}</h5>
-                        <div className="text-muted small">
-                          {m.release_year} • {m.duration}
-                        </div>
-                      </div>
-                      <div className="col-md-6 text-md-end mt-3 mt-md-0">
-                        <button
-                          className="btn btn-outline-info btn-sm me-2"
-                          data-bs-toggle="modal"
-                          data-bs-target={`#infoModal${m.show_id}`}
-                          style={{ borderColor: "#1976d2", color: "#1976d2" }}
-                        >
-                          All Information
-                        </button>
-                        <button
-                          className="btn btn-outline-primary btn-sm me-2"
-                          data-bs-toggle="modal"
-                          data-bs-target={`#editMovieModal${m.show_id}`}
-                          style={{ borderColor: "#1976d2", color: "#1976d2" }}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="btn btn-outline-danger btn-sm"
-                          onClick={() => handleDelete(m.show_id)}
-                          style={{ borderColor: "#dc3545", color: "#dc3545" }}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+          <div className="mt-4">
+            <Pagination
+              currentPage={pageNum}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              onPageChange={setPageNum}
+              onPageSizeChange={setPageSize}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Add Movie Modal */}
+      <div className="modal fade" id="addMovieModal" tabIndex={-1} aria-labelledby="addMovieModalLabel" aria-hidden="true">
+        <div className="modal-dialog modal-lg">
+          <div className="modal-content" style={{ backgroundColor: '#F0F2F5' }}>
+            <div className="modal-header" style={{ backgroundColor: '#F0F2F5' }}>
+              <h5 className="modal-title" id="addMovieModalLabel" style={{ color: '#00294D' }}>Add New Title</h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div className="modal-body">
+              <NewMovieForm
+                onSuccess={() => {
+                  const modalElement = document.getElementById('addMovieModal');
+                  if (modalElement) {
+                    const modal = Modal.getInstance(modalElement);
+                    modal?.hide();
+                  }
+                  fetchMovies(pageSize, pageNum, selectedCategories, sortOrder).then(
+                    (data) => setMovies(data.movies)
+                  );
+                }}
+                onCancel={() => {
+                  const modalElement = document.getElementById('addMovieModal');
+                  if (modalElement) {
+                    const modal = Modal.getInstance(modalElement);
+                    modal?.hide();
+                  }
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Info Modals */}
+      {movies.map((m) => (
+        <div key={`modal-${m.show_id}`} className="modal fade" id={`infoModal${m.show_id}`} tabIndex={-1} aria-hidden="true">
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content" style={{ backgroundColor: '#FFFFFF' }}>
+              <div className="modal-header" style={{ backgroundColor: '#E8F0FE', borderBottom: '1px solid #1976d2' }}>
+                <h5 className="modal-title" style={{ color: '#00294D' }}>{m.title}</h5>
+                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div className="modal-body">
+                <p><strong>Show ID:</strong> {m.show_id}</p>
+                <p><strong>Director:</strong> {m.director}</p>
+                <p><strong>Cast:</strong> {m.cast}</p>
+                <p><strong>Country:</strong> {m.country}</p>
+                <p><strong>Release Year:</strong> {m.release_year}</p>
+                <p><strong>Rating:</strong> {m.rating}</p>
+                <p><strong>Duration:</strong> {m.duration}</p>
+                <p><strong>Description:</strong> {m.description}</p>
+                <div><strong>Genre{"(s)"}:</strong>
+                  <ul className="list-unstyled mb-0">
+                    {Object.keys(m).map((key) => {
+                      if (
+                        key !== "show_id" &&
+                        key !== "title" &&
+                        key !== "director" &&
+                        key !== "cast" &&
+                        key !== "country" &&
+                        key !== "release_year" &&
+                        key !== "rating" &&
+                        key !== "duration"
+                      ) {
+                        return m[key as keyof Movie] === 1 ? (
+                          <li key={key} className="badge bg-secondary me-1 mb-1">{key}</li>
+                        ) : null;
+                      }
+                      return null;
+                    })}
+                  </ul>
                 </div>
-              ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
 
-              <div className="mt-4">
-                <Pagination
-                  currentPage={pageNum}
-                  totalPages={totalPages}
-                  pageSize={pageSize}
-                  onPageChange={setPageNum}
-                  onPageSizeChange={setPageSize}
+      {/* Edit Movie Modal */}
+      {movies.map((m) => (
+        <div key={`edit-modal-${m.show_id}`} className="modal fade" id={`editMovieModal${m.show_id}`} tabIndex={-1} aria-labelledby={`editMovieModalLabel${m.show_id}`} aria-hidden="true">
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content" style={{ backgroundColor: '#F0F2F5' }}>
+              <div className="modal-header" style={{ backgroundColor: '#F0F2F5' }}>
+                <h5 className="modal-title" id={`editMovieModalLabel${m.show_id}`} style={{ color: '#00294D' }}>Edit Title</h5>
+                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div className="modal-body">
+                <EditMovieForm
+                  movie={m}
+                  onSuccess={() => {
+                    const modalElement = document.getElementById(`editMovieModal${m.show_id}`);
+                    if (modalElement) {
+                      const modal = Modal.getInstance(modalElement);
+                      modal?.hide();
+                    }
+                    fetchMovies(pageSize, pageNum, selectedCategories, sortOrder).then(
+                      (data) => setMovies(data.movies)
+                    );
+                  }}
+                  onCancel={() => {
+                    const modalElement = document.getElementById(`editMovieModal${m.show_id}`);
+                    if (modalElement) {
+                      const modal = Modal.getInstance(modalElement);
+                      modal?.hide();
+                    }
+                  }}
                 />
               </div>
             </div>
           </div>
-
-          {/* Add Movie Modal */}
-          <div
-            className="modal fade"
-            id="addMovieModal"
-            tabIndex={-1}
-            aria-labelledby="addMovieModalLabel"
-            aria-hidden="true"
-          >
-            <div className="modal-dialog modal-lg">
-              <div
-                className="modal-content"
-                style={{ backgroundColor: "#F0F2F5" }}
-              >
-                <div
-                  className="modal-header"
-                  style={{ backgroundColor: "#F0F2F5" }}
-                >
-                  <h5
-                    className="modal-title"
-                    id="addMovieModalLabel"
-                    style={{ color: "#00294D" }}
-                  >
-                    Add New Title
-                  </h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  ></button>
-                </div>
-                <div className="modal-body">
-                  <NewMovieForm
-                    onSuccess={() => {
-                      const modalElement =
-                        document.getElementById("addMovieModal");
-                      if (modalElement) {
-                        const modal = Modal.getInstance(modalElement);
-                        modal?.hide();
-                      }
-                      fetchMovies(
-                        pageSize,
-                        pageNum,
-                        selectedCategories,
-                        sortOrder
-                      ).then((data) => setMovies(data.movies));
-                    }}
-                    onCancel={() => {
-                      const modalElement =
-                        document.getElementById("addMovieModal");
-                      if (modalElement) {
-                        const modal = Modal.getInstance(modalElement);
-                        modal?.hide();
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Info Modals */}
-          {movies.map((m) => (
-            <div
-              key={`modal-${m.show_id}`}
-              className="modal fade"
-              id={`infoModal${m.show_id}`}
-              tabIndex={-1}
-              aria-hidden="true"
-            >
-              <div className="modal-dialog modal-lg">
-                <div
-                  className="modal-content"
-                  style={{ backgroundColor: "#FFFFFF" }}
-                >
-                  <div
-                    className="modal-header"
-                    style={{
-                      backgroundColor: "#E8F0FE",
-                      borderBottom: "1px solid #1976d2",
-                    }}
-                  >
-                    <h5 className="modal-title" style={{ color: "#00294D" }}>
-                      {m.title}
-                    </h5>
-                    <button
-                      type="button"
-                      className="btn-close"
-                      data-bs-dismiss="modal"
-                      aria-label="Close"
-                    ></button>
-                  </div>
-                  <div className="modal-body">
-                    <p>
-                      <strong>Show ID:</strong> {m.show_id}
-                    </p>
-                    <p>
-                      <strong>Average Rating:</strong>{" "}
-                      {m.averageRating ?? "N/A"}
-                    </p>
-                    <p>
-                      <strong>Number of Ratings:</strong> {m.numRatings ?? 0}
-                    </p>
-                    <p>
-                      <strong>Director:</strong> {m.director}
-                    </p>
-                    <p>
-                      <strong>Cast:</strong> {m.cast}
-                    </p>
-                    <p>
-                      <strong>Country:</strong> {m.country}
-                    </p>
-                    <p>
-                      <strong>Release Year:</strong> {m.release_year}
-                    </p>
-                    <p>
-                      <strong>Rating:</strong> {m.rating}
-                    </p>
-                    <p>
-                      <strong>Duration:</strong> {m.duration}
-                    </p>
-                    <p>
-                      <strong>Description:</strong> {m.description}
-                    </p>
-                    <div>
-                      <strong>Genre{"(s)"}:</strong>
-                      <ul className="list-unstyled mb-0">
-                        {Object.keys(m).map((key) => {
-                          if (
-                            key !== "show_id" &&
-                            key !== "title" &&
-                            key !== "director" &&
-                            key !== "cast" &&
-                            key !== "country" &&
-                            key !== "release_year" &&
-                            key !== "rating" &&
-                            key !== "duration"
-                          ) {
-                            return m[key as keyof Movie] === 1 ? (
-                              <li
-                                key={key}
-                                className="badge bg-secondary me-1 mb-1"
-                              >
-                                {key}
-                              </li>
-                            ) : null;
-                          }
-                          return null;
-                        })}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {/* Edit Movie Modal */}
-          {movies.map((m) => (
-            <div
-              key={`edit-modal-${m.show_id}`}
-              className="modal fade"
-              id={`editMovieModal${m.show_id}`}
-              tabIndex={-1}
-              aria-labelledby={`editMovieModalLabel${m.show_id}`}
-              aria-hidden="true"
-            >
-              <div className="modal-dialog modal-lg">
-                <div
-                  className="modal-content"
-                  style={{ backgroundColor: "#F0F2F5" }}
-                >
-                  <div
-                    className="modal-header"
-                    style={{ backgroundColor: "#F0F2F5" }}
-                  >
-                    <h5
-                      className="modal-title"
-                      id={`editMovieModalLabel${m.show_id}`}
-                      style={{ color: "#00294D" }}
-                    >
-                      Edit Title
-                    </h5>
-                    <button
-                      type="button"
-                      className="btn-close"
-                      data-bs-dismiss="modal"
-                      aria-label="Close"
-                    ></button>
-                  </div>
-                  <div className="modal-body">
-                    <EditMovieForm
-                      movie={m}
-                      onSuccess={() => {
-                        const modalElement = document.getElementById(
-                          `editMovieModal${m.show_id}`
-                        );
-                        if (modalElement) {
-                          const modal = Modal.getInstance(modalElement);
-                          modal?.hide();
-                        }
-                        fetchMovies(
-                          pageSize,
-                          pageNum,
-                          selectedCategories,
-                          sortOrder
-                        ).then((data) => setMovies(data.movies));
-                      }}
-                      onCancel={() => {
-                        const modalElement = document.getElementById(
-                          `editMovieModal${m.show_id}`
-                        );
-                        if (modalElement) {
-                          const modal = Modal.getInstance(modalElement);
-                          modal?.hide();
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
-        <Footer />
-      </AuthorizeView>
+      ))}
+    </div>
+    <Footer />
     </>
   );
 };
