@@ -107,6 +107,20 @@ function MoviesPage() {
       try {
         setLoading(true);
 
+        // ⏳ Wait for userId to appear in localStorage
+        let userId = localStorage.getItem("userId");
+        let retries = 10;
+        while (!userId && retries > 0) {
+          await new Promise((resolve) => setTimeout(resolve, 200)); // wait 200ms
+          userId = localStorage.getItem("userId");
+          retries--;
+        }
+
+        if (!userId) {
+          console.error("❌ userId not found in localStorage after waiting.");
+          return;
+        }
+
         // Fetch personalized recommendations from recommendation API (get 50 max)
         const recommendationsResponse = await fetch(
           `http://44.214.17.52:5000/recommend_user?user_id=${localStorage.getItem(
@@ -236,8 +250,8 @@ function MoviesPage() {
   const MoviePoster = ({ movie }: { movie: Movie }) => {
     // Remove unwanted characters like (), :, and -
     const title = movie.title
-        .replace(/[\(\):\'\.\-&]/g, '')  // Remove parentheses, colons, and dashes
-        .replace(/^#+/, '');
+      .replace(/[\(\):\'\.\-&]/g, "") // Remove parentheses, colons, and dashes
+      .replace(/^#+/, "");
 
     const imageUrl = `http://44.214.17.52/${encodeURIComponent(title)}.jpg`; // Use encodeURIComponent instead of Uri.EscapeDataString
 

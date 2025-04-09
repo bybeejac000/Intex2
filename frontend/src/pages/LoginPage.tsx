@@ -60,6 +60,7 @@ function LoginPage() {
       if (!response.ok) {
         throw new Error(data?.message || "Invalid email or password.");
       }
+      await fetchAndStoreUserId();
 
       navigate("/movies");
     } catch (error: any) {
@@ -67,6 +68,31 @@ function LoginPage() {
       console.error("Fetching attempt failed:", error);
     }
   };
+
+  const fetchAndStoreUserId = async (): Promise<void> => {
+    try {
+      const email = localStorage.getItem("email");
+      const response = await fetch(
+        `https://localhost:5000/CineNiche/getId?email=${email}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+
+      if (data.length > 0) {
+        const id = data[0].user_id;
+        localStorage.setItem("userId", id);
+        console.log("✅ User ID stored:", id);
+      } else {
+        console.warn("No user found for this email.");
+      }
+    } catch (error) {
+      console.error("Error fetching user ID:", error);
+    }
+  };
+
   function GetUserIdComponent() {
     const [userId, setUserId] = useState(null);
 
@@ -190,7 +216,6 @@ function LoginPage() {
                     padding: "15px 30px",
                     fontSize: "1.2rem",
                   }}
-                  onClick={() => setShowUserIdComponent(true)} // ✅ triggers the fetch
                 >
                   Login
                 </button>
@@ -213,7 +238,6 @@ function LoginPage() {
           </div>
         </div>
       </div>
-      {showUserIdComponent && <GetUserIdComponent />}
 
       <Footer />
     </>
