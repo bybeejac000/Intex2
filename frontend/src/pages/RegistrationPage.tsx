@@ -334,9 +334,6 @@ function RegistrationPage() {
                 </div>
               </div>
             </form>
-          </div>
-        </div>
-      </div>
       <Footer />
     </>
   );
