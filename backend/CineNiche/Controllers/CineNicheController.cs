@@ -20,7 +20,9 @@ namespace CineNiche.Controllers
         [HttpGet("GetMovies")]
         public IActionResult GetMovies(int pageSize = 10, int pageNum = 1, string? sortOrder = null, [FromQuery] List<string>? categories = null)
         {
-            var query = _movieContext.Titles.AsQueryable();
+            var query = _movieContext.Titles
+                .Include(t => t.Ratings)
+                .AsQueryable();
 
             // Apply category filtering based on passed categories
             if (categories != null && categories.Any())
@@ -39,18 +41,98 @@ namespace CineNiche.Controllers
                 query = query.Where(predicate);
             }
 
-            // Apply sorting based on sortOrder
+            //// Apply sorting based on sortOrder
+            //if (!string.IsNullOrEmpty(sortOrder))
+            //{
+            //    query = sortOrder.ToLower() == "desc"
+            //        ? query.OrderByDescending(m => m.title)
+            //        : query.OrderBy(m => m.title);
+            //}
+
             if (!string.IsNullOrEmpty(sortOrder))
             {
-                query = sortOrder.ToLower() == "desc"
-                    ? query.OrderByDescending(m => m.title)
-                    : query.OrderBy(m => m.title);
+                switch (sortOrder.ToLower())
+                {
+                    case "desc":
+                        query = query.OrderByDescending(m => m.title);
+                        break;
+                    case "asc":
+                        query = query.OrderBy(m => m.title);
+                        break;
+                    case "averagerating_desc":
+                        query = query.OrderByDescending(m => m.Ratings.Any() ? m.Ratings.Average(r => r.rating) : 0);
+                        break;
+                    case "averagerating_asc":
+                        query = query.OrderBy(m => m.Ratings.Any() ? m.Ratings.Average(r => r.rating) : 0);
+                        break;
+                    case "numratings_desc":
+                        query = query.OrderByDescending(m => m.Ratings.Count());
+                        break;
+                    case "numratings_asc":
+                        query = query.OrderBy(m => m.Ratings.Count());
+                        break;
+                    default:
+                        query = query.OrderBy(m => m.title); // default to ascending title
+                        break;
+                }
             }
 
             var totalNumMovies = query.Count();
+           
             var movies = query
                 .Skip((pageNum - 1) * pageSize)
                 .Take(pageSize)
+                .Select(m => new
+                {
+                    m.show_id,
+                    m.title,
+                    m.type,
+                    m.director,
+                    m.cast,
+                    m.country,
+                    m.release_year,
+                    m.rating, // MPAA rating
+                    m.duration,
+                    m.description,
+                    m.action,
+                    m.adventure,
+                    m.anime_series_international_tv_shows,
+                    m.british_tv_shows_docuseries_international_tv_shows,
+                    m. children,
+                    m.comedies,
+                    m.comedies_dramas_international_movies,
+                    m.comedies_international_movies,
+                    m.comedies_romantic_movies,
+                    m.crime_tv_shows_docuseries,
+                    m.documentaries,
+                    m.documentaries_international_movies,
+                    m.docuseries,
+                    m.dramas,
+                    m.dramas_international_movies,
+                    m.dramas_romantic_movies,
+                    m.family_movies,
+                    m.fantasy,
+                    m.horror_movies,
+                    m.international_movies_thrillers,
+                    m.international_tv_shows_romantic_tv_shows_tv_dramas,
+                    m.kids_tv,
+                    m.language_tv_shows,
+                    m.musicals,
+                    m.nature_tv,
+                    m.reality_tv,
+                    m.spirituality,
+                    m.tv_action,
+                    m.tv_comedies,
+                    m.tv_dramas,
+                    m.talk_shows_tv_comedies,
+                    m.thrillers,
+                    NumRatings = m.Ratings != null
+                        ? m.Ratings.Count()
+                        : 0,
+                    AverageRating = m.Ratings != null && m.Ratings.Any() 
+                        ? Math.Round(m.Ratings.Average(r => r.rating), 1) 
+                        : 0
+                })
                 .ToList();
 
             return Ok(new
@@ -162,14 +244,73 @@ namespace CineNiche.Controllers
         [HttpGet("GetMovie/{showId}")]
         public IActionResult GetMovie(string showId)
         {
-            var movie = _movieContext.Titles.FirstOrDefault(m => m.show_id == showId);
+            var movie = _movieContext.Titles
+                .Include(m => m.Ratings)
+                .FirstOrDefault(m => m.show_id == showId);
 
             if (movie == null)
             {
                 return NotFound(new { message = "Movie not found" });
             }
 
-            return Ok(movie);
+            var averageRating = movie.Ratings != null && movie.Ratings.Any()
+                    ? Math.Round(movie.Ratings.Average(r => r.rating), 1)
+                    : 0;
+
+            var numRatings = movie.Ratings?.Count() ?? 0;
+
+            var result = new
+            {
+                movie.show_id,
+                movie.title,
+                movie.director,
+                movie.cast,
+                movie.country,
+                movie.description,
+                movie.type,
+                movie.duration,
+                movie.release_year,
+                movie.rating, // MPAA rating
+
+                // Category fields if needed
+                movie.action,
+                movie.adventure,
+                movie.anime_series_international_tv_shows,
+                movie.british_tv_shows_docuseries_international_tv_shows,
+                movie.children,
+                movie.comedies,
+                movie.comedies_dramas_international_movies,
+                movie.comedies_international_movies,
+                movie.comedies_romantic_movies,
+                movie.crime_tv_shows_docuseries,
+                movie.documentaries,
+                movie.documentaries_international_movies,
+                movie.docuseries,
+                movie.dramas,
+                movie.dramas_international_movies,
+                movie.dramas_romantic_movies,
+                movie.family_movies,
+                movie.fantasy,
+                movie.horror_movies,
+                movie.international_movies_thrillers,
+                movie.international_tv_shows_romantic_tv_shows_tv_dramas,
+                movie.kids_tv,
+                movie.language_tv_shows,
+                movie.musicals,
+                movie.nature_tv,
+                movie.reality_tv,
+                movie.spirituality,
+                movie.tv_action,
+                movie.tv_comedies,
+                movie.tv_dramas,
+                movie.talk_shows_tv_comedies,
+                movie.thrillers,
+
+                AverageRating = averageRating,
+                NumRatings = numRatings
+            };
+
+            return Ok(result);
         }
 
     }

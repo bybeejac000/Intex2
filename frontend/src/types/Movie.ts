@@ -41,4 +41,7 @@ export interface Movie {
   tv_dramas: number;
   talk_shows_tv_comedies: number;
   thrillers: number;
+
+  numRatings?: number;
+  averageRating?: number;
 }
