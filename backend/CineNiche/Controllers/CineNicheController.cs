@@ -18,11 +18,17 @@ namespace CineNiche.Controllers
         public CineNicheController(MovieDbContext temp) => _movieContext = temp;
 
         [HttpGet("GetMovies")]
-        public IActionResult GetMovies(int pageSize = 10, int pageNum = 1, string? sortOrder = null, [FromQuery] List<string>? categories = null)
+        public IActionResult GetMovies(int pageSize = 10, int pageNum = 1, string? sortOrder = null, [FromQuery] List<string>? categories = null, string? searchTerm = null)
         {
             var query = _movieContext.Titles
                 .Include(t => t.Ratings)
                 .AsQueryable();
+
+            // Apply search filtering
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query = query.Where(m => m.title.ToLower().Contains(searchTerm.ToLower()));
+            }
 
             // Apply category filtering based on passed categories
             if (categories != null && categories.Any())
