@@ -236,37 +236,202 @@ const AdminMoviesPage = () => {
                     <input
                       className="form-check-input"
                       type="checkbox"
-                      id="actionCheck"
-                      checked={selectedCategories.includes("action")}
-                      onChange={() =>
-                        setSelectedCategories((prevCategories) =>
-                          prevCategories.includes("action")
-                            ? prevCategories.filter((cat) => cat !== "action")
-                            : [...prevCategories, "action"]
-                        )
-                      }
+                      id="actionAdventureCheck"
+                      checked={selectedCategories.includes("action") || selectedCategories.includes("adventure") || selectedCategories.includes("tv_action")}
+                      onChange={() => {
+                        const actionCategories = ["action", "adventure", "tv_action"];
+                        const hasAllSelected = actionCategories.every(cat => selectedCategories.includes(cat));
+                        
+                        if (hasAllSelected) {
+                          // Remove all action categories
+                          setSelectedCategories(prevCats => prevCats.filter(cat => !actionCategories.includes(cat)));
+                        } else {
+                          // Add all action categories that aren't already selected
+                          const catsToAdd = actionCategories.filter(cat => !selectedCategories.includes(cat));
+                          setSelectedCategories(prevCats => [...prevCats, ...catsToAdd]);
+                        }
+                      }}
                     />
-                    <label className="form-check-label" htmlFor="actionCheck">
-                      Action
+                    <label className="form-check-label" htmlFor="actionAdventureCheck">
+                      Action & Adventure
                     </label>
                   </div>
+                  
                   <div className="form-check mb-2">
                     <input
                       className="form-check-input"
                       type="checkbox"
                       id="comedyCheck"
-                      checked={selectedCategories.includes("comedy")}
-                      onChange={() =>
-                        setSelectedCategories((prevCategories) =>
-                          prevCategories.includes("comedy")
-                            ? prevCategories.filter((cat) => cat !== "comedy")
-                            : [...prevCategories, "comedy"]
-                        )
-                      }
+                      checked={selectedCategories.includes("comedies") || selectedCategories.includes("comedies_romantic_movies") || 
+                              selectedCategories.includes("tv_comedies") || selectedCategories.includes("talk_shows_tv_comedies") ||
+                              selectedCategories.includes("comedies_international_movies") || selectedCategories.includes("comedies_dramas_international_movies")}
+                      onChange={() => {
+                        const comedyCategories = ["comedies", "comedies_romantic_movies", "tv_comedies", 
+                                              "talk_shows_tv_comedies", "comedies_international_movies", 
+                                              "comedies_dramas_international_movies"];
+                        const hasAllSelected = comedyCategories.every(cat => selectedCategories.includes(cat));
+                        
+                        if (hasAllSelected) {
+                          // Remove all comedy categories
+                          setSelectedCategories(prevCats => prevCats.filter(cat => !comedyCategories.includes(cat)));
+                        } else {
+                          // Add all comedy categories that aren't already selected
+                          const catsToAdd = comedyCategories.filter(cat => !selectedCategories.includes(cat));
+                          setSelectedCategories(prevCats => [...prevCats, ...catsToAdd]);
+                        }
+                      }}
                     />
-
                     <label className="form-check-label" htmlFor="comedyCheck">
                       Comedy
+                    </label>
+                  </div>
+
+                  <div className="form-check mb-2">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="dramaCheck"
+                      checked={selectedCategories.includes("dramas") || selectedCategories.includes("dramas_romantic_movies") || 
+                              selectedCategories.includes("tv_dramas") || selectedCategories.includes("dramas_international_movies") ||
+                              selectedCategories.includes("comedies_dramas_international_movies") || 
+                              selectedCategories.includes("international_tv_shows_romantic_tv_shows_tv_dramas")}
+                      onChange={() => {
+                        const dramaCategories = ["dramas", "dramas_romantic_movies", "tv_dramas", 
+                                            "dramas_international_movies", "comedies_dramas_international_movies", 
+                                            "international_tv_shows_romantic_tv_shows_tv_dramas"];
+                        const hasAllSelected = dramaCategories.every(cat => selectedCategories.includes(cat));
+                        
+                        if (hasAllSelected) {
+                          // Remove all drama categories
+                          setSelectedCategories(prevCats => prevCats.filter(cat => !dramaCategories.includes(cat)));
+                        } else {
+                          // Add all drama categories that aren't already selected
+                          const catsToAdd = dramaCategories.filter(cat => !selectedCategories.includes(cat));
+                          setSelectedCategories(prevCats => [...prevCats, ...catsToAdd]);
+                        }
+                      }}
+                    />
+                    <label className="form-check-label" htmlFor="dramaCheck">
+                      Drama
+                    </label>
+                  </div>
+
+                  <div className="form-check mb-2">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="documentaryCheck"
+                      checked={selectedCategories.includes("documentaries") || selectedCategories.includes("documentaries_international_movies") || 
+                              selectedCategories.includes("docuseries") || selectedCategories.includes("crime_tv_shows_docuseries") ||
+                              selectedCategories.includes("british_tv_shows_docuseries_international_tv_shows")}
+                      onChange={() => {
+                        const docCategories = ["documentaries", "documentaries_international_movies", "docuseries", 
+                                          "crime_tv_shows_docuseries", "british_tv_shows_docuseries_international_tv_shows"];
+                        const hasAllSelected = docCategories.every(cat => selectedCategories.includes(cat));
+                        
+                        if (hasAllSelected) {
+                          // Remove all documentary categories
+                          setSelectedCategories(prevCats => prevCats.filter(cat => !docCategories.includes(cat)));
+                        } else {
+                          // Add all documentary categories that aren't already selected
+                          const catsToAdd = docCategories.filter(cat => !selectedCategories.includes(cat));
+                          setSelectedCategories(prevCats => [...prevCats, ...catsToAdd]);
+                        }
+                      }}
+                    />
+                    <label className="form-check-label" htmlFor="documentaryCheck">
+                      Documentaries
+                    </label>
+                  </div>
+
+                  <div className="form-check mb-2">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="familyCheck"
+                      checked={selectedCategories.includes("children") || selectedCategories.includes("family_movies") || 
+                              selectedCategories.includes("kids_tv")}
+                      onChange={() => {
+                        const familyCategories = ["children", "family_movies", "kids_tv"];
+                        const hasAllSelected = familyCategories.every(cat => selectedCategories.includes(cat));
+                        
+                        if (hasAllSelected) {
+                          // Remove all family categories
+                          setSelectedCategories(prevCats => prevCats.filter(cat => !familyCategories.includes(cat)));
+                        } else {
+                          // Add all family categories that aren't already selected
+                          const catsToAdd = familyCategories.filter(cat => !selectedCategories.includes(cat));
+                          setSelectedCategories(prevCats => [...prevCats, ...catsToAdd]);
+                        }
+                      }}
+                    />
+                    <label className="form-check-label" htmlFor="familyCheck">
+                      Kids & Family
+                    </label>
+                  </div>
+
+                  <div className="form-check mb-2">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="thrillerCheck" 
+                      checked={selectedCategories.includes("thrillers") || selectedCategories.includes("horror_movies") || 
+                              selectedCategories.includes("international_movies_thrillers")}
+                      onChange={() => {
+                        const thrillerCategories = ["thrillers", "horror_movies", "international_movies_thrillers"];
+                        const hasAllSelected = thrillerCategories.every(cat => selectedCategories.includes(cat));
+                        
+                        if (hasAllSelected) {
+                          // Remove all thriller categories
+                          setSelectedCategories(prevCats => prevCats.filter(cat => !thrillerCategories.includes(cat)));
+                        } else {
+                          // Add all thriller categories that aren't already selected
+                          const catsToAdd = thrillerCategories.filter(cat => !selectedCategories.includes(cat));
+                          setSelectedCategories(prevCats => [...prevCats, ...catsToAdd]);
+                        }
+                      }}
+                    />
+                    <label className="form-check-label" htmlFor="thrillerCheck">
+                      Thriller & Horror
+                    </label>
+                  </div>
+
+                  <div className="form-check mb-2">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="internationalCheck"
+                      checked={selectedCategories.includes("international_movies_thrillers") || 
+                              selectedCategories.includes("comedies_international_movies") || 
+                              selectedCategories.includes("dramas_international_movies") || 
+                              selectedCategories.includes("documentaries_international_movies") ||
+                              selectedCategories.includes("anime_series_international_tv_shows") ||
+                              selectedCategories.includes("british_tv_shows_docuseries_international_tv_shows") ||
+                              selectedCategories.includes("international_tv_shows_romantic_tv_shows_tv_dramas") ||
+                              selectedCategories.includes("language_tv_shows")}
+                      onChange={() => {
+                        const internationalCategories = ["international_movies_thrillers", 
+                                                     "comedies_international_movies", 
+                                                     "dramas_international_movies", 
+                                                     "documentaries_international_movies",
+                                                     "anime_series_international_tv_shows",
+                                                     "british_tv_shows_docuseries_international_tv_shows",
+                                                     "international_tv_shows_romantic_tv_shows_tv_dramas",
+                                                     "language_tv_shows"];
+                        const hasAllSelected = internationalCategories.every(cat => selectedCategories.includes(cat));
+                        
+                        if (hasAllSelected) {
+                          // Remove all international categories
+                          setSelectedCategories(prevCats => prevCats.filter(cat => !internationalCategories.includes(cat)));
+                        } else {
+                          // Add all international categories that aren't already selected
+                          const catsToAdd = internationalCategories.filter(cat => !selectedCategories.includes(cat));
+                          setSelectedCategories(prevCats => [...prevCats, ...catsToAdd]);
+                        }
+                      }}
+                    />
+                    <label className="form-check-label" htmlFor="internationalCheck">
+                      International
                     </label>
                   </div>
 
@@ -493,7 +658,10 @@ const AdminMoviesPage = () => {
                             key !== "country" &&
                             key !== "release_year" &&
                             key !== "rating" &&
-                            key !== "duration"
+                            key !== "duration" &&
+                            key !== "description" &&
+                            key !== "averageRating" &&
+                            key !== "numRatings"
                           ) {
                             return m[key as keyof Movie] === 1 ? (
                               <li
