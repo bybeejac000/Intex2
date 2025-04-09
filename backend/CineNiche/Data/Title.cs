@@ -86,5 +86,7 @@ namespace CineNiche.Data
         public int talk_shows_tv_comedies { get; set; }
         [Required]
         public int thrillers {  get; set; }
+
+        public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
     }
 }
