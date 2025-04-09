@@ -11,12 +11,12 @@ import { Movie } from "../types/Movie";
 
 function MoviesPage() {
   const [isExpanded, setIsExpanded] = useState(false);
-//   const [recommendationsRows, setRecommendationsRows] = useState(1);
+  //   const [recommendationsRows, setRecommendationsRows] = useState(1);
   const [popularRows, setPopularRows] = useState(1);
   const [newReleasesRows, setNewReleasesRows] = useState(1);
   const [allMoviesRows, setAllMoviesRows] = useState(1);
   const [allTVShowsRows, setAllTVShowsRows] = useState(1);
-  
+
   // Movie data state
   const [recommendationsData, setRecommendationsData] = useState<Movie[]>([]);
   const [popularData, setPopularData] = useState<Movie[]>([]);
@@ -24,53 +24,75 @@ function MoviesPage() {
   const [allMoviesData, setAllMoviesData] = useState<Movie[]>([]);
   const [allTVShowsData, setAllTVShowsData] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Search functionality
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  
+
   // Category filtering
   const [showCategoryFilter, setShowCategoryFilter] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  
+
   // Recommendations paging
-  const [totalRecommendations, setTotalRecommendations] = useState<string[]>([]);
+  const [totalRecommendations, setTotalRecommendations] = useState<string[]>(
+    []
+  );
   const [recommendationsLoaded, setRecommendationsLoaded] = useState(7);
   const [hasMoreRecommendations, setHasMoreRecommendations] = useState(true);
-  
+
   const navigate = useNavigate();
 
   // Available categories
   const categories = [
-    "action", "adventure", "comedies", "documentaries", 
-    "dramas", "horror_movies", "family_movies", "thrillers"
+    "action",
+    "adventure",
+    "comedies",
+    "documentaries",
+    "dramas",
+    "horror_movies",
+    "family_movies",
+    "thrillers",
   ];
 
   // Handle category selection
   const toggleCategory = (category: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(category) 
-        ? prev.filter(cat => cat !== category) 
+    setSelectedCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((cat) => cat !== category)
         : [...prev, category]
     );
   };
-  
+
   // Apply category filters and reload movies
   const applyFilters = async () => {
     setLoading(true);
     try {
       // Refetch all movies with selected categories
-      const allMoviesResponse = await fetchMovies(7, 1, selectedCategories, null);
+      const allMoviesResponse = await fetchMovies(
+        7,
+        1,
+        selectedCategories,
+        null
+      );
       setAllMoviesData(allMoviesResponse.movies);
-      
+
       // Update other sections with category filters
-      const popularResponse = await fetchMovies(7, 1, selectedCategories, "popular");
+      const popularResponse = await fetchMovies(
+        7,
+        1,
+        selectedCategories,
+        "popular"
+      );
       setPopularData(popularResponse.movies);
-      
-      const newReleasesResponse = await fetchMovies(7, 1, selectedCategories, "release_year_desc");
+
+      const newReleasesResponse = await fetchMovies(
+        7,
+        1,
+        selectedCategories,
+        "release_year_desc"
+      );
       setNewReleasesData(newReleasesResponse.movies);
-      
     } catch (error) {
       console.error("Error applying filters:", error);
     } finally {
@@ -84,18 +106,22 @@ function MoviesPage() {
     const loadData = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch personalized recommendations from recommendation API (get 50 max)
-        const recommendationsResponse = await fetch(`http://44.214.17.52:5000/recommend_user?user_id=199&num=50`);
+        const recommendationsResponse = await fetch(
+          `http://44.214.17.52:5000/recommend_user?user_id=${localStorage.getItem(
+            "userId"
+          )}&num=50`
+        );
         const recommendationsData = await recommendationsResponse.json();
         const recommendedShowIds = recommendationsData.results;
-        
+
         // Store all recommendation IDs for later paging
         setTotalRecommendations(recommendedShowIds);
-        
+
         // Only fetch details for the first 7 recommendations initially
         const initialShowIds = recommendedShowIds.slice(0, 7);
-        
+
         // Fetch full details for each recommended movie
         const recommendedMovies: Movie[] = [];
         for (const showId of initialShowIds) {
@@ -108,25 +134,30 @@ function MoviesPage() {
         }
         console.log("Recommendations data:", recommendedMovies);
         setRecommendationsData(recommendedMovies);
-        
+
         // Set if we have more recommendations to load
         setHasMoreRecommendations(recommendedShowIds.length > 7);
-        
+
         // Fetch popular movies
         const popularResponse = await fetchMovies(7, 1, [], "popular");
         console.log("Popular data:", popularResponse.movies);
         setPopularData(popularResponse.movies);
-        
+
         // Fetch new releases (sort by release year)
-        const newReleasesResponse = await fetchMovies(7, 1, [], "release_year_desc");
+        const newReleasesResponse = await fetchMovies(
+          7,
+          1,
+          [],
+          "release_year_desc"
+        );
         console.log("New releases data:", newReleasesResponse.movies);
         setNewReleasesData(newReleasesResponse.movies);
-        
+
         // Fetch all movies
         const allMoviesResponse = await fetchMovies(7, 1, [], null);
         console.log("All movies data:", allMoviesResponse.movies);
         setAllMoviesData(allMoviesResponse.movies);
-        
+
         // Fetch TV shows
         const tvShowsResponse = await fetchMovies(7, 1, ["tv_shows"], null);
         console.log("TV shows data:", tvShowsResponse.movies);
@@ -137,7 +168,7 @@ function MoviesPage() {
         setLoading(false);
       }
     };
-    
+
     loadData();
   }, []);
 
@@ -151,12 +182,12 @@ function MoviesPage() {
     try {
       let sortOrder = null;
       let categories: string[] = [];
-      
+
       if (category === "recommendations") sortOrder = "rating_desc";
       if (category === "popular") sortOrder = "popular";
       if (category === "new_releases") sortOrder = "release_year_desc";
       if (category === "tv_shows") categories = ["tv_shows"];
-      
+
       const response = await fetchMovies(7, page, categories, sortOrder);
       setter([...currentData, ...response.movies]);
     } catch (error) {
@@ -203,22 +234,21 @@ function MoviesPage() {
   };
 
   const MoviePoster = ({ movie }: { movie: Movie }) => {
-    const title = movie.title.replace(/^#+/, ''); // Use replace with regex instead of trimStart
+    const title = movie.title.replace(/^#+/, ""); // Use replace with regex instead of trimStart
     const imageUrl = `http://44.214.17.52/${encodeURIComponent(title)}.jpg`; // Use encodeURIComponent instead of Uri.EscapeDataString
-    console.log("Image URL:", imageUrl);
-    
+
     return (
       <div className="movie-poster" onClick={() => handleClick(movie.show_id)}>
-        <img 
+        <img
           src={imageUrl}
           alt={movie.title}
           className="poster-image"
           style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            borderRadius: '8px',
-            boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            borderRadius: "8px",
+            boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
           }}
         />
       </div>
@@ -228,12 +258,15 @@ function MoviesPage() {
   // Function to load more recommendations
   const loadMoreRecommendations = async () => {
     if (!hasMoreRecommendations) return;
-    
+
     try {
       // Calculate the next batch (next 7 or remaining if less than 7)
-      const end = Math.min(recommendationsLoaded + 7, totalRecommendations.length);
+      const end = Math.min(
+        recommendationsLoaded + 7,
+        totalRecommendations.length
+      );
       const nextBatch = totalRecommendations.slice(recommendationsLoaded, end);
-      
+
       // Fetch details for each recommendation in the next batch
       const newRecommendations: Movie[] = [];
       for (const showId of nextBatch) {
@@ -244,16 +277,15 @@ function MoviesPage() {
           console.error(`Error fetching details for movie ${showId}:`, error);
         }
       }
-      
+
       // Add new recommendations to the existing data
-      setRecommendationsData(current => [...current, ...newRecommendations]);
-      
+      setRecommendationsData((current) => [...current, ...newRecommendations]);
+
       // Update how many we've loaded
       setRecommendationsLoaded(end);
-      
+
       // Check if we have more to load
       setHasMoreRecommendations(end < totalRecommendations.length);
-      
     } catch (error) {
       console.error("Error loading more recommendations:", error);
     }
@@ -263,20 +295,23 @@ function MoviesPage() {
     <>
       <AuthorizeView>
         <Header />
-        <div className="movies-container" style={{
-            backgroundColor: '#0a1929',
-            backgroundImage: 'linear-gradient(135deg, #000810 0%, #00294D 100%)',
-            overflow: 'hidden',
+        <div
+          className="movies-container"
+          style={{
+            backgroundColor: "#0a1929",
+            backgroundImage:
+              "linear-gradient(135deg, #000810 0%, #00294D 100%)",
+            overflow: "hidden",
             margin: 0,
-            width: '100vw',
-            height: '100vh',
-            marginTop: '65px',
-            paddingBottom: '75px'
-        }}>
-
-            
-            {/* Sidebar Navigation */}
-            <div className={`sidebar ${isExpanded ? 'expanded' : ''}`}
+            width: "100vw",
+            height: "100vh",
+            marginTop: "65px",
+            paddingBottom: "75px",
+          }}
+        >
+          {/* Sidebar Navigation */}
+          <div
+            className={`sidebar ${isExpanded ? "expanded" : ""}`}
             onMouseEnter={() => setIsExpanded(true)}
             onMouseLeave={() => {
               if (!isSearching) {
@@ -303,13 +338,15 @@ function MoviesPage() {
             {isExpanded && searchResults.length > 0 && (
               <div className="search-results">
                 {searchResults.map((movie) => (
-                  <div 
-                    key={movie.show_id} 
+                  <div
+                    key={movie.show_id}
                     className="search-result-item"
                     onClick={() => handleClick(movie.show_id)}
                   >
                     <div className="search-result-title">{movie.title}</div>
-                    <div className="search-result-year">{movie.release_year}</div>
+                    <div className="search-result-year">
+                      {movie.release_year}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -412,7 +449,7 @@ function MoviesPage() {
                 </svg>
                 {isExpanded && <span>TV Shows</span>}
               </div>
-              
+
               {/* Category Filter Button */}
               <div
                 className="nav-item"
@@ -426,16 +463,16 @@ function MoviesPage() {
                   className="bi bi-filter"
                   viewBox="0 0 16 16"
                 >
-                  <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                  <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z" />
                 </svg>
                 {isExpanded && <span>Filter by Category</span>}
               </div>
-              
+
               {/* Category Filter Dropdown */}
               {isExpanded && showCategoryFilter && (
                 <div className="category-filter">
                   <div className="category-list">
-                    {categories.map(category => (
+                    {categories.map((category) => (
                       <div key={category} className="category-item">
                         <label>
                           <input
@@ -443,19 +480,16 @@ function MoviesPage() {
                             checked={selectedCategories.includes(category)}
                             onChange={() => toggleCategory(category)}
                           />
-                          <span>{category.replace(/_/g, ' ')}</span>
+                          <span>{category.replace(/_/g, " ")}</span>
                         </label>
                       </div>
                     ))}
                   </div>
                   <div className="filter-actions">
-                    <button 
-                      className="apply-filter"
-                      onClick={applyFilters}
-                    >
+                    <button className="apply-filter" onClick={applyFilters}>
                       Apply Filters
                     </button>
-                    <button 
+                    <button
                       className="clear-filter"
                       onClick={() => {
                         setSelectedCategories([]);
@@ -468,7 +502,7 @@ function MoviesPage() {
                 </div>
               )}
             </div>
-            
+
             <div className="profile-nav-item">
               <div className="nav-item" onClick={() => navigate("/profile")}>
                 <svg
@@ -489,7 +523,6 @@ function MoviesPage() {
               </div>
             </div>
           </div>
-
 
           {/* Main Content */}
           <div className="main-content">
@@ -514,7 +547,7 @@ function MoviesPage() {
                       ))}
                     </div>
                     {hasMoreRecommendations && (
-                      <div 
+                      <div
                         className="movie-navigation-arrow"
                         onClick={loadMoreRecommendations}
                       >
@@ -548,13 +581,13 @@ function MoviesPage() {
                         </div>
                       ))}
                     </div>
-                    <div 
+                    <div
                       className="movie-navigation-arrow"
                       onClick={() => {
                         setPopularRows(popularRows + 1);
                         loadMoreMovies(
-                          "popular", 
-                          popularRows + 1, 
+                          "popular",
+                          popularRows + 1,
                           setPopularData,
                           popularData
                         );
@@ -589,13 +622,13 @@ function MoviesPage() {
                         </div>
                       ))}
                     </div>
-                    <div 
+                    <div
                       className="movie-navigation-arrow"
                       onClick={() => {
                         setNewReleasesRows(newReleasesRows + 1);
                         loadMoreMovies(
-                          "new_releases", 
-                          newReleasesRows + 1, 
+                          "new_releases",
+                          newReleasesRows + 1,
                           setNewReleasesData,
                           newReleasesData
                         );
@@ -630,13 +663,13 @@ function MoviesPage() {
                         </div>
                       ))}
                     </div>
-                    <div 
+                    <div
                       className="movie-navigation-arrow"
                       onClick={() => {
                         setAllMoviesRows(allMoviesRows + 1);
                         loadMoreMovies(
-                          "all_movies", 
-                          allMoviesRows + 1, 
+                          "all_movies",
+                          allMoviesRows + 1,
                           setAllMoviesData,
                           allMoviesData
                         );
@@ -671,13 +704,13 @@ function MoviesPage() {
                         </div>
                       ))}
                     </div>
-                    <div 
+                    <div
                       className="movie-navigation-arrow"
                       onClick={() => {
                         setAllTVShowsRows(allTVShowsRows + 1);
                         loadMoreMovies(
-                          "tv_shows", 
-                          allTVShowsRows + 1, 
+                          "tv_shows",
+                          allTVShowsRows + 1,
                           setAllTVShowsData,
                           allTVShowsData
                         );
@@ -707,6 +740,6 @@ function MoviesPage() {
       </AuthorizeView>
     </>
   );
-};
+}
 
 export default MoviesPage;
