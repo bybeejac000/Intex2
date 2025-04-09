@@ -283,7 +283,9 @@ function MovieDetailsPage() {
   }
 
   // Create image URL using the same logic as on the MoviesPage
-  const title = movie?.title.replace(/^#+/, "");
+  const title = movie?.title
+    .replace(/[\(\):\'\.\-&]/g, '')  // Remove parentheses, colons, and dashes
+    .replace(/^#+/, "");
   const imageUrl = title
     ? `http://44.214.17.52/${encodeURIComponent(title)}.jpg`
     : "";
@@ -326,7 +328,6 @@ function MovieDetailsPage() {
                   >
                     Leave a Rating
                   </button>
-                  {showRatingPopup && <StarRating />}
                 </div>
               </div>
               
@@ -363,6 +364,8 @@ function MovieDetailsPage() {
                   <strong>Cast:</strong> {movie.cast}
                 </div>
                 
+                {showRatingPopup && <StarRating />}
+                
                 <button
                   className="btn btn-primary mt-3"
                   onClick={fetchRecommendations}
@@ -385,71 +388,72 @@ function MovieDetailsPage() {
               </div>
               
               <div className="col-md-4">
-                <div className="d-flex">
-                  {showRecommendations && (
-                    <div className="recommendations-panel" style={{ 
-                      maxHeight: "80vh", 
-                      overflowY: "auto", 
-                      flex: 1,
+                {/* Empty column */}
+              </div>
+            </div>
+            
+            {showRecommendations && (
+              <div className="row mt-5">
+                <div className="col-12">
+                  <h4 className="mb-3" style={{ fontWeight: "300" }}>Since you enjoyed <strong>{movie.title}</strong>, try watching...</h4>
+                  {loadingRecommendations ? (
+                    <div className="d-flex justify-content-center my-5">
+                      <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Loading recommendations...</span>
+                      </div>
+                    </div>
+                  ) : recommendations.length > 0 ? (
+                    <div className="recommended-movies d-flex gap-3" style={{ 
+                      overflowX: "auto",
+                      paddingBottom: "15px",
                       scrollbarWidth: "thin",
                       scrollbarColor: "#1976d2 transparent"
                     }}>
                       <style>
                         {`
-                          .recommendations-panel::-webkit-scrollbar {
-                            width: 8px;
+                          .recommended-movies::-webkit-scrollbar {
+                            height: 8px;
                           }
-                          .recommendations-panel::-webkit-scrollbar-track {
+                          .recommended-movies::-webkit-scrollbar-track {
                             background: transparent;
                           }
-                          .recommendations-panel::-webkit-scrollbar-thumb {
+                          .recommended-movies::-webkit-scrollbar-thumb {
                             background-color: #1976d2;
                             border-radius: 20px;
                           }
                         `}
                       </style>
-                      <h4 className="mb-3" style={{ fontWeight: "300" }}>Since you enjoyed <strong>{movie.title}</strong>, try watching...</h4>
-                      {loadingRecommendations ? (
-                        <div className="d-flex justify-content-center my-5">
-                          <div className="spinner-border text-primary" role="status">
-                            <span className="visually-hidden">Loading recommendations...</span>
-                          </div>
+                      {recommendations.map((rec, index) => (
+                        <div 
+                          key={index} 
+                          className="recommendation-item d-flex flex-column align-items-center mb-3"
+                          style={{ cursor: "pointer", minWidth: "150px" }}
+                          onClick={() => handleRecommendationClick(rec.title)}
+                        >
+                          <img 
+                            src={`http://44.214.17.52/${encodeURIComponent(rec.title.replace(/[\(\):\'\.\-&]/g, '').replace(/^#+/, ''))}.jpg`}
+                            alt={rec.title}
+                            style={{ 
+                              width: "150px", 
+                              height: "200px", 
+                              objectFit: "cover",
+                              borderRadius: "4px",
+                              marginBottom: "8px"
+                            }}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "https://via.placeholder.com/100x150?text=No+Image";
+                            }}
+                          />
+                          <h6 className="text-center mt-1" style={{ fontSize: "0.9rem", width: "100%" }}>{rec.title}</h6>
                         </div>
-                      ) : recommendations.length > 0 ? (
-                        <div className="recommended-movies">
-                          {recommendations.map((rec, index) => (
-                            <div 
-                              key={index} 
-                              className="recommendation-item d-flex flex-column align-items-center mb-3"
-                              style={{ cursor: "pointer" }}
-                              onClick={() => handleRecommendationClick(rec.title)}
-                            >
-                              <img 
-                                src={`http://44.214.17.52/${encodeURIComponent(rec.title)}.jpg`}
-                                alt={rec.title}
-                                style={{ 
-                                  width: "150px", 
-                                  height: "200px", 
-                                  objectFit: "cover",
-                                  borderRadius: "4px",
-                                  marginBottom: "8px"
-                                }}
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = "https://via.placeholder.com/100x150?text=No+Image";
-                                }}
-                              />
-                              <h6 className="text-center mt-1" style={{ fontSize: "0.9rem", width: "100%" }}>{rec.title}</h6>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p>No recommendations found.</p>
-                      )}
+                      ))}
                     </div>
+                  ) : (
+                    <p>No recommendations found.</p>
                   )}
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
         

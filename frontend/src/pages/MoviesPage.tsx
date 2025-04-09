@@ -203,7 +203,11 @@ function MoviesPage() {
   };
 
   const MoviePoster = ({ movie }: { movie: Movie }) => {
-    const title = movie.title.replace(/^#+/, ''); // Use replace with regex instead of trimStart
+    // Remove unwanted characters like (), :, and -
+    const title = movie.title
+        .replace(/[\(\):\'\.\-&]/g, '')  // Remove parentheses, colons, and dashes
+        .replace(/^#+/, '');
+
     const imageUrl = `http://44.214.17.52/${encodeURIComponent(title)}.jpg`; // Use encodeURIComponent instead of Uri.EscapeDataString
     console.log("Image URL:", imageUrl);
     
