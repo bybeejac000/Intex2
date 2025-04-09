@@ -1,0 +1,121 @@
+/* Offset the page below the header */
+.privacy-container {
+    background-color: #0a1929;
+    color: white;
+    min-height: 100vh;
+    margin: 0;
+    padding: 80px 20px 20px; /* 80px top padding to clear the header */
+    position: relative;
+    text-align: left;
+    font-family: sans-serif;
+  }
+  
+  /* Back button */
+  .back-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    cursor: pointer;
+    display: inline-block;
+  }
+  
+  /* Sidebar on the left */
+  .privacy-sidebar {
+    float: left;
+    width: 300px;
+    padding: 20px;
+    background-color: #1a2937;
+    border: 1px solid #333;
+    box-sizing: border-box;
+    margin-right: 20px;
+  }
+  
+  .privacy-sidebar h2 {
+    margin-top: 0;
+    font-weight: bold;
+    text-decoration: underline;
+  }
+  
+  .privacy-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .privacy-sidebar li {
+    margin-bottom: 10px;
+  }
+  
+  .privacy-sidebar button {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #1976d2;
+    text-align: left;
+    cursor: pointer;
+    font-size: 1rem;
+    width: 100%;
+    word-wrap: break-word;
+  }
+  
+  .print-button {
+    margin-top: 20px;
+    background: #1976d2;
+    color: white;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  
+  /* Main content on the right */
+  .privacy-main {
+    margin-left: 320px; /* ensures the sidebar doesn't overlap content */
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #0a1929;
+  }
+  
+  /* Titles and text */
+  .policy-title {
+    font-size: 2rem;
+    font-weight: bold;
+    text-decoration: underline;
+    margin-bottom: 20px;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: underline;
+    margin: 20px 0 10px;
+  }
+  
+  /* Highlighted text using the blue accent color */
+  .highlight {
+    color: #1976d2;
+    font-weight: bold;
+  }
+  
+  .highlight-link {
+    color: #1976d2;
+    text-decoration: underline;
+  }
+  
+  /* Responsive layout */
+  @media (max-width: 768px) {
+    .privacy-sidebar {
+      float: none;
+      width: auto;
+      margin-right: 0;
+      margin-bottom: 20px;
+    }
+  
+    .privacy-main {
+      margin-left: 0;
+    }
+  }
+  
