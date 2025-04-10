@@ -98,6 +98,7 @@ app.MapPost("/logout", async (HttpContext context, SignInManager<ApplicationUser
         Secure = true,
         SameSite = SameSiteMode.None
     });
+    
 
     return Results.Ok(new { message = "Logout successful" });
 }).RequireAuthorization();
