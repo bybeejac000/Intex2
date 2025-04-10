@@ -40,7 +40,7 @@ const ProfilePage: React.FC = () => {
 
   const fetchProfile = async () => {
     try {
-      const response = await fetch("https://localhost:5000/account/me", {
+      const response = await fetch("https://cineniche.click/account/me", {
         credentials: "include",
       });
       if (!response.ok) throw new Error("Failed to fetch user data");
@@ -60,7 +60,7 @@ const ProfilePage: React.FC = () => {
     setIsEditingFirstName(false);
     try {
       const payload = { firstName };
-      const res = await fetch("https://localhost:5000/account/updateProfile", {
+      const res = await fetch("https://cineniche.click/account/updateProfile", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -78,7 +78,7 @@ const ProfilePage: React.FC = () => {
     setIsEditingLastName(false);
     try {
       const payload = { lastName };
-      const res = await fetch("https://localhost:5000/account/updateProfile", {
+      const res = await fetch("https://cineniche.click/account/updateProfile", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -101,7 +101,7 @@ const ProfilePage: React.FC = () => {
     setShowPhotoSelector(false);
     try {
       const payload = { ProfilePictureId: idx };
-      const res = await fetch("https://localhost:5000/account/updateProfile", {
+      const res = await fetch("https://cineniche.click/account/updateProfile", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -136,7 +136,7 @@ const ProfilePage: React.FC = () => {
   const performLogOut = async () => {
     setLoggingOut(true);
     try {
-      const response = await fetch("https://localhost:5000/logout", {
+      const response = await fetch("https://cineniche.click/logout", {
         method: "POST",
         credentials: "include",
       });
@@ -153,7 +153,7 @@ const ProfilePage: React.FC = () => {
   // Toggle 2FA.
   const toggle2FA = async () => {
     try {
-      const response = await fetch("https://localhost:5000/account/toggle2FA", {
+      const response = await fetch("https://cineniche.click/account/toggle2FA", {
         method: "POST",
         credentials: "include",
       });
