@@ -141,3 +141,75 @@ export const fetchMovieById = async (movieId: string): Promise<Movie> => {
     throw error;
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+interface QueryResponse<T> {
+  // match whatever your API actually returns:
+  // e.g. { rows: Movie[] } or { data: Movie[] } or { results: Movie[] }
+  rows?: T[];
+  data?: T[];
+  results?: T[];
+}
+
+export async function fetchNewReleases(): Promise<Movie[]> {
+  const sql = `
+    SELECT *
+    FROM movies_titles
+    WHERE release_year > 2020
+    ORDER BY release_year DESC
+    LIMIT 50
+  `;
+  const res = await fetch("http://44.214.17.52:5000/query", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query: sql }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`New‐releases query failed: ${res.status} – ${errText}`);
+  }
+
+  const json: QueryResponse<Movie> = await res.json();
+  // pick the right field:
+  return json.rows ?? json.data ?? json.results ?? [];
+}
+
+
+
+
+

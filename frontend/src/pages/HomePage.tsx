@@ -28,8 +28,12 @@ function HomePage() {
                 {/* Right side - 2/3 of the screen */}
                 <div className="col-md-8 d-flex flex-column justify-content-center align-items-center text-light" style={{ height: '100vh' }}>
                     <div className="text-center mb-5">
-                        <h1 className="display-1 fw-light" style={{ color: '#ffffff' }}>CineNiche</h1>
-                        <p className="lead text-light-50">Subtitle Here: we need to explain the purpose of this site and fulfil the 413 requirements</p>
+                        <img 
+                            src="/images/ChatGPT Image Apr 9, 2025, 07_00_00 PM.png" 
+                            alt="CineNiche Logo" 
+                            style={{ maxWidth: '400px', marginBottom: '20px' }}
+                        />
+                        <p className="lead text-light-75">Where film discovery meets personal taste. <br />Sign in or register to build your collection and find movies that matter to you!</p>
                     </div>
                     <div className="d-grid gap-3 col-md-6 mx-auto">
                         <button 
