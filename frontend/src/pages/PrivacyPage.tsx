@@ -50,6 +50,7 @@ const PrivacyPage = () => {
   return (
     <>
       <Header />
+      <div style={{ height: '50px' }} />
       <div className="privacy-container">
         <button className="back-button" onClick={handleBack}>
           &#8592; Back
