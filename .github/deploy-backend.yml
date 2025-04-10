@@ -3,7 +3,7 @@ name: Deploy .NET Backend to Beanstalk
 on:
   push:
     paths:
-      - "server/**"
+  - "backend/CineNiche/**"
     branches: [main]
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
 
       - name: Publish .NET App
         run: |
-          cd server
+          cd backend/CineNiche
           dotnet publish -c Release -o out
           cd out
           zip -r ../deploy.zip .
@@ -31,7 +31,7 @@ jobs:
           environment_name: your-env-name
           version_label: ${{ github.sha }}
           region: us-east-1
-          deployment_package: server/deploy.zip
+          deployment_package: backend/CineNiche/deploy.zip
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
