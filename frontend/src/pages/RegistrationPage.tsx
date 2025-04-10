@@ -1,12 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "./HomePage.css";
 import ScrollingPosters from "../components/ScrollingPosters";
+import { useNavigate } from "react-router-dom";
+import NotificationModal from "../components/NotificationModal/NotificationModal";
+import ConfirmationModal from "../components/ConfirmationModal/ConfirmationModal";
 
 function RegistrationPage() {
-  const [step, setStep] = useState(1);
+  const navigate = useNavigate();
+
+  // Steps 1-8: Registration fields (with confirmPassword added)
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -15,26 +20,51 @@ function RegistrationPage() {
     phoneNumber: "",
     email: "",
     password: "",
+    confirmPassword: ""
   });
 
+  // Step 9: 4-digit verification code entry
+  const [verificationDigits, setVerificationDigits] = useState(["", "", "", ""]);
+
+  // Refs for the 4 input boxes
+  const digitRefs = [
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null)
+  ];
+
+  // Registration step (1-9)
+  const [step, setStep] = useState(1);
+
+  // Notification state for using NotificationModal
+  const [notification, setNotification] = useState<{ show: boolean, message: string }>({
+    show: false,
+    message: ""
+  });
+
+  // Handle changes for registration fields
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  // For step 7, check password length before moving on
   const handleNext = () => {
-    // Check password length on step 7
     if (step === 7 && formData.password.length < 15) {
-      alert("Password must be at least 15 characters long");
+      setNotification({
+        show: true,
+        message: "Password must be at least 15 characters long"
+      });
       return;
     }
-    if (step < 8) setStep(step + 1);
+    if (step < 9) setStep(step + 1);
   };
 
+  // Handle registration submission (for steps 1–8)
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Handle form submission
     const registrationData = {
       firstName: formData.firstName,
       lastName: formData.lastName,
@@ -48,39 +78,84 @@ function RegistrationPage() {
     try {
       const response = await fetch("https://localhost:5000/Account/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(registrationData),
       });
 
       if (response.ok) {
-        // const data = await response.json();
-        alert("Registration Successful!");
-        // Redirect or reset form here if desired
+        // Save pending email for verification.
+        localStorage.setItem("pendingRegistrationEmail", formData.email);
+        // Show registration success notification.
+        setNotification({
+          show: true,
+          message: "Almost there! Please check your email for the verification code."
+        });
+        // Move to verification step.
+        setStep(9);
       } else {
         const errorData = await response.json();
         console.error(errorData);
-        alert("Registration Failed. Please check your input.");
+        setNotification({
+          show: true,
+          message: "Registration Failed. Please check your input."
+        });
       }
     } catch (error) {
       console.error("Error submitting registration:", error);
-      alert("An error occured. Please try again later.");
+      setNotification({
+        show: true,
+        message: "An error occurred. Please try again later."
+      });
+    }
+  };
+
+  // Handle changes in each verification digit input.
+  const handleDigitChange = (index: number, value: string) => {
+    if (value.length > 1) return; // Only allow one character
+    const newDigits = [...verificationDigits];
+    newDigits[index] = value;
+    setVerificationDigits(newDigits);
+
+    // Auto-focus next input box if available.
+    if (value.length === 1 && index < 3) {
+      digitRefs[index + 1].current?.focus();
+    }
+  };
+
+  // Hardcoded acceptable code is "0000"
+  const handleVerifyCode = () => {
+    const codeEntered = verificationDigits.join("");
+    if (codeEntered === "0000") {
+      setNotification({
+        show: true,
+        message: "Email verified successfully!"
+      });
+      // Clear pending registration email and navigate to movies after a short delay.
+      localStorage.removeItem("pendingRegistrationEmail");
+      setTimeout(() => {
+        navigate("/movies");
+      }, 500);
+    } else {
+      setNotification({
+        show: true,
+        message: "Invalid verification code. Please try again."
+      });
     }
   };
 
   const buttonStyle = {
     backgroundColor: "#1976d2",
     color: "white",
-    padding: "10px 20px", // Adjusted padding to make it thinner
+    padding: "10px 20px",
     fontSize: "1.2rem",
     height: "50px",
-    textAlign: "center", // Ensures the text is centered
-    display: "inline-flex", // Makes the button inline so text can be centered
-    justifyContent: "center", // Ensures the content is centered
-    alignItems: "center", // Ensures vertical alignment of text
+    textAlign: "center" as const,
+    display: "inline-flex",
+    justifyContent: "center",
+    alignItems: "center",
   };
 
+  // Render steps 1-9.
   const renderStep = () => {
     switch (step) {
       case 1:
@@ -175,14 +250,51 @@ function RegistrationPage() {
               type="password"
               name="password"
               placeholder="Password"
-              className={`form-control form-control-lg ${formData.password.length > 0 ? 
-                (formData.password.length >= 15 ? 'is-valid' : 'is-invalid') : ''}`}
+              className={`form-control form-control-lg ${
+                formData.password.length > 0
+                  ? formData.password.length >= 15
+                    ? "is-valid"
+                    : "is-invalid"
+                  : ""
+              }`}
               value={formData.password}
               onChange={handleChange}
             />
-            <p className={formData.password.length > 0 && formData.password.length < 15 ? 'text-danger' : ''}>
-              *Password must contain at least 15 characters 
-              {formData.password.length > 0 && ` (${formData.password.length}/15)`}
+            <p
+              className={
+                formData.password.length > 0 && formData.password.length < 15
+                  ? "text-danger"
+                  : ""
+              }
+            >
+              *Password must contain at least 15 characters{" "}
+              {formData.password.length > 0 &&
+                `(${formData.password.length}/15)`}
+            </p>
+            <h5 className="mb-4">Confirm password</h5>
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm Password"
+              className={`form-control form-control-lg ${
+                formData.confirmPassword.length > 0
+                  ? formData.confirmPassword === formData.password
+                    ? "is-valid"
+                    : "is-invalid"
+                  : ""
+              }`}
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
+            <p
+              className={
+                formData.confirmPassword.length > 0 &&
+                formData.confirmPassword !== formData.password
+                  ? "text-danger"
+                  : ""
+              }
+            >
+              *Passwords must match
             </p>
           </div>
         );
@@ -206,7 +318,7 @@ function RegistrationPage() {
                 padding: buttonStyle.padding,
                 fontSize: buttonStyle.fontSize,
                 height: buttonStyle.height,
-                textAlign: "center" as const,
+                textAlign: "center",
                 display: buttonStyle.display,
                 justifyContent: buttonStyle.justifyContent,
                 alignItems: buttonStyle.alignItems,
@@ -214,6 +326,46 @@ function RegistrationPage() {
               }}
             >
               Confirm and Register
+            </button>
+          </div>
+        );
+      case 9:
+        return (
+          <div className="mb-3 text-center">
+            <h3 className="mb-4">Enter Verification Code</h3>
+            <p>
+              An email has been sent to <strong>{formData.email}</strong> with a verification code. Please enter it below.
+            </p>
+            <div style={{ display: "flex", justifyContent: "center", gap: "15px", marginTop: "2rem", marginBottom: "2rem" }}>
+              {verificationDigits.map((digit, index) => (
+                <input
+                  key={index}
+                  type="text"
+                  maxLength={1}
+                  ref={digitRefs[index]}
+                  className="verification-box"
+                  style={{
+                    width: "60px",
+                    height: "60px",
+                    fontSize: "2rem",
+                    textAlign: "center",
+                    backgroundColor: "rgba(200,200,200,0.5)",
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    color: "white",
+                    borderRadius: "4px",
+                  }}
+                  value={verificationDigits[index]}
+                  onChange={(e) => handleDigitChange(index, e.target.value)}
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              className="btn btn-primary"
+              style={{ ...buttonStyle, width: "300px", marginTop: "1.5rem" }}
+              onClick={handleVerifyCode}
+            >
+              Verify
             </button>
           </div>
         );
@@ -241,53 +393,86 @@ function RegistrationPage() {
           <div className="col-md-4">
             <ScrollingPosters />
           </div>
-                    {/* Right side - 2/3 of the screen */}
-                    <div className="col-md-8 d-flex flex-column justify-content-center align-items-center text-light" style={{ height: '100vh' }}>
-                        <div className="text-center mb-5 d-flex align-items-center justify-content-center" style={{ paddingTop: "100px" }}>
-                            <button 
-                                className="btn btn-link text-light text-decoration-none me-3" 
-                                onClick={() => window.history.back()}
-                                style={{ fontSize: '2.25rem', paddingBottom: '38px' }}
-                            >
-                                ←
-                            </button>
-                            <h1 className="display-1 fw-light mb-4">Register for an Account</h1>
-                        </div>
-                        
-                        <form className="d-flex flex-column gap-3" style={{ maxWidth: '300px', margin: '0 auto' }} onSubmit={handleSubmit}>
-                            {renderStep()}
-                            <div className="d-flex justify-content-center gap-3">
-                                {step === 8 && <button 
-                                    type="submit" 
-                                    className="btn btn-lg"
-                                    style={{
-                                        backgroundColor: 'transparent',
-                                        border: '2px solid #1976d2',
-                                        color: '#1976d2',
-                                        padding: buttonStyle.padding,
-                                        fontSize: buttonStyle.fontSize,
-                                        height: buttonStyle.height,
-                                        textAlign: "center" as const,
-                                        display: buttonStyle.display,
-                                        justifyContent: buttonStyle.justifyContent,
-                                        alignItems: buttonStyle.alignItems,
-                                        width: '500px'
-                                    }}
-                                    onClick={() => setStep(1)}
-                                >Go Back and Edit</button>}
-                                {step < 8 && <button type="button" className="btn btn-primary" onClick={handleNext}>Next</button>}
-                            </div>
-                            <div className="mt-3">
-                                <p>Step {step} of 8</p>
-                                <div className="progress" style={{marginBottom: "100px"}}>
-                                    <div className="progress-bar" role="progressbar" style={{ width: `${(step / 8) * 100}%` }} aria-valuenow={step} aria-valuemin={1} aria-valuemax={8}></div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+          {/* Right side - 2/3 of the screen */}
+          <div
+            className="col-md-8 d-flex flex-column justify-content-center align-items-center text-light"
+            style={{ height: "100vh" }}
+          >
+            <div
+              className="text-center mb-5 d-flex align-items-center justify-content-center"
+              style={{ paddingTop: "100px" }}
+            >
+              <button
+                className="btn btn-link text-light text-decoration-none me-3"
+                onClick={() => window.history.back()}
+                style={{ fontSize: "2.25rem", paddingBottom: "38px" }}
+              >
+                ←
+              </button>
+              <h1 className="display-1 fw-light mb-4">Register for an Account</h1>
             </div>
+            <br />
+            <br />
+            <form
+              className="d-flex flex-column gap-3"
+              style={{ maxWidth: "300px", margin: "0 auto" }}
+              onSubmit={handleSubmit}
+            >
+              {renderStep()}
+              <div className="d-flex justify-content-center gap-3">
+                {step === 8 && (
+                  <button
+                    type="submit"
+                    className="btn btn-lg"
+                    style={{
+                      backgroundColor: "transparent",
+                      border: "2px solid #1976d2",
+                      color: "#1976d2",
+                      padding: buttonStyle.padding,
+                      fontSize: buttonStyle.fontSize,
+                      height: buttonStyle.height,
+                      textAlign: "center",
+                      display: buttonStyle.display,
+                      justifyContent: buttonStyle.justifyContent,
+                      alignItems: buttonStyle.alignItems,
+                      width: "500px",
+                    }}
+                    onClick={() => setStep(1)}
+                  >
+                    Go Back and Edit
+                  </button>
+                )}
+                {step < 8 && (
+                  <button type="button" className="btn btn-primary" onClick={handleNext}>
+                    Next
+                  </button>
+                )}
+              </div>
+              <div className="mt-3">
+                <p>Step {step} of 9</p>
+                <div className="progress" style={{ marginBottom: "100px" }}>
+                  <div
+                    className="progress-bar"
+                    role="progressbar"
+                    style={{ width: `${(step / 9) * 100}%` }}
+                    aria-valuenow={step}
+                    aria-valuemin={1}
+                    aria-valuemax={9}
+                  ></div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
       <Footer />
+      {/* Render NotificationModal if there's any message */}
+      {notification.show && (
+        <NotificationModal
+          message={notification.message}
+          onOk={() => setNotification({ show: false, message: "" })}
+        />
+      )}
     </>
   );
 }

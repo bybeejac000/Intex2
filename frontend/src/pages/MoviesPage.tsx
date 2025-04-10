@@ -15,6 +15,55 @@ function MoviesPage() {
 
 
 
+  // LOAD IN FIRST NAME:
+    const [firstName, setFirstName] = useState('');
+
+    // Fetch profile data on mount.
+    useEffect(() => {
+      fetchProfile();
+    }, []);
+  
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch('https://localhost:5000/account/me', {
+          credentials: 'include',
+        });
+        if (!response.ok) throw new Error('Failed to fetch user data');
+        const data = await response.json();
+        setFirstName(data.firstName || '');
+        //setLastName(data.lastName || '');
+        //setEmail(data.email || '');
+        //setTwoFactorEnabled(data.twoFactorEnabled || false);
+        //setProfilePictureId(data.profilePictureId || 0);
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+      }
+    };
+  
+    // Save functions
+    const saveFirstName = async () => {
+      //setIsEditingFirstName(false);
+      try {
+        const payload = { firstName };
+        const res = await fetch('https://localhost:5000/account/updateProfile', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error('Profile update failed');
+        console.log('First name updated.');
+      } catch (error) {
+        console.error(error);
+        alert('Error updating first name.');
+      }
+    };
+
+// First name is loaded in now
+
+
+
+
   // Movie data state
   const [recommendationsData, setRecommendationsData] = useState<Movie[]>([]);
   const [popularData, setPopularData] = useState<Movie[]>([]);
@@ -131,7 +180,7 @@ function MoviesPage() {
         }
 
         if (!userId) {
-          console.error("❌ userId not found in localStorage after waiting.");
+          console.error("userId not found in localStorage after waiting.");
           return;
         }
 
@@ -619,7 +668,7 @@ function MoviesPage() {
 
                 {/* My Recommendations Section */}
                 <section id="recommendations" className="movie-section">
-                  <h2 style={{ textAlign: 'left' }}>({})'s Top Recommendations</h2>
+                  <h2 style={{ textAlign: 'left' }}>{firstName}'s Top Recommendations</h2>
                   <div className="movie-row-container">
                     <div className="movie-grid">
                       {recommendationsData.map((movie) => (
