@@ -52,6 +52,7 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+app.UseCors("AllowFrontend");
 /*
 using (var scope = app.Services.CreateScope())
 {
@@ -79,13 +80,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowFrontend");
 //app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapIdentityApi<ApplicationUser>();
+//app.MapIdentityApi<ApplicationUser>();
+app.MapGroup("/").RequireCors("AllowFrontend").MapIdentityApi<ApplicationUser>();
 
 app.MapPost("/logout", async (HttpContext context, SignInManager<ApplicationUser> signInManager) =>
 {
