@@ -161,7 +161,7 @@ function MoviesPage() {
       console.error("Error fetching data:", error);
     }
   };
-  // Fetch data on component mount
+  // Fetch data on component mounts
   useEffect(() => {
     const loadData = async () => {
       try {
