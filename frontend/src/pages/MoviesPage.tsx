@@ -12,17 +12,15 @@ import { Movie } from "../types/Movie";
 function MoviesPage() {
   const [isExpanded, setIsExpanded] = useState(false);
   //   const [recommendationsRows, setRecommendationsRows] = useState(1);
-  const [popularRows, setPopularRows] = useState(1);
-  const [newReleasesRows, setNewReleasesRows] = useState(1);
-  const [allMoviesRows, setAllMoviesRows] = useState(1);
-  const [allTVShowsRows, setAllTVShowsRows] = useState(1);
+
+
 
   // Movie data state
   const [recommendationsData, setRecommendationsData] = useState<Movie[]>([]);
   const [popularData, setPopularData] = useState<Movie[]>([]);
   const [newReleasesData, setNewReleasesData] = useState<Movie[]>([]);
   const [allMoviesData, setAllMoviesData] = useState<Movie[]>([]);
-  const [allTVShowsData, setAllTVShowsData] = useState<Movie[]>([]);
+  const [throwbackData, setThrowbackData] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Search functionality
@@ -35,11 +33,10 @@ function MoviesPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   // Recommendations paging
-  const [totalRecommendations, setTotalRecommendations] = useState<string[]>(
+  const [, setTotalRecommendations] = useState<string[]>(
     []
   );
-  const [recommendationsLoaded, setRecommendationsLoaded] = useState(7);
-  const [hasMoreRecommendations, setHasMoreRecommendations] = useState(true);
+  const [, setHasMoreRecommendations] = useState(true);
 
   const navigate = useNavigate();
 
@@ -55,13 +52,30 @@ function MoviesPage() {
     "thrillers",
   ];
 
+  // Add activeCategory state to track selected category
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
   // Handle category selection
   const toggleCategory = (category: string) => {
+    // Set the active category
+    setActiveCategory(category);
+    
+    // Update selected categories state
     setSelectedCategories((prev) =>
       prev.includes(category)
         ? prev.filter((cat) => cat !== category)
         : [...prev, category]
     );
+    
+    // Fetch movies for this category
+    selectCategory(category);
+    
+    // Close the category filter dropdown
+    setShowCategoryFilter(false);
+    
+    // Scroll to the "Find a Title By Category" section
+    const section = document.querySelector("#allMovies");
+    if (section) section.scrollIntoView({ behavior: "smooth" });
   };
 
   // Apply category filters and reload movies
@@ -133,8 +147,8 @@ function MoviesPage() {
         // Store all recommendation IDs for later paging
         setTotalRecommendations(recommendedShowIds);
 
-        // Only fetch details for the first 7 recommendations initially
-        const initialShowIds = recommendedShowIds.slice(0, 7);
+        // Now fetch details for all 50 recommendations (or less if there are fewer)
+        const initialShowIds = recommendedShowIds.slice(0, 50);
 
         // Fetch full details for each recommended movie
         const recommendedMovies: Movie[] = [];
@@ -146,36 +160,44 @@ function MoviesPage() {
             console.error(`Error fetching details for movie ${showId}:`, error);
           }
         }
-        console.log("Recommendations data:", recommendedMovies);
         setRecommendationsData(recommendedMovies);
+        
+        // Filter for throwback titles (movies before 2000)
+        const throwbackMovies = recommendedMovies.filter(movie => 
+          movie.release_year < 2000
+        );
+        setThrowbackData(throwbackMovies);
+        
+        setHasMoreRecommendations(false); // No need for load more functionality
 
-        // Set if we have more recommendations to load
-        setHasMoreRecommendations(recommendedShowIds.length > 7);
+        // Fetch popular movies with high ratings (using popular=true parameter)
+        const popularResponse = await fetch(
+          `https://localhost:5000/CineNiche/GetMovies?popular=true&pageSize=50&pageNum=1`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+        const popularData = await popularResponse.json();
+        // Sort the popular movies alphabetically by title
+        const sortedPopularMovies = [...popularData.movies].sort((a, b) => 
+          a.title.localeCompare(b.title)
+        );
+        setPopularData(sortedPopularMovies);
 
-        // Fetch popular movies
-        const popularResponse = await fetchMovies(7, 1, [], "popular");
-        console.log("Popular data:", popularResponse.movies);
-        setPopularData(popularResponse.movies);
-
-        // Fetch new releases (sort by release year)
+        // Fetch new releases (sort by release year) (50 at once)
         const newReleasesResponse = await fetchMovies(
-          7,
+          50,
           1,
           [],
           "release_year_desc"
         );
-        console.log("New releases data:", newReleasesResponse.movies);
         setNewReleasesData(newReleasesResponse.movies);
 
-        // Fetch all movies
-        const allMoviesResponse = await fetchMovies(7, 1, [], null);
-        console.log("All movies data:", allMoviesResponse.movies);
+        // Fetch all movies (50 at once)
+        const allMoviesResponse = await fetchMovies(50, 1, [], null);
         setAllMoviesData(allMoviesResponse.movies);
 
-        // Fetch TV shows
-        const tvShowsResponse = await fetchMovies(7, 1, ["tv_shows"], null);
-        console.log("TV shows data:", tvShowsResponse.movies);
-        setAllTVShowsData(tvShowsResponse.movies);
       } catch (error) {
         console.error("Error loading movies:", error);
       } finally {
@@ -187,27 +209,6 @@ function MoviesPage() {
   }, []);
 
   // Function to load more movies for a category
-  const loadMoreMovies = async (
-    category: string,
-    page: number,
-    setter: React.Dispatch<React.SetStateAction<Movie[]>>,
-    currentData: Movie[]
-  ) => {
-    try {
-      let sortOrder = null;
-      let categories: string[] = [];
-
-      if (category === "recommendations") sortOrder = "rating_desc";
-      if (category === "popular") sortOrder = "popular";
-      if (category === "new_releases") sortOrder = "release_year_desc";
-      if (category === "tv_shows") categories = ["tv_shows"];
-
-      const response = await fetchMovies(7, page, categories, sortOrder);
-      setter([...currentData, ...response.movies]);
-    } catch (error) {
-      console.error(`Error loading more ${category}:`, error);
-    }
-  };
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -250,7 +251,7 @@ function MoviesPage() {
   const MoviePoster = ({ movie }: { movie: Movie }) => {
     // Remove unwanted characters like (), :, and -
     const title = movie.title
-      .replace(/[\(\):\'\.\-&]/g, "") // Remove parentheses, colons, and dashes
+      .replace(/[\(\):\'\.\-&\!\Ñ\ñ]/g, "") // Remove parentheses, colons, and dashes
       .replace(/^#+/, "");
 
     const imageUrl = `http://44.214.17.52/${encodeURIComponent(title)}.jpg`; // Use encodeURIComponent instead of Uri.EscapeDataString
@@ -274,40 +275,91 @@ function MoviesPage() {
   };
 
   // Function to load more recommendations
-  const loadMoreRecommendations = async () => {
-    if (!hasMoreRecommendations) return;
 
+  // Function to select specific category and load its movies
+  const selectCategory = async (category: string) => {
+    setLoading(true);
+    setActiveCategory(category);
     try {
-      // Calculate the next batch (next 7 or remaining if less than 7)
-      const end = Math.min(
-        recommendationsLoaded + 7,
-        totalRecommendations.length
+      // Fetch 50 movies for the selected category
+      const response = await fetchMovies(
+        50, 
+        1, 
+        [category], 
+        null
       );
-      const nextBatch = totalRecommendations.slice(recommendationsLoaded, end);
-
-      // Fetch details for each recommendation in the next batch
-      const newRecommendations: Movie[] = [];
-      for (const showId of nextBatch) {
-        try {
-          const movieDetails = await fetchMovieById(showId);
-          newRecommendations.push(movieDetails);
-        } catch (error) {
-          console.error(`Error fetching details for movie ${showId}:`, error);
-        }
-      }
-
-      // Add new recommendations to the existing data
-      setRecommendationsData((current) => [...current, ...newRecommendations]);
-
-      // Update how many we've loaded
-      setRecommendationsLoaded(end);
-
-      // Check if we have more to load
-      setHasMoreRecommendations(end < totalRecommendations.length);
+      setAllMoviesData(response.movies);
     } catch (error) {
-      console.error("Error loading more recommendations:", error);
+      console.error("Error loading category movies:", error);
+    } finally {
+      setLoading(false);
+      
+      // Ensure we stay at the allMovies section after category selection
+      setTimeout(() => {
+        const section = document.querySelector("#allMovies");
+        if (section) {
+          section.scrollIntoView({ behavior: "auto" });
+          
+          // Save current scroll position
+          const currentPos = window.scrollY;
+          
+          // Prevent any automatic scrolling for a short period
+          const preventScroll = (e: Event) => {
+            window.scrollTo(0, currentPos);
+            e.preventDefault();
+          };
+          
+          window.addEventListener('scroll', preventScroll, { passive: false });
+          
+          // Remove the scroll prevention after a short delay
+          setTimeout(() => {
+            window.removeEventListener('scroll', preventScroll);
+          }, 100);
+        }
+      }, 50);
     }
   };
+
+  // Reset to all movies (clear category filter)
+  const resetCategoryFilter = async () => {
+    setLoading(true);
+    setActiveCategory(null);
+    try {
+      // Fetch 50 movies
+      const response = await fetchMovies(50, 1, [], null);
+      setAllMoviesData(response.movies);
+    } catch (error) {
+      console.error("Error resetting category filter:", error);
+    } finally {
+      setLoading(false);
+      
+      // Ensure we stay at the allMovies section after resetting
+      setTimeout(() => {
+        const section = document.querySelector("#allMovies");
+        if (section) {
+          section.scrollIntoView({ behavior: "auto" });
+          
+          // Save current scroll position
+          const currentPos = window.scrollY;
+          
+          // Prevent any automatic scrolling for a short period
+          const preventScroll = (e: Event) => {
+            window.scrollTo(0, currentPos);
+            e.preventDefault();
+          };
+          
+          window.addEventListener('scroll', preventScroll, { passive: false });
+          
+          // Remove the scroll prevention after a short delay
+          setTimeout(() => {
+            window.removeEventListener('scroll', preventScroll);
+          }, 100);
+        }
+      }, 50);
+    }
+  };
+
+  // Example fetch call
 
   return (
     <>
@@ -448,25 +500,6 @@ function MoviesPage() {
                 </svg>
                 {isExpanded && <span>All Movies</span>}
               </div>
-              <div
-                className="nav-item"
-                onClick={() => {
-                  const section = document.querySelector("#allTVShows");
-                  if (section) section.scrollIntoView({ behavior: "smooth" });
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  fill="currentColor"
-                  className="bi bi-tv"
-                  viewBox="0 0 16 16"
-                >
-                  <path d="M2.5 13.5A.5.5 0 0 1 3 13h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zM13.991 3l.024.001a1.46 1.46 0 0 1 .538.143.757.757 0 0 1 .302.254c.067.1.145.277.145.602v5.991l-.001.024a1.464 1.464 0 0 1-.143.538.758.758 0 0 1-.254.302c-.1.067-.277.145-.602.145H2.009l-.024-.001a1.464 1.464 0 0 1-.538-.143.758.758 0 0 1-.302-.254C1.078 10.502 1 10.325 1 10V4.009l.001-.024a1.46 1.46 0 0 1 .143-.538.758.758 0 0 1 .254-.302C1.498 3.078 1.675 3 2 3h11.991zM14 2H2C0 2 0 4 0 4v6c0 2 2 2 2 2h12c2 0 2-2 2-2V4c0-2-2-2-2-2z" />
-                </svg>
-                {isExpanded && <span>TV Shows</span>}
-              </div>
 
               {/* Category Filter Button */}
               <div
@@ -483,7 +516,7 @@ function MoviesPage() {
                 >
                   <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z" />
                 </svg>
-                {isExpanded && <span>Filter by Category</span>}
+                {isExpanded && <span>Filter by Genre</span>}
               </div>
 
               {/* Category Filter Dropdown */}
@@ -552,9 +585,41 @@ function MoviesPage() {
               </div>
             ) : (
               <>
+                {/* CSS for horizontal scrolling movie rows */}
+                <style>
+                  {`
+                    .movie-grid {
+                      display: flex;
+                      overflow-x: auto;
+                      scroll-behavior: smooth;
+                      padding: 10px 0;
+                      -ms-overflow-style: none;
+                      scrollbar-width: none;
+                      gap: 20px;
+                      padding-bottom: 20px;
+                    }
+                    
+                    .movie-grid::-webkit-scrollbar {
+                      display: none;
+                    }
+                    
+                    .movie-card {
+                      flex: 0 0 auto;
+                      width: 200px;
+                      margin-right: 5px;
+                    }
+                    
+                    @media (max-width: 768px) {
+                      .movie-card {
+                        width: 140px;
+                      }
+                    }
+                  `}
+                </style>
+
                 {/* My Recommendations Section */}
                 <section id="recommendations" className="movie-section">
-                  <h2>(nameHere)'s Top Recommendations</h2>
+                  <h2 style={{ textAlign: 'left' }}>({})'s Top Recommendations</h2>
                   <div className="movie-row-container">
                     <div className="movie-grid">
                       {recommendationsData.map((movie) => (
@@ -564,32 +629,12 @@ function MoviesPage() {
                         </div>
                       ))}
                     </div>
-                    {hasMoreRecommendations && (
-                      <div
-                        className="movie-navigation-arrow"
-                        onClick={loadMoreRecommendations}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          fill="currentColor"
-                          className="bi bi-chevron-right"
-                          viewBox="0 0 16 16"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"
-                          />
-                        </svg>
-                      </div>
-                    )}
                   </div>
                 </section>
 
                 {/* Most Popular Section */}
                 <section id="popular" className="movie-section">
-                  <h2>Most Popular on CineNiche</h2>
+                  <h2 style={{ textAlign: 'left' }}>Top Rated Titles on CineNiche Today</h2>
                   <div className="movie-row-container">
                     <div className="movie-grid">
                       {popularData.map((movie) => (
@@ -599,38 +644,12 @@ function MoviesPage() {
                         </div>
                       ))}
                     </div>
-                    <div
-                      className="movie-navigation-arrow"
-                      onClick={() => {
-                        setPopularRows(popularRows + 1);
-                        loadMoreMovies(
-                          "popular",
-                          popularRows + 1,
-                          setPopularData,
-                          popularData
-                        );
-                      }}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        fill="currentColor"
-                        className="bi bi-chevron-right"
-                        viewBox="0 0 16 16"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"
-                        />
-                      </svg>
-                    </div>
                   </div>
                 </section>
 
                 {/* New Releases Section */}
                 <section id="newReleases" className="movie-section">
-                  <h2>New Releases</h2>
+                  <h2 style={{ textAlign: 'left' }}>New Releases</h2>
                   <div className="movie-row-container">
                     <div className="movie-grid">
                       {newReleasesData.map((movie) => (
@@ -640,38 +659,64 @@ function MoviesPage() {
                         </div>
                       ))}
                     </div>
-                    <div
-                      className="movie-navigation-arrow"
-                      onClick={() => {
-                        setNewReleasesRows(newReleasesRows + 1);
-                        loadMoreMovies(
-                          "new_releases",
-                          newReleasesRows + 1,
-                          setNewReleasesData,
-                          newReleasesData
-                        );
-                      }}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        fill="currentColor"
-                        className="bi bi-chevron-right"
-                        viewBox="0 0 16 16"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"
-                        />
-                      </svg>
+                  </div>
+                </section>
+
+                {/* Throwback Recommendations Section */}
+                <section id="throwbackRecommendations" className="movie-section">
+                  <h2 style={{ textAlign: 'left' }}>Your Top Throwback Titles</h2>
+                  <div className="movie-row-container">
+                    <div className="movie-grid">
+                      {throwbackData.map((movie) => (
+                        <div key={movie.show_id} className="movie-card">
+                          <MoviePoster movie={movie} />
+                          <p className="movie-title">{movie.title}</p>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </section>
 
                 {/* All Movies Section */}
                 <section id="allMovies" className="movie-section">
-                  <h2>All Movies</h2>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+                    <h2 style={{ textAlign: 'left', marginBottom: '5px' }}>{activeCategory ? categories.find(c => c === activeCategory)?.replace(/_/g, " ") : "Find a Title By Genre:"}</h2>
+                    <div className="category-selector" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '0', marginBottom: '15px' }}>
+                      {activeCategory && (
+                        <button 
+                          className="category-button" 
+                          onClick={resetCategoryFilter}
+                          style={{
+                            padding: '5px 10px',
+                            borderRadius: '15px',
+                            background: 'rgba(25, 118, 210, 0.2)',
+                            color: '#1976d2',
+                            border: 'none',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Show All
+                        </button>
+                      )}
+                      {categories.map(category => (
+                        <button 
+                          key={category} 
+                          className={`category-button ${activeCategory === category ? 'active' : ''}`} 
+                          onClick={() => toggleCategory(category)}
+                          style={{
+                            padding: '5px 10px',
+                            borderRadius: '15px',
+                            background: activeCategory === category ? '#1976d2' : 'rgba(25, 118, 210, 0.2)',
+                            color: activeCategory === category ? 'white' : '#1976d2',
+                            border: 'none',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {category.replace(/_/g, " ")}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   <div className="movie-row-container">
                     <div className="movie-grid">
                       {allMoviesData.map((movie) => (
@@ -681,75 +726,9 @@ function MoviesPage() {
                         </div>
                       ))}
                     </div>
-                    <div
-                      className="movie-navigation-arrow"
-                      onClick={() => {
-                        setAllMoviesRows(allMoviesRows + 1);
-                        loadMoreMovies(
-                          "all_movies",
-                          allMoviesRows + 1,
-                          setAllMoviesData,
-                          allMoviesData
-                        );
-                      }}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        fill="currentColor"
-                        className="bi bi-chevron-right"
-                        viewBox="0 0 16 16"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"
-                        />
-                      </svg>
-                    </div>
                   </div>
                 </section>
 
-                {/* All TV Shows Section */}
-                <section id="allTVShows" className="movie-section">
-                  <h2>All TV Shows</h2>
-                  <div className="movie-row-container">
-                    <div className="movie-grid">
-                      {allTVShowsData.map((movie) => (
-                        <div key={movie.show_id} className="movie-card">
-                          <MoviePoster movie={movie} />
-                          <p className="movie-title">{movie.title}</p>
-                        </div>
-                      ))}
-                    </div>
-                    <div
-                      className="movie-navigation-arrow"
-                      onClick={() => {
-                        setAllTVShowsRows(allTVShowsRows + 1);
-                        loadMoreMovies(
-                          "tv_shows",
-                          allTVShowsRows + 1,
-                          setAllTVShowsData,
-                          allTVShowsData
-                        );
-                      }}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        fill="currentColor"
-                        className="bi bi-chevron-right"
-                        viewBox="0 0 16 16"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </section>
               </>
             )}
           </div>

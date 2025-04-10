@@ -284,7 +284,7 @@ function MovieDetailsPage() {
 
   // Create image URL using the same logic as on the MoviesPage
   const title = movie?.title
-    .replace(/[\(\):\'\.\-&]/g, '')  // Remove parentheses, colons, and dashes
+    .replace(/[\(\):\'\.\-&?!Ññ]/g, "")  // Remove parentheses, colons, and dashes
     .replace(/^#+/, "");
   const imageUrl = title
     ? `http://44.214.17.52/${encodeURIComponent(title)}.jpg`
@@ -354,7 +354,6 @@ function MovieDetailsPage() {
                   <span className="badge bg-warning">{movie.rating}</span>
                   <span className="badge" style={{ backgroundColor: "#1976d2" }}>★ {movie.averageRating} from {movie.numRatings} ratings</span>
                 </div>
-                
                 <p><strong>Description:</strong> {movie.description}</p>
                 
                 <div className="movie-director mb-3">
@@ -362,6 +361,24 @@ function MovieDetailsPage() {
                 </div>
                 <div className="movie-cast mb-3">
                   <strong>Cast:</strong> {movie.cast}
+                </div>
+                
+                <div className="movie-genres mb-3">
+                  <strong>Genres:</strong>{" "}
+                  <div className="d-flex flex-wrap gap-1 mt-1">
+                    {Object.entries(movie)
+                      .filter(([key, value]) => 
+                        value === 1 && 
+                        key !== "show_id" &&
+                        key !== "release_year" &&
+                        !["type", "title", "director", "cast", "country", "rating", "duration", "description", "numRatings", "averageRating"].includes(key)
+                      )
+                      .map(([key]) => (
+                        <span key={key} className="badge bg-info me-1 mb-1">
+                          {key.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
+                        </span>
+                      ))}
+                  </div>
                 </div>
                 
                 {showRatingPopup && <StarRating />}
