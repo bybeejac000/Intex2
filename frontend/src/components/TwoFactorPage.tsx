@@ -82,7 +82,7 @@ const TwoFactorPage: React.FC = () => {
       </p>
 
       <div className="code-inputs">
-        {verificationDigits.map((digit, index) => (
+        {verificationDigits.map((_, index) => (
           <input
             key={index}
             type="text"
