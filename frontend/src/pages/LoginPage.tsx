@@ -93,41 +93,6 @@ function LoginPage() {
     }
   };
 
-  function GetUserIdComponent() {
-    const [userId, setUserId] = useState(null);
-
-    useEffect(() => {
-      const fetchUserId = async () => {
-        try {
-          const email = localStorage.getItem("email");
-          const response = await fetch(
-            `https://localhost:5000/CineNiche/getId?email=${email}`,
-            {
-              method: "GET",
-              credentials: "include",
-            }
-          );
-          const data = await response.json();
-
-          if (data.length > 0) {
-            const id = data[0].user_id;
-            setUserId(id);
-            localStorage.setItem("userId", id);
-            console.log("User ID:", id);
-          } else {
-            console.warn("No user found for this email.");
-          }
-        } catch (error) {
-          console.error("Error fetching user ID:", error);
-        }
-      };
-
-      fetchUserId();
-    }, []);
-
-    return null; // ✅ must return something to be a valid React component
-  }
-
   return (
     <>
       <Header />
