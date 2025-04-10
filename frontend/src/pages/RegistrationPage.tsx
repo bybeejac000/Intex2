@@ -376,7 +376,7 @@ function RegistrationPage() {
             </button>
           </div>
         );
-      // Step 9: verification codes
+      // Step 9: verification code
       case 9:
         return (
           <div className="mb-3 text-center">
