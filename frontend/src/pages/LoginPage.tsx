@@ -4,11 +4,10 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "./HomePage.css";
 import ScrollingPosters from "../components/ScrollingPosters";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 function LoginPage() {
   // State variables for email, password, and remember me checkbox
-  const [showUserIdComponent, setShowUserIdComponent] = useState(false);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [rememberme, setRememberme] = useState<boolean>(false);
