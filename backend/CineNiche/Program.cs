@@ -53,6 +53,26 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    try
+    {
+        var movieDb = services.GetRequiredService<MovieDbContext>();
+        movieDb.Database.EnsureCreated();
+
+        var identityDb = services.GetRequiredService<ApplicationDbContext>();
+        identityDb.Database.EnsureCreated();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Database init failed: {ex.Message}");
+    }
+}
+
+
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
