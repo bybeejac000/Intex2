@@ -34,9 +34,11 @@ const CookieConsent = ({ onAccept, onDecline }: CookieConsentProps) => {
     <div 
       style={{
         position: 'fixed',
-        bottom: '60px',
-        left: '33.33%',
+        bottom: '20px',
+        left: '0',
         right: '0',
+        width: '80%',
+        margin: '0 auto',
         backgroundColor: '#1976d2',
         color: 'white',
         padding: '15px',
@@ -44,11 +46,12 @@ const CookieConsent = ({ onAccept, onDecline }: CookieConsentProps) => {
         justifyContent: 'space-between',
         alignItems: 'center',
         zIndex: 1000,
-        boxShadow: '0 -2px 10px rgba(0,0,0,0.2)'
+        boxShadow: '0 -2px 10px rgba(0,0,0,0.2)',
+        borderRadius: '8px'
       }}
     >
       <div>
-        <p style={{ margin: '0 0 10px 0', fontSize: '16px' }}>
+        <p style={{ margin: '0 0 10px 0', fontSize: '16px', textAlign: 'center' }}>
           <strong>Cookie Notice</strong>
         </p>
         <p style={{ marginRight: '15px', fontSize: '14px', textAlign: 'center' }}>
@@ -58,22 +61,6 @@ const CookieConsent = ({ onAccept, onDecline }: CookieConsentProps) => {
         </p>
       </div>
       <div style={{ display: 'flex', gap: '10px' }}>
-        <button
-          onClick={handleDecline}
-          style={{
-            backgroundColor: 'transparent',
-            color: 'white',
-            border: '1px solid white',
-            padding: '8px 16px',
-            cursor: 'pointer',
-            borderRadius: '4px',
-            width: '100px',
-            height: '36px'
-          }}
-        >
-          Decline
-        </button>
-        
         <button
           onClick={handleAccept}
           style={{
@@ -89,6 +76,22 @@ const CookieConsent = ({ onAccept, onDecline }: CookieConsentProps) => {
           }}
         >
           Accept
+        </button>
+        
+        <button
+          onClick={handleDecline}
+          style={{
+            backgroundColor: 'transparent',
+            color: 'white',
+            border: '1px solid white',
+            padding: '8px 16px',
+            cursor: 'pointer',
+            borderRadius: '4px',
+            width: '100px',
+            height: '36px'
+          }}
+        >
+          Decline
         </button>
       </div>
     </div>
