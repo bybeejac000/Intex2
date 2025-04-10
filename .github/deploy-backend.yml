@@ -3,7 +3,7 @@ name: Deploy .NET Backend to Beanstalk
 on:
   push:
     paths:
-  - "backend/CineNiche/**"
+      - "backend/CineNiche/**"
     branches: [main]
 
 jobs:
@@ -27,8 +27,8 @@ jobs:
       - name: Deploy to Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v21
         with:
-          application_name: your-app-name
-          environment_name: your-env-name
+          application_name: CineNicheProd
+          environment_name: CineNicheProd-env
           version_label: ${{ github.sha }}
           region: us-east-1
           deployment_package: backend/CineNiche/deploy.zip
