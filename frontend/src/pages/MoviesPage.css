@@ -9,8 +9,8 @@
 .sidebar {
     position: fixed;
     left: 0;
-    top: 65px;
-    height: calc(100vh - 65px - 75px);
+    top: 74px;
+    height: calc(100vh - 65px - 72px);
     background-color: rgba(10, 25, 41, 0.9);
     width: 60px;
     transition: width 0.3s ease;

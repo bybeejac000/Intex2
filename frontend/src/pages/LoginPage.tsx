@@ -4,7 +4,8 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "./HomePage.css";
 import ScrollingPosters from "../components/ScrollingPosters";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import CookieConsent from "../components/CookieConsent";
 
 function LoginPage() {
   // State variables for email, password, and remember me checkbox
@@ -12,8 +13,19 @@ function LoginPage() {
   const [password, setPassword] = useState<string>("");
   const [rememberme, setRememberme] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const [cookiesAccepted, setCookiesAccepted] = useState<boolean | null>(null);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user has already made a cookie choice
+    const cookieConsent = localStorage.getItem('cookieConsent');
+    if (cookieConsent === 'accepted') {
+      setCookiesAccepted(true);
+    } else if (cookieConsent === 'declined') {
+      setCookiesAccepted(false);
+    }
+  }, []);
 
   // Handle input field changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,6 +39,16 @@ function LoginPage() {
     }
   };
 
+  // Handle cookie consent accept
+  const handleCookieAccept = () => {
+    setCookiesAccepted(true);
+  };
+
+  // Handle cookie consent decline
+  const handleCookieDecline = () => {
+    setCookiesAccepted(false);
+  };
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -37,15 +59,24 @@ function LoginPage() {
       return;
     }
 
-    const loginUrl = rememberme
-      ? "https://localhost:5000/login?useCookies=true"
-      : "https://localhost:5000/login?useSessionCookies=true";
+    // Determine login URL based on cookie consent and remember me
+    let loginUrl = "https://localhost:5000/login";
+    
+    if (cookiesAccepted === true) {
+      // If cookies are accepted, use the remember me preference
+      loginUrl = rememberme
+        ? "https://localhost:5000/login?useCookies=true"
+        : "https://localhost:5000/login?useSessionCookies=true";
+    } else {
+      // If cookies are declined, always use session cookies
+      loginUrl = "https://localhost:5000/login?useSessionCookies=true";
+    }
 
     try {
       localStorage.setItem("email", email);
       const response = await fetch(loginUrl, {
         method: "POST",
-        credentials: "include",
+        credentials: "include", // Always include credentials
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
@@ -59,6 +90,8 @@ function LoginPage() {
       if (!response.ok) {
         throw new Error(data?.message || "Invalid email or password.");
       }
+      
+      // Always fetch user ID regardless of cookie preference
       await fetchAndStoreUserId();
 
       navigate("/movies");
@@ -183,25 +216,17 @@ function LoginPage() {
                 >
                   Login
                 </button>
-                <button
-                  onClick={() => navigate("/movies")}
-                  className="btn btn-lg"
-                  style={{
-                    backgroundColor: "transparent",
-                    color: "#1976d2",
-                    border: "2px solid #1976d2",
-                    padding: "15px 30px",
-                    fontSize: "1.2rem",
-                  }}
-                >
-                  Access Movies (Placeholder)
-                </button>
               </form>
               {error && <p className="error">{error}</p>}
             </div>
           </div>
         </div>
       </div>
+
+      <CookieConsent 
+        onAccept={handleCookieAccept} 
+        onDecline={handleCookieDecline} 
+      />
 
       <Footer />
     </>

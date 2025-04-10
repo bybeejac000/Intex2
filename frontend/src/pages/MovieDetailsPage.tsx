@@ -29,6 +29,10 @@ function MovieDetailsPage() {
   const [hoverRating, setHoverRating] = useState(0);
   const [submittingRating, setSubmittingRating] = useState(false);
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
+  
+  // Image error state
+  const [mainImageError, setMainImageError] = useState(false);
+  const [recImageErrors, setRecImageErrors] = useState<{[key: number]: boolean}>({});
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -112,6 +116,14 @@ function MovieDetailsPage() {
     );
   };
 
+  // Function to handle recommendation image errors
+  const handleRecImageError = (index: number) => {
+    setRecImageErrors(prev => ({
+      ...prev,
+      [index]: true
+    }));
+  };
+
   // Star Rating Component
   const StarRating = () => {
     const stars = [1, 2, 3, 4, 5];
@@ -119,48 +131,34 @@ function MovieDetailsPage() {
     const handleRatingSubmit = async () => {
       if (userRating === 0) return;
       
+      // Show brief submitting state
       setSubmittingRating(true);
-      try {
-        // API call to submit rating
-        const response = await fetch('http://44.214.17.52:5000/ratings', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            show_id: id,
-            rating: userRating,
-            // Add user info if available
-            user_id: localStorage.getItem('userId') || 'anonymous',
-          }),
-        });
-        
-        if (response.ok) {
-          setRatingSubmitted(true);
-          // Update local rating display
-          if (movie) {
-            const newNumRatings = (movie.numRatings || 0) + 1;
-            const newAvgRating = (((movie.averageRating || 0) * (movie.numRatings || 0)) + userRating) / newNumRatings;
-            setMovie({
-              ...movie,
-              numRatings: newNumRatings,
-              averageRating: newAvgRating
-            });
-          }
-          
-          // Hide rating component after delay
-          setTimeout(() => {
-            setShowRatingPopup(false);
-            setRatingSubmitted(false);
-          }, 2000);
-        } else {
-          throw new Error('Failed to submit rating');
+      
+      // Simulate a short delay
+      setTimeout(() => {
+        // Update local rating display
+        if (movie) {
+          const newNumRatings = (movie.numRatings || 0) + 1;
+          const newAvgRating = (((movie.averageRating || 0) * (movie.numRatings || 0)) + userRating) / newNumRatings;
+          setMovie({
+            ...movie,
+            numRatings: newNumRatings,
+            averageRating: newAvgRating
+          });
         }
-      } catch (err) {
-        console.error('Error submitting rating:', err);
-      } finally {
+        
+        // Close popup
+        setShowRatingPopup(false);
+        
+        // Reset states
         setSubmittingRating(false);
-      }
+        setRatingSubmitted(true);
+        
+        // Reset rating after a delay
+        setTimeout(() => {
+          setRatingSubmitted(false);
+        }, 500);
+      }, 300);
     };
     
     return (
@@ -284,7 +282,7 @@ function MovieDetailsPage() {
 
   // Create image URL using the same logic as on the MoviesPage
   const title = movie?.title
-    .replace(/[\(\):\'\.\-&?!Ññ]/g, "")  // Remove parentheses, colons, and dashes
+    .replace(/[\(\):\'\.\-&?!Ññ%]/g, "")  // Remove parentheses, colons, and dashes
     .replace(/^#+/, "");
   const imageUrl = title
     ? `http://44.214.17.52/${encodeURIComponent(title)}.jpg`
@@ -309,17 +307,42 @@ function MovieDetailsPage() {
           <div className="container">
             <div className="row justify-content-start">
               <div className="col-md-3 text-center">
-                <img
-                  src={imageUrl}
-                  alt={movie.title}
-                  className="movie-poster-large"
-                  style={{ 
-                    maxWidth: "300px", 
-                    height: "450px", 
-                    maxHeight: "500px", 
-                    borderRadius: "8px" 
-                  }}
-                />
+                {!mainImageError ? (
+                  <img
+                    src={imageUrl}
+                    alt={movie.title}
+                    className="movie-poster-large"
+                    onError={() => setMainImageError(true)}
+                    style={{ 
+                      maxWidth: "300px", 
+                      height: "450px", 
+                      maxHeight: "500px", 
+                      borderRadius: "8px" 
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: "300px",
+                      height: "450px",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
+                      backgroundColor: "#1a3b5c",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      textAlign: "center",
+                      padding: "10px",
+                      color: "#fff",
+                      fontSize: "18px",
+                      margin: "0 auto"
+                    }}
+                  >
+                    Title Image Coming Soon
+                    <p style={{ fontSize: "11px", textAlign: "center", color: "#aaa", marginTop: "5px" }}>Click for more details</p>
+                  </div>
+                )}
                 <div className="mt-3">
                   <button className="btn btn-primary w-100 mb-2">Play Now</button>
                   <button 
@@ -374,7 +397,7 @@ function MovieDetailsPage() {
                         !["type", "title", "director", "cast", "country", "rating", "duration", "description", "numRatings", "averageRating"].includes(key)
                       )
                       .map(([key]) => (
-                        <span key={key} className="badge bg-info me-1 mb-1">
+                        <span key={key} className="badge bg-secondary me-1 mb-1">
                           {key.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
                         </span>
                       ))}
@@ -447,20 +470,42 @@ function MovieDetailsPage() {
                           style={{ cursor: "pointer", minWidth: "150px" }}
                           onClick={() => handleRecommendationClick(rec.title)}
                         >
-                          <img 
-                            src={`http://44.214.17.52/${encodeURIComponent(rec.title.replace(/[\(\):\'\.\-&]/g, '').replace(/^#+/, ''))}.jpg`}
-                            alt={rec.title}
-                            style={{ 
-                              width: "150px", 
-                              height: "200px", 
-                              objectFit: "cover",
-                              borderRadius: "4px",
-                              marginBottom: "8px"
-                            }}
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = "https://via.placeholder.com/100x150?text=No+Image";
-                            }}
-                          />
+                          {!recImageErrors[index] ? (
+                            <img 
+                              src={`http://44.214.17.52/${encodeURIComponent(rec.title.replace(/[\(\):\'\.\-&\!\Ñ\ñ/%]/g, '').replace(/^#+/, ''))}.jpg`}
+                              alt={rec.title}
+                              onError={() => handleRecImageError(index)}
+                              style={{ 
+                                width: "150px", 
+                                height: "200px", 
+                                objectFit: "cover",
+                                borderRadius: "4px",
+                                marginBottom: "8px"
+                              }}
+                            />
+                          ) : (
+                            <div
+                              style={{
+                                width: "150px",
+                                height: "200px",
+                                borderRadius: "4px",
+                                boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
+                                backgroundColor: "#1a3b5c",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                textAlign: "center",
+                                padding: "8px",
+                                color: "#fff",
+                                fontSize: "12px",
+                                marginBottom: "8px"
+                              }}
+                            >
+                              Title Image Coming Soon
+                              <p style={{ fontSize: "9px", textAlign: "center", color: "#aaa", marginTop: "5px" }}>Click for more details</p>
+                            </div>
+                          )}
                           <h6 className="text-center mt-1" style={{ fontSize: "0.9rem", width: "100%" }}>{rec.title}</h6>
                         </div>
                       ))}

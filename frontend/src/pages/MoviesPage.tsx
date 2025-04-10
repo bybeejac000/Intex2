@@ -251,25 +251,51 @@ function MoviesPage() {
   const MoviePoster = ({ movie }: { movie: Movie }) => {
     // Remove unwanted characters like (), :, and -
     const title = movie.title
-      .replace(/[\(\):\'\.\-&\!\Ñ\ñ]/g, "") // Remove parentheses, colons, and dashes
+      .replace(/[\(\):\'\.\-&\!\Ñ\ñ/%]/g, "") // Remove parentheses, colons, and dashes
       .replace(/^#+/, "");
 
     const imageUrl = `http://44.214.17.52/${encodeURIComponent(title)}.jpg`; // Use encodeURIComponent instead of Uri.EscapeDataString
 
+    const [imageError, setImageError] = useState(false);
+
     return (
       <div className="movie-poster" onClick={() => handleClick(movie.show_id)}>
-        <img
-          src={imageUrl}
-          alt={movie.title}
-          className="poster-image"
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            borderRadius: "8px",
-            boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
-          }}
-        />
+        {!imageError ? (
+          <img
+            src={imageUrl}
+            alt={movie.title}
+            className="poster-image"
+            onError={() => setImageError(true)}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              borderRadius: "8px",
+              boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              borderRadius: "8px",
+              boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
+              backgroundColor: "#1a3b5c",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              padding: "10px",
+              color: "#fff",
+              fontSize: "14px"
+            }}
+          >
+            Title Image Coming Soon
+            <p style={{ fontSize: "11px", textAlign: "center", color: "#aaa", marginTop: "5px" }}>Click for more details</p>
+          </div>
+        )}
       </div>
     );
   };
@@ -324,6 +350,7 @@ function MoviesPage() {
   const resetCategoryFilter = async () => {
     setLoading(true);
     setActiveCategory(null);
+    setSelectedCategories([]);
     try {
       // Fetch 50 movies
       const response = await fetchMovies(50, 1, [], null);
@@ -391,7 +418,7 @@ function MoviesPage() {
           >
             <div className="search-bar">
               {!isExpanded && (
-                <i className="bi bi-search" style={{ fontSize: "1.2rem" }}></i>
+                <i className="bi bi-search" style={{ fontSize: "1.2rem", marginLeft: "8px" }}></i>
               )}
               {isExpanded && (
                 <input
