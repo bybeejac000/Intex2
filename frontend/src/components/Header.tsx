@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faCog } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faCog, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { useState, useRef, useEffect } from 'react';
 import ProfilePhoto from '../components/ProfilePhoto/ProfilePhoto';
 
@@ -60,6 +60,24 @@ function Header() {
         }
     };
 
+    const handleLogout = async () => {
+        try {
+            const response = await fetch('https://localhost:5000/account/logout', {
+                method: 'POST',
+                credentials: 'include',
+            });
+            
+            if (response.ok) {
+                setIsLoggedIn(false);
+                navigate('/');
+            } else {
+                console.error('Logout failed');
+            }
+        } catch (error) {
+            console.error('Error during logout:', error);
+        }
+    };
+
     return (
         <header className="fixed-top" style={{
             backgroundColor: '#010f1e',
@@ -73,13 +91,13 @@ function Header() {
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    marginLeft: '25px'
+                    marginLeft: '-4px'
                 }}
             >
                 <img 
                     src="/images/CineNiche_Icon.png" 
                     alt="CineNiche Icon" 
-                    style={{ height: '40px', marginRight: '-5px' }} 
+                    style={{ height: '40px', marginRight: '8px' }} 
                 />
                 <h1 className="text-start text-light display-6 mb-0" style={{ fontSize: '1.75rem' }}>
                     CineNiche
@@ -154,6 +172,27 @@ function Header() {
                                 <FontAwesomeIcon icon={faCog} />
                                 <span>Admin</span>
                             </Link>
+                            <button 
+                                onClick={handleLogout}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    padding: '0.75rem 1.25rem',
+                                    color: 'white',
+                                    textDecoration: 'none',
+                                    transition: 'background-color 0.2s ease',
+                                    gap: '10px',
+                                    background: 'none',
+                                    border: 'none',
+                                    width: '100%',
+                                    textAlign: 'left',
+                                    cursor: 'pointer'
+                                }}
+                                className="hover-effect"
+                            >
+                                <FontAwesomeIcon icon={faSignOutAlt} />
+                                <span>Log Out</span>
+                            </button>
                         </div>
                     )}
                 </div>
