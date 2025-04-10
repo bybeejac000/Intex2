@@ -37,7 +37,7 @@ function MoviesPage() {
       console.error("Error fetching profile:", err);
     }
   };
-
+  //trigger
   // Save functions
   const saveFirstName = async () => {
     //setIsEditingFirstName(false);
