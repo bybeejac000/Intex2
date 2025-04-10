@@ -1,29 +1,14 @@
-name: Deploy .NET Backend to Beanstalk
-
-on:
-  push:
-    paths:
-      - "backend/CineNiche/**"
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: "8.0.x"
-
       - name: Publish .NET App
         run: |
           cd backend/CineNiche
           dotnet publish -c Release -o out
           cd out
           zip -r ../deploy.zip .
+
+      - name: Debug Secrets
+        run: |
+          echo "Access Key: ${{ secrets.AWS_ACCESS_KEY_ID }}"
+          echo "Secret Key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}"
 
       - name: Deploy to Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v21
