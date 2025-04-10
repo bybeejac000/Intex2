@@ -11,7 +11,7 @@ import ConfirmationModal from "../components/ConfirmationModal/ConfirmationModal
 function RegistrationPage() {
   const navigate = useNavigate();
 
-  // Steps 1-8: Registration fields (with confirmPassword added)
+  // Steps 1-8: Registration fields, including confirmPassword and agreed (checkbox)
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -20,51 +20,63 @@ function RegistrationPage() {
     phoneNumber: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    agreed: false,
   });
 
   // Step 9: 4-digit verification code entry
   const [verificationDigits, setVerificationDigits] = useState(["", "", "", ""]);
-
   // Refs for the 4 input boxes
   const digitRefs = [
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null)
+    useRef<HTMLInputElement>(null),
   ];
 
-  // Registration step (1-9)
+  // The step can go from 1 to 9
   const [step, setStep] = useState(1);
 
-  // Notification state for using NotificationModal
-  const [notification, setNotification] = useState<{ show: boolean, message: string }>({
-    show: false,
-    message: ""
-  });
+  // State for notification modals (replaces alerts)
+  const [notification, setNotification] = useState({ show: false, message: "" });
 
-  // Handle changes for registration fields
+  // Handle changes for any registration field
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value, type, checked } = e.target;
+    if (type === "checkbox") {
+      // For the "agreed" checkbox
+      setFormData({ ...formData, agreed: checked });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
-  // For step 7, check password length before moving on
+  // Intercept Enter key presses to avoid unwanted form submission
+  const handleFormKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      // For steps 1–7, simulate "Next" button
+      if (step < 8) {
+        handleNext();
+      }
+      // For step 9 or 8, do nothing or custom logic
+    }
+  };
+
+  // Advance to the next step. If step 7, check password length.
   const handleNext = () => {
     if (step === 7 && formData.password.length < 15) {
-      setNotification({
-        show: true,
-        message: "Password must be at least 15 characters long"
-      });
+      setNotification({ show: true, message: "Password must be at least 15 characters long" });
       return;
     }
-    if (step < 9) setStep(step + 1);
+    if (step < 9) {
+      setStep(step + 1);
+    }
   };
 
-  // Handle registration submission (for steps 1–8)
+  // Submit registration on step 8
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     const registrationData = {
       firstName: formData.firstName,
       lastName: formData.lastName,
@@ -83,63 +95,50 @@ function RegistrationPage() {
       });
 
       if (response.ok) {
-        // Save pending email for verification.
         localStorage.setItem("pendingRegistrationEmail", formData.email);
-        // Show registration success notification.
         setNotification({
           show: true,
-          message: "Almost there! Please check your email for the verification code."
+          message: "Almost there! Please check your email for the verification code.",
         });
-        // Move to verification step.
         setStep(9);
       } else {
         const errorData = await response.json();
         console.error(errorData);
         setNotification({
           show: true,
-          message: "Registration Failed. Please check your input."
+          message: "Registration Failed. Please check your input.",
         });
       }
     } catch (error) {
       console.error("Error submitting registration:", error);
       setNotification({
         show: true,
-        message: "An error occurred. Please try again later."
+        message: "An error occurred. Please try again later.",
       });
     }
   };
 
-  // Handle changes in each verification digit input.
+  // Handling each verification digit box for step 9
   const handleDigitChange = (index: number, value: string) => {
-    if (value.length > 1) return; // Only allow one character
+    if (value.length > 1) return;
     const newDigits = [...verificationDigits];
     newDigits[index] = value;
     setVerificationDigits(newDigits);
-
-    // Auto-focus next input box if available.
+    // Auto-focus next input if user typed a digit
     if (value.length === 1 && index < 3) {
       digitRefs[index + 1].current?.focus();
     }
   };
 
-  // Hardcoded acceptable code is "0000"
+  // Hardcoded "0000" for verification code
   const handleVerifyCode = () => {
     const codeEntered = verificationDigits.join("");
     if (codeEntered === "0000") {
-      setNotification({
-        show: true,
-        message: "Email verified successfully!"
-      });
-      // Clear pending registration email and navigate to movies after a short delay.
+      setNotification({ show: true, message: "Email verified successfully!" });
       localStorage.removeItem("pendingRegistrationEmail");
-      setTimeout(() => {
-        navigate("/movies");
-      }, 500);
+      navigate("/movies");
     } else {
-      setNotification({
-        show: true,
-        message: "Invalid verification code. Please try again."
-      });
+      setNotification({ show: true, message: "Invalid verification code. Please try again." });
     }
   };
 
@@ -155,9 +154,10 @@ function RegistrationPage() {
     alignItems: "center",
   };
 
-  // Render steps 1-9.
+  // Renders each step's UI
   const renderStep = () => {
     switch (step) {
+      // Steps 1–7: user inputs
       case 1:
         return (
           <div className="mb-3">
@@ -298,6 +298,7 @@ function RegistrationPage() {
             </p>
           </div>
         );
+      // Step 8: final confirmation + "agreed" checkbox
       case 8:
         return (
           <div className="text-center">
@@ -309,6 +310,36 @@ function RegistrationPage() {
             <p>State: {formData.state}</p>
             <p>Email: {formData.email}</p>
             <br />
+            <div className="form-check mb-3">
+              <input
+                type="checkbox"
+                id="termsCheckbox"
+                className="form-check-input"
+                checked={formData.agreed}
+                onChange={handleChange}
+                name="agreed"
+              />
+              <label
+                htmlFor="termsCheckbox"
+                className="form-check-label"
+                style={{ fontSize: "0.9rem" }}
+              >
+                I have read and agree to the{" "}
+                <a
+                  href="/terms"
+                  style={{ color: "#1976d2", textDecoration: "underline" }}
+                >
+                  Terms of Service
+                </a>{" "}
+                and{" "}
+                <a
+                  href="/privacy"
+                  style={{ color: "#1976d2", textDecoration: "underline" }}
+                >
+                  Privacy Policy
+                </a>.
+              </label>
+            </div>
             <button
               type="submit"
               className="btn btn-lg"
@@ -324,11 +355,13 @@ function RegistrationPage() {
                 alignItems: buttonStyle.alignItems,
                 width: "300px",
               }}
+              disabled={!formData.agreed}
             >
               Confirm and Register
             </button>
           </div>
         );
+      // Step 9: verification code
       case 9:
         return (
           <div className="mb-3 text-center">
@@ -336,7 +369,15 @@ function RegistrationPage() {
             <p>
               An email has been sent to <strong>{formData.email}</strong> with a verification code. Please enter it below.
             </p>
-            <div style={{ display: "flex", justifyContent: "center", gap: "15px", marginTop: "2rem", marginBottom: "2rem" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "15px",
+                marginTop: "2rem",
+                marginBottom: "2rem",
+              }}
+            >
               {verificationDigits.map((digit, index) => (
                 <input
                   key={index}
@@ -389,11 +430,9 @@ function RegistrationPage() {
         }}
       >
         <div className="row g-0 h-100">
-          {/* Left side - 1/3 of the screen */}
           <div className="col-md-4">
             <ScrollingPosters />
           </div>
-          {/* Right side - 2/3 of the screen */}
           <div
             className="col-md-8 d-flex flex-column justify-content-center align-items-center text-light"
             style={{ height: "100vh" }}
@@ -417,6 +456,7 @@ function RegistrationPage() {
               className="d-flex flex-column gap-3"
               style={{ maxWidth: "300px", margin: "0 auto" }}
               onSubmit={handleSubmit}
+              onKeyDown={handleFormKeyDown}
             >
               {renderStep()}
               <div className="d-flex justify-content-center gap-3">
@@ -443,7 +483,11 @@ function RegistrationPage() {
                   </button>
                 )}
                 {step < 8 && (
-                  <button type="button" className="btn btn-primary" onClick={handleNext}>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleNext}
+                  >
                     Next
                   </button>
                 )}
@@ -466,7 +510,8 @@ function RegistrationPage() {
         </div>
       </div>
       <Footer />
-      {/* Render NotificationModal if there's any message */}
+
+      {/* Notification Modal */}
       {notification.show && (
         <NotificationModal
           message={notification.message}
