@@ -39,23 +39,6 @@ function MoviesPage() {
   };
   //trigger
   // Save functions
-  const saveFirstName = async () => {
-    //setIsEditingFirstName(false);
-    try {
-      const payload = { firstName };
-      const res = await fetch("https://cineniche.click/account/updateProfile", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error("Profile update failed");
-      console.log("First name updated.");
-    } catch (error) {
-      console.error(error);
-      alert("Error updating first name.");
-    }
-  };
 
   // First name is loaded in now
 

@@ -1,19 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
-import ProfilePhoto from '../../components/ProfilePhoto/ProfilePhoto';
-import ConfirmationModal from '../../components/ConfirmationModal/ConfirmationModal';
-import NotificationModal from '../../components/NotificationModal/NotificationModal';
-import './ProfilePage.css';
+import React, { useState, useEffect } from "react";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
+import ProfilePhoto from "../../components/ProfilePhoto/ProfilePhoto";
+import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
+import NotificationModal from "../../components/NotificationModal/NotificationModal";
+import "./ProfilePage.css";
 
 const ProfilePage: React.FC = () => {
-  const navigate = useNavigate();
-
   // Profile fields.
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [profilePictureId, setProfilePictureId] = useState<number>(0);
   const [showPhotoSelector, setShowPhotoSelector] = useState(false);
@@ -22,10 +19,14 @@ const ProfilePage: React.FC = () => {
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const [show2FAConfirmation, setShow2FAConfirmation] = useState(false);
-  const [showChangeEmailConfirmation, setShowChangeEmailConfirmation] = useState(false);
-  const [showChangePasswordConfirmation, setShowChangePasswordConfirmation] = useState(false);
-  const [showEmailSentNotification, setShowEmailSentNotification] = useState(false);
-  const [showPasswordSentNotification, setShowPasswordSentNotification] = useState(false);
+  const [showChangeEmailConfirmation, setShowChangeEmailConfirmation] =
+    useState(false);
+  const [showChangePasswordConfirmation, setShowChangePasswordConfirmation] =
+    useState(false);
+  const [showEmailSentNotification, setShowEmailSentNotification] =
+    useState(false);
+  const [showPasswordSentNotification, setShowPasswordSentNotification] =
+    useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
   // Editing states.
@@ -39,18 +40,18 @@ const ProfilePage: React.FC = () => {
 
   const fetchProfile = async () => {
     try {
-      const response = await fetch('https://localhost:5000/account/me', {
-        credentials: 'include',
+      const response = await fetch("https://localhost:5000/account/me", {
+        credentials: "include",
       });
-      if (!response.ok) throw new Error('Failed to fetch user data');
+      if (!response.ok) throw new Error("Failed to fetch user data");
       const data = await response.json();
-      setFirstName(data.firstName || '');
-      setLastName(data.lastName || '');
-      setEmail(data.email || '');
+      setFirstName(data.firstName || "");
+      setLastName(data.lastName || "");
+      setEmail(data.email || "");
       setTwoFactorEnabled(data.twoFactorEnabled || false);
       setProfilePictureId(data.profilePictureId || 0);
     } catch (err) {
-      console.error('Error fetching profile:', err);
+      console.error("Error fetching profile:", err);
     }
   };
 
@@ -59,17 +60,17 @@ const ProfilePage: React.FC = () => {
     setIsEditingFirstName(false);
     try {
       const payload = { firstName };
-      const res = await fetch('https://localhost:5000/account/updateProfile', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("https://localhost:5000/account/updateProfile", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error('Profile update failed');
-      console.log('First name updated.');
+      if (!res.ok) throw new Error("Profile update failed");
+      console.log("First name updated.");
     } catch (error) {
       console.error(error);
-      alert('Error updating first name.');
+      alert("Error updating first name.");
     }
   };
 
@@ -77,17 +78,17 @@ const ProfilePage: React.FC = () => {
     setIsEditingLastName(false);
     try {
       const payload = { lastName };
-      const res = await fetch('https://localhost:5000/account/updateProfile', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("https://localhost:5000/account/updateProfile", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error('Profile update failed');
-      console.log('Last name updated.');
+      if (!res.ok) throw new Error("Profile update failed");
+      console.log("Last name updated.");
     } catch (error) {
       console.error(error);
-      alert('Error updating last name.');
+      alert("Error updating last name.");
     }
   };
 
@@ -100,17 +101,17 @@ const ProfilePage: React.FC = () => {
     setShowPhotoSelector(false);
     try {
       const payload = { ProfilePictureId: idx };
-      const res = await fetch('https://localhost:5000/account/updateProfile', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("https://localhost:5000/account/updateProfile", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error('Failed to update profile picture');
-      console.log('Profile picture updated.');
+      if (!res.ok) throw new Error("Failed to update profile picture");
+      console.log("Profile picture updated.");
     } catch (error) {
       console.error(error);
-      alert('Error updating profile picture.');
+      alert("Error updating profile picture.");
     }
   };
 
@@ -135,16 +136,16 @@ const ProfilePage: React.FC = () => {
   const performLogOut = async () => {
     setLoggingOut(true);
     try {
-      const response = await fetch('https://localhost:5000/logout', {
-        method: 'POST',
-        credentials: 'include',
+      const response = await fetch("https://localhost:5000/logout", {
+        method: "POST",
+        credentials: "include",
       });
-      if (!response.ok) throw new Error('Logout failed');
+      if (!response.ok) throw new Error("Logout failed");
       setShowLogoutConfirmation(false);
-      window.location.href = '/';
+      window.location.href = "/";
     } catch (error) {
       console.error(error);
-      alert('Error logging out.');
+      alert("Error logging out.");
       setLoggingOut(false);
     }
   };
@@ -152,11 +153,11 @@ const ProfilePage: React.FC = () => {
   // Toggle 2FA.
   const toggle2FA = async () => {
     try {
-      const response = await fetch('https://localhost:5000/account/toggle2FA', {
-        method: 'POST',
-        credentials: 'include',
+      const response = await fetch("https://localhost:5000/account/toggle2FA", {
+        method: "POST",
+        credentials: "include",
       });
-      if (!response.ok) throw new Error('Toggle 2FA failed');
+      if (!response.ok) throw new Error("Toggle 2FA failed");
       const data = await response.json();
       setTwoFactorEnabled(data.twoFactorEnabled);
     } catch (error) {
@@ -173,7 +174,9 @@ const ProfilePage: React.FC = () => {
       <Header />
       <div className="profile-container">
         <div className="profile-header">
-          <button className="back-arrow-btn" onClick={handleBack}>←</button>
+          <button className="back-arrow-btn" onClick={handleBack}>
+            ←
+          </button>
           <h1 className="profile-title">My Profile</h1>
         </div>
 
@@ -236,7 +239,11 @@ const ProfilePage: React.FC = () => {
               >
                 <div className="photo-grid">
                   {[0, 1, 2, 3, 4, 5].map((idx) => (
-                    <div key={idx} className="photo-option" onClick={() => handleSelectPicture(idx)}>
+                    <div
+                      key={idx}
+                      className="photo-option"
+                      onClick={() => handleSelectPicture(idx)}
+                    >
                       <ProfilePhoto pictureId={idx} size={80} />
                     </div>
                   ))}
@@ -266,7 +273,11 @@ const ProfilePage: React.FC = () => {
 
         {/* Log Out button */}
         <div className="logout-row">
-          <button className="profile-button" onClick={handleLogOutClick} disabled={loggingOut}>
+          <button
+            className="profile-button"
+            onClick={handleLogOutClick}
+            disabled={loggingOut}
+          >
             Log Out
           </button>
         </div>
