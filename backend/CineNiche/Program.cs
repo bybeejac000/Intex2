@@ -52,7 +52,7 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-
+/*
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -70,7 +70,7 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine($"Database init failed: {ex.Message}");
     }
 }
-
+*/
 
 
 if (app.Environment.IsDevelopment())
@@ -80,7 +80,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowFrontend");
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -112,8 +112,8 @@ app.MapGet("/pingauth", (ClaimsPrincipal user) =>
     return Results.Json(new { email = email });
 }).RequireAuthorization();
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
-app.Urls.Add($"http://*:{port}");
+//var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+//app.Urls.Add($"http://*:{port}");
 
 app.MapGet("/", () => "CineNiche backend is live!");
 
