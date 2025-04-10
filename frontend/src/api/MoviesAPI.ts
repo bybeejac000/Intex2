@@ -5,7 +5,7 @@ interface FetchMoviesResponse {
   totalNumMovies: number;
 }
 
-const API_URL = "https://localhost:5000/CineNiche"; // Correct API URL
+const API_URL = "https://cineniche.click/CineNiche"; // Correct API URL
 
 // Default fetch options for all requests
 const defaultOptions = {
@@ -142,41 +142,6 @@ export const fetchMovieById = async (movieId: string): Promise<Movie> => {
   }
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 interface QueryResponse<T> {
   // match whatever your API actually returns:
   // e.g. { rows: Movie[] } or { data: Movie[] } or { results: Movie[] }
@@ -208,8 +173,3 @@ export async function fetchNewReleases(): Promise<Movie[]> {
   // pick the right field:
   return json.rows ?? json.data ?? json.results ?? [];
 }
-
-
-
-
-

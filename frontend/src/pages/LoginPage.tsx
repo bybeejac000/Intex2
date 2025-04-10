@@ -19,10 +19,10 @@ function LoginPage() {
 
   useEffect(() => {
     // Check if user has already made a cookie choice
-    const cookieConsent = localStorage.getItem('cookieConsent');
-    if (cookieConsent === 'accepted') {
+    const cookieConsent = localStorage.getItem("cookieConsent");
+    if (cookieConsent === "accepted") {
       setCookiesAccepted(true);
-    } else if (cookieConsent === 'declined') {
+    } else if (cookieConsent === "declined") {
       setCookiesAccepted(false);
     }
   }, []);
@@ -60,16 +60,16 @@ function LoginPage() {
     }
 
     // Determine login URL based on cookie consent and remember me
-    let loginUrl = "https://localhost:5000/login";
-    
+    let loginUrl = "https://cineniche.click/login";
+
     if (cookiesAccepted === true) {
       // If cookies are accepted, use the remember me preference
       loginUrl = rememberme
-        ? "https://localhost:5000/login?useCookies=true"
-        : "https://localhost:5000/login?useSessionCookies=true";
+        ? "https://cineniche.click/login?useCookies=true"
+        : "https://cineniche.click/login?useSessionCookies=true";
     } else {
       // If cookies are declined, always use session cookies
-      loginUrl = "https://localhost:5000/login?useSessionCookies=true";
+      loginUrl = "https://cineniche.click/login?useSessionCookies=true";
     }
 
     try {
@@ -90,7 +90,7 @@ function LoginPage() {
       if (!response.ok) {
         throw new Error(data?.message || "Invalid email or password.");
       }
-      
+
       // Always fetch user ID regardless of cookie preference
       await fetchAndStoreUserId();
 
@@ -105,7 +105,7 @@ function LoginPage() {
     try {
       const email = localStorage.getItem("email");
       const response = await fetch(
-        `https://localhost:5000/CineNiche/getId?email=${email}`,
+        `https://cineniche.click/CineNiche/getId?email=${email}`,
         {
           method: "GET",
           credentials: "include",
@@ -223,9 +223,9 @@ function LoginPage() {
         </div>
       </div>
 
-      <CookieConsent 
-        onAccept={handleCookieAccept} 
-        onDecline={handleCookieDecline} 
+      <CookieConsent
+        onAccept={handleCookieAccept}
+        onDecline={handleCookieDecline}
       />
 
       <Footer />

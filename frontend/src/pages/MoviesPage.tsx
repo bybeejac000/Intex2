@@ -13,56 +13,51 @@ function MoviesPage() {
   const [isExpanded, setIsExpanded] = useState(false);
   //   const [recommendationsRows, setRecommendationsRows] = useState(1);
 
-
-
   // LOAD IN FIRST NAME:
-    const [firstName, setFirstName] = useState('');
+  const [firstName, setFirstName] = useState("");
 
-    // Fetch profile data on mount.
-    useEffect(() => {
-      fetchProfile();
-    }, []);
-  
-    const fetchProfile = async () => {
-      try {
-        const response = await fetch('https://localhost:5000/account/me', {
-          credentials: 'include',
-        });
-        if (!response.ok) throw new Error('Failed to fetch user data');
-        const data = await response.json();
-        setFirstName(data.firstName || '');
-        //setLastName(data.lastName || '');
-        //setEmail(data.email || '');
-        //setTwoFactorEnabled(data.twoFactorEnabled || false);
-        //setProfilePictureId(data.profilePictureId || 0);
-      } catch (err) {
-        console.error('Error fetching profile:', err);
-      }
-    };
-  
-    // Save functions
-    const saveFirstName = async () => {
-      //setIsEditingFirstName(false);
-      try {
-        const payload = { firstName };
-        const res = await fetch('https://localhost:5000/account/updateProfile', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) throw new Error('Profile update failed');
-        console.log('First name updated.');
-      } catch (error) {
-        console.error(error);
-        alert('Error updating first name.');
-      }
-    };
+  // Fetch profile data on mount.
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
-// First name is loaded in now
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch("https://cineniche.click/account/me", {
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch user data");
+      const data = await response.json();
+      setFirstName(data.firstName || "");
+      //setLastName(data.lastName || '');
+      //setEmail(data.email || '');
+      //setTwoFactorEnabled(data.twoFactorEnabled || false);
+      //setProfilePictureId(data.profilePictureId || 0);
+    } catch (err) {
+      console.error("Error fetching profile:", err);
+    }
+  };
 
+  // Save functions
+  const saveFirstName = async () => {
+    //setIsEditingFirstName(false);
+    try {
+      const payload = { firstName };
+      const res = await fetch("https://cineniche.click/account/updateProfile", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("Profile update failed");
+      console.log("First name updated.");
+    } catch (error) {
+      console.error(error);
+      alert("Error updating first name.");
+    }
+  };
 
-
+  // First name is loaded in now
 
   // Movie data state
   const [recommendationsData, setRecommendationsData] = useState<Movie[]>([]);
@@ -82,9 +77,7 @@ function MoviesPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   // Recommendations paging
-  const [, setTotalRecommendations] = useState<string[]>(
-    []
-  );
+  const [, setTotalRecommendations] = useState<string[]>([]);
   const [, setHasMoreRecommendations] = useState(true);
 
   const navigate = useNavigate();
@@ -108,20 +101,20 @@ function MoviesPage() {
   const toggleCategory = (category: string) => {
     // Set the active category
     setActiveCategory(category);
-    
+
     // Update selected categories state
     setSelectedCategories((prev) =>
       prev.includes(category)
         ? prev.filter((cat) => cat !== category)
         : [...prev, category]
     );
-    
+
     // Fetch movies for this category
     selectCategory(category);
-    
+
     // Close the category filter dropdown
     setShowCategoryFilter(false);
-    
+
     // Scroll to the "Find a Title By Category" section
     const section = document.querySelector("#allMovies");
     if (section) section.scrollIntoView({ behavior: "smooth" });
@@ -210,18 +203,18 @@ function MoviesPage() {
           }
         }
         setRecommendationsData(recommendedMovies);
-        
+
         // Filter for throwback titles (movies before 2000)
-        const throwbackMovies = recommendedMovies.filter(movie => 
-          movie.release_year < 2000
+        const throwbackMovies = recommendedMovies.filter(
+          (movie) => movie.release_year < 2000
         );
         setThrowbackData(throwbackMovies);
-        
+
         setHasMoreRecommendations(false); // No need for load more functionality
 
         // Fetch popular movies with high ratings (using popular=true parameter)
         const popularResponse = await fetch(
-          `https://localhost:5000/CineNiche/GetMovies?popular=true&pageSize=50&pageNum=1`,
+          `https://cineniche.click/CineNiche/GetMovies?popular=true&pageSize=50&pageNum=1`,
           {
             method: "GET",
             credentials: "include",
@@ -229,7 +222,7 @@ function MoviesPage() {
         );
         const popularData = await popularResponse.json();
         // Sort the popular movies alphabetically by title
-        const sortedPopularMovies = [...popularData.movies].sort((a, b) => 
+        const sortedPopularMovies = [...popularData.movies].sort((a, b) =>
           a.title.localeCompare(b.title)
         );
         setPopularData(sortedPopularMovies);
@@ -246,7 +239,6 @@ function MoviesPage() {
         // Fetch all movies (50 at once)
         const allMoviesResponse = await fetchMovies(50, 1, [], null);
         setAllMoviesData(allMoviesResponse.movies);
-
       } catch (error) {
         console.error("Error loading movies:", error);
       } finally {
@@ -338,11 +330,20 @@ function MoviesPage() {
               textAlign: "center",
               padding: "10px",
               color: "#fff",
-              fontSize: "14px"
+              fontSize: "14px",
             }}
           >
             Title Image Coming Soon
-            <p style={{ fontSize: "11px", textAlign: "center", color: "#aaa", marginTop: "5px" }}>Click for more details</p>
+            <p
+              style={{
+                fontSize: "11px",
+                textAlign: "center",
+                color: "#aaa",
+                marginTop: "5px",
+              }}
+            >
+              Click for more details
+            </p>
           </div>
         )}
       </div>
@@ -357,38 +358,33 @@ function MoviesPage() {
     setActiveCategory(category);
     try {
       // Fetch 50 movies for the selected category
-      const response = await fetchMovies(
-        50, 
-        1, 
-        [category], 
-        null
-      );
+      const response = await fetchMovies(50, 1, [category], null);
       setAllMoviesData(response.movies);
     } catch (error) {
       console.error("Error loading category movies:", error);
     } finally {
       setLoading(false);
-      
+
       // Ensure we stay at the allMovies section after category selection
       setTimeout(() => {
         const section = document.querySelector("#allMovies");
         if (section) {
           section.scrollIntoView({ behavior: "auto" });
-          
+
           // Save current scroll position
           const currentPos = window.scrollY;
-          
+
           // Prevent any automatic scrolling for a short period
           const preventScroll = (e: Event) => {
             window.scrollTo(0, currentPos);
             e.preventDefault();
           };
-          
-          window.addEventListener('scroll', preventScroll, { passive: false });
-          
+
+          window.addEventListener("scroll", preventScroll, { passive: false });
+
           // Remove the scroll prevention after a short delay
           setTimeout(() => {
-            window.removeEventListener('scroll', preventScroll);
+            window.removeEventListener("scroll", preventScroll);
           }, 100);
         }
       }, 50);
@@ -408,27 +404,27 @@ function MoviesPage() {
       console.error("Error resetting category filter:", error);
     } finally {
       setLoading(false);
-      
+
       // Ensure we stay at the allMovies section after resetting
       setTimeout(() => {
         const section = document.querySelector("#allMovies");
         if (section) {
           section.scrollIntoView({ behavior: "auto" });
-          
+
           // Save current scroll position
           const currentPos = window.scrollY;
-          
+
           // Prevent any automatic scrolling for a short period
           const preventScroll = (e: Event) => {
             window.scrollTo(0, currentPos);
             e.preventDefault();
           };
-          
-          window.addEventListener('scroll', preventScroll, { passive: false });
-          
+
+          window.addEventListener("scroll", preventScroll, { passive: false });
+
           // Remove the scroll prevention after a short delay
           setTimeout(() => {
-            window.removeEventListener('scroll', preventScroll);
+            window.removeEventListener("scroll", preventScroll);
           }, 100);
         }
       }, 50);
@@ -467,7 +463,10 @@ function MoviesPage() {
           >
             <div className="search-bar">
               {!isExpanded && (
-                <i className="bi bi-search" style={{ fontSize: "1.2rem", marginLeft: "8px" }}></i>
+                <i
+                  className="bi bi-search"
+                  style={{ fontSize: "1.2rem", marginLeft: "8px" }}
+                ></i>
               )}
               {isExpanded && (
                 <input
@@ -695,7 +694,9 @@ function MoviesPage() {
 
                 {/* My Recommendations Section */}
                 <section id="recommendations" className="movie-section">
-                  <h2 style={{ textAlign: 'left' }}>{firstName}'s Top Recommendations</h2>
+                  <h2 style={{ textAlign: "left" }}>
+                    {firstName}'s Top Recommendations
+                  </h2>
                   <div className="movie-row-container">
                     <div className="movie-grid">
                       {recommendationsData.map((movie) => (
@@ -710,7 +711,9 @@ function MoviesPage() {
 
                 {/* Most Popular Section */}
                 <section id="popular" className="movie-section">
-                  <h2 style={{ textAlign: 'left' }}>Top Rated Titles on CineNiche Today</h2>
+                  <h2 style={{ textAlign: "left" }}>
+                    Top Rated Titles on CineNiche Today
+                  </h2>
                   <div className="movie-row-container">
                     <div className="movie-grid">
                       {popularData.map((movie) => (
@@ -725,7 +728,7 @@ function MoviesPage() {
 
                 {/* New Releases Section */}
                 <section id="newReleases" className="movie-section">
-                  <h2 style={{ textAlign: 'left' }}>New Releases</h2>
+                  <h2 style={{ textAlign: "left" }}>New Releases</h2>
                   <div className="movie-row-container">
                     <div className="movie-grid">
                       {newReleasesData.map((movie) => (
@@ -739,8 +742,13 @@ function MoviesPage() {
                 </section>
 
                 {/* Throwback Recommendations Section */}
-                <section id="throwbackRecommendations" className="movie-section">
-                  <h2 style={{ textAlign: 'left' }}>Your Top Throwback Titles</h2>
+                <section
+                  id="throwbackRecommendations"
+                  className="movie-section"
+                >
+                  <h2 style={{ textAlign: "left" }}>
+                    Your Top Throwback Titles
+                  </h2>
                   <div className="movie-row-container">
                     <div className="movie-grid">
                       {throwbackData.map((movie) => (
@@ -755,37 +763,65 @@ function MoviesPage() {
 
                 {/* All Movies Section */}
                 <section id="allMovies" className="movie-section">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
-                    <h2 style={{ textAlign: 'left', marginBottom: '5px' }}>{activeCategory ? categories.find(c => c === activeCategory)?.replace(/_/g, " ") : "Find a Title By Genre:"}</h2>
-                    <div className="category-selector" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '0', marginBottom: '15px' }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    <h2 style={{ textAlign: "left", marginBottom: "5px" }}>
+                      {activeCategory
+                        ? categories
+                            .find((c) => c === activeCategory)
+                            ?.replace(/_/g, " ")
+                        : "Find a Title By Genre:"}
+                    </h2>
+                    <div
+                      className="category-selector"
+                      style={{
+                        display: "flex",
+                        gap: "10px",
+                        flexWrap: "wrap",
+                        marginTop: "0",
+                        marginBottom: "15px",
+                      }}
+                    >
                       {activeCategory && (
-                        <button 
-                          className="category-button" 
+                        <button
+                          className="category-button"
                           onClick={resetCategoryFilter}
                           style={{
-                            padding: '5px 10px',
-                            borderRadius: '15px',
-                            background: 'rgba(25, 118, 210, 0.2)',
-                            color: '#1976d2',
-                            border: 'none',
-                            cursor: 'pointer'
+                            padding: "5px 10px",
+                            borderRadius: "15px",
+                            background: "rgba(25, 118, 210, 0.2)",
+                            color: "#1976d2",
+                            border: "none",
+                            cursor: "pointer",
                           }}
                         >
                           Show All
                         </button>
                       )}
-                      {categories.map(category => (
-                        <button 
-                          key={category} 
-                          className={`category-button ${activeCategory === category ? 'active' : ''}`} 
+                      {categories.map((category) => (
+                        <button
+                          key={category}
+                          className={`category-button ${
+                            activeCategory === category ? "active" : ""
+                          }`}
                           onClick={() => toggleCategory(category)}
                           style={{
-                            padding: '5px 10px',
-                            borderRadius: '15px',
-                            background: activeCategory === category ? '#1976d2' : 'rgba(25, 118, 210, 0.2)',
-                            color: activeCategory === category ? 'white' : '#1976d2',
-                            border: 'none',
-                            cursor: 'pointer'
+                            padding: "5px 10px",
+                            borderRadius: "15px",
+                            background:
+                              activeCategory === category
+                                ? "#1976d2"
+                                : "rgba(25, 118, 210, 0.2)",
+                            color:
+                              activeCategory === category ? "white" : "#1976d2",
+                            border: "none",
+                            cursor: "pointer",
                           }}
                         >
                           {category.replace(/_/g, " ")}
@@ -804,7 +840,6 @@ function MoviesPage() {
                     </div>
                   </div>
                 </section>
-
               </>
             )}
           </div>
