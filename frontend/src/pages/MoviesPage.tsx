@@ -139,7 +139,28 @@ function MoviesPage() {
       setShowCategoryFilter(false);
     }
   };
-
+  const fetchMoviesData = async () => {
+    try {
+      const encodedQuery = encodeURIComponent(
+        "SELECT * FROM movies_titles WHERE release_year > 2020 ORDER BY release_year DESC LIMIT 50"
+      );
+      const response = await fetch(
+        `http://44.214.17.52:5000/query?query=${encodedQuery}`,
+        {
+          method: "POST",
+        }
+      );
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server error: ${response.status} - ${errorText}`);
+      }
+      const data = await response.json();
+      console.log("Fetched new release data:", data);
+      setNewReleasesData(data); // data should be an array of Movie objects
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
   // Fetch data on component mount
   useEffect(() => {
     const loadData = async () => {
@@ -228,7 +249,7 @@ function MoviesPage() {
         setLoading(false);
       }
     };
-
+    fetchMoviesData();
     loadData();
   }, []);
 

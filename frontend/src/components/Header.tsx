@@ -62,7 +62,7 @@ function Header() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("https://localhost:5000/account/logout", {
+      const response = await fetch("https://cineniche.click/account/logout", {
         method: "POST",
         credentials: "include",
       });
