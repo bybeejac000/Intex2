@@ -44,7 +44,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000")
+            policy.WithOrigins("http://localhost:3000",
+             "http://cineniche-frontend.s3-website-us-east-1.amazonaws.com")
                   .AllowCredentials()
                   .AllowAnyMethod()
                   .AllowAnyHeader();
@@ -98,6 +99,7 @@ app.MapPost("/logout", async (HttpContext context, SignInManager<ApplicationUser
         Secure = true,
         SameSite = SameSiteMode.None
     });
+    
 
     return Results.Ok(new { message = "Logout successful" });
 }).RequireAuthorization();

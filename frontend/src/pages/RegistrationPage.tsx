@@ -6,7 +6,6 @@ import "./HomePage.css";
 import ScrollingPosters from "../components/ScrollingPosters";
 import { useNavigate } from "react-router-dom";
 import NotificationModal from "../components/NotificationModal/NotificationModal";
-import ConfirmationModal from "../components/ConfirmationModal/ConfirmationModal";
 
 function RegistrationPage() {
   const navigate = useNavigate();
@@ -25,7 +24,12 @@ function RegistrationPage() {
   });
 
   // Step 9: 4-digit verification code entry
-  const [verificationDigits, setVerificationDigits] = useState(["", "", "", ""]);
+  const [verificationDigits, setVerificationDigits] = useState([
+    "",
+    "",
+    "",
+    "",
+  ]);
   // Refs for the 4 input boxes
   const digitRefs = [
     useRef<HTMLInputElement>(null),
@@ -38,7 +42,10 @@ function RegistrationPage() {
   const [step, setStep] = useState(1);
 
   // State for notification modals (replaces alerts)
-  const [notification, setNotification] = useState({ show: false, message: "" });
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+  });
 
   // Handle changes for any registration field
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,7 +73,10 @@ function RegistrationPage() {
   // Advance to the next step. If step 7, check password length.
   const handleNext = () => {
     if (step === 7 && formData.password.length < 15) {
-      setNotification({ show: true, message: "Password must be at least 15 characters long" });
+      setNotification({
+        show: true,
+        message: "Password must be at least 15 characters long",
+      });
       return;
     }
     if (step < 9) {
@@ -98,7 +108,8 @@ function RegistrationPage() {
         localStorage.setItem("pendingRegistrationEmail", formData.email);
         setNotification({
           show: true,
-          message: "Almost there! Please check your email for the verification code.",
+          message:
+            "Almost there! Please check your email for the verification code.",
         });
         setStep(9);
       } else {
@@ -138,7 +149,10 @@ function RegistrationPage() {
       localStorage.removeItem("pendingRegistrationEmail");
       navigate("/movies");
     } else {
-      setNotification({ show: true, message: "Invalid verification code. Please try again." });
+      setNotification({
+        show: true,
+        message: "Invalid verification code. Please try again.",
+      });
     }
   };
 
@@ -337,7 +351,8 @@ function RegistrationPage() {
                   style={{ color: "#1976d2", textDecoration: "underline" }}
                 >
                   Privacy Policy
-                </a>.
+                </a>
+                .
               </label>
             </div>
             <button
@@ -367,7 +382,8 @@ function RegistrationPage() {
           <div className="mb-3 text-center">
             <h3 className="mb-4">Enter Verification Code</h3>
             <p>
-              An email has been sent to <strong>{formData.email}</strong> with a verification code. Please enter it below.
+              An email has been sent to <strong>{formData.email}</strong> with a
+              verification code. Please enter it below.
             </p>
             <div
               style={{
@@ -378,7 +394,7 @@ function RegistrationPage() {
                 marginBottom: "2rem",
               }}
             >
-              {verificationDigits.map((digit, index) => (
+              {verificationDigits.map((_, index) => (
                 <input
                   key={index}
                   type="text"
@@ -448,7 +464,9 @@ function RegistrationPage() {
               >
                 ←
               </button>
-              <h1 className="display-1 fw-light mb-4">Register for an Account</h1>
+              <h1 className="display-1 fw-light mb-4">
+                Register for an Account
+              </h1>
             </div>
             <br />
             <br />

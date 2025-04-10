@@ -16,6 +16,9 @@ function Logout(props: { children: React.ReactNode }) {
       });
 
       if (response.ok) {
+
+        // localStorage.clear();
+        // sessionStorage.clear();
         navigate("/login");
       } else {
         console.error("Logout failed:", response.status);

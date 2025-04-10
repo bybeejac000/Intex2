@@ -15,9 +15,10 @@ function Header() {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await fetch("https://localhost:5000/account/me", {
+        const response = await fetch("https://cineniche.click/account/me", {
           credentials: "include",
         });
+
         if (response.ok) {
           const data = await response.json();
           setIsLoggedIn(true);
@@ -25,21 +26,19 @@ function Header() {
             setProfilePictureId(data.profilePictureId);
           }
         } else if (response.status === 401) {
-          // No console error for 401; treat it as "not logged in".
+          // Unauthorized - user not logged in (no error needed)
           setIsLoggedIn(false);
         } else {
-          // For other errors (403, 404, 500, etc.), you can log a quiet message if needed
           console.warn(`Profile fetch returned status ${response.status}`);
           setIsLoggedIn(false);
         }
       } catch (error) {
-        // This catches network errors (e.g. server down).
         console.warn("Error fetching profile in header:", error);
         setIsLoggedIn(false);
       }
     };
-    fetchProfileData();
 
+    fetchProfileData();
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
@@ -57,7 +56,6 @@ function Header() {
   };
 
   const handleTitleClick = () => {
-    // If user is logged in, go to movies; otherwise, home
     if (isLoggedIn) {
       navigate("/movies");
     } else {
@@ -67,10 +65,11 @@ function Header() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("https://localhost:5000/account/logout", {
+      const response = await fetch("https://cineniche.click/account/logout", {
         method: "POST",
         credentials: "include",
       });
+
       if (response.ok) {
         setIsLoggedIn(false);
         navigate("/");
@@ -113,6 +112,7 @@ function Header() {
           CineNiche
         </h1>
       </div>
+
       {isLoggedIn && (
         <div
           ref={dropdownRef}
@@ -133,6 +133,7 @@ function Header() {
           >
             <ProfilePhoto pictureId={profilePictureId} size={40} />
           </div>
+
           {isDropdownOpen && (
             <div
               style={{
@@ -209,6 +210,7 @@ function Header() {
           )}
         </div>
       )}
+
       <style>
         {`
           .hover-effect:hover {

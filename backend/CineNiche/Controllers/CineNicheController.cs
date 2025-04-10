@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SQLitePCL;
+using System.Security.Claims;
+using System.Security.Policy;
+
 
 namespace CineNiche.Controllers
 {
@@ -15,7 +18,12 @@ namespace CineNiche.Controllers
     {
         private MovieDbContext _movieContext;
 
-        public CineNicheController(MovieDbContext temp) => _movieContext = temp;
+        private readonly ApplicationDbContext _identityContext;
+
+        public CineNicheController(MovieDbContext temp, ApplicationDbContext identityContext) {
+            _movieContext = temp;
+            _identityContext = identityContext;
+        }
 
         [HttpGet("GetMovies")]
         public IActionResult GetMovies(int pageSize = 10, int pageNum = 1, string? sortOrder = null, [FromQuery] List<string>? categories = null, string? searchTerm = null)
@@ -163,6 +171,22 @@ namespace CineNiche.Controllers
         [HttpPost("AddMovie")]
         public IActionResult AddMovie([FromBody] Title newMovie)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            var user = _identityContext.Users.FirstOrDefault(u => u.Id == userId);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+            // check of user has permission (UserRole == 1 = admin)
+            if (user.UserRole != 1)
+            {
+                return Forbid("You are not authorized to add movies.");
+            }
+            
             _movieContext.Titles.Add(newMovie);
             _movieContext.SaveChanges();
             return Ok(newMovie);
@@ -171,6 +195,21 @@ namespace CineNiche.Controllers
         [HttpPut("UpdateMovie/{showId}")]
         public IActionResult UpdateMovie(string showId, [FromBody] Title updatedMovie)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            var user = _identityContext.Users.FirstOrDefault(u => u.Id == userId);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+            // check of user has permission (UserRole == 1 = admin)
+            if (user.UserRole != 1)
+            {
+                return Forbid("You are not authorized to add movies.");
+            }
             var existingMovie = _movieContext.Titles.Find(showId);
 
             if (existingMovie == null)
@@ -242,6 +281,21 @@ namespace CineNiche.Controllers
         [HttpDelete("DeleteMovie/{showId}")]
         public IActionResult DeleteMovie(string showId)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            var user = _identityContext.Users.FirstOrDefault(u => u.Id == userId);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+            // check of user has permission (UserRole == 1 = admin)
+            if (user.UserRole != 1)
+            {
+                return Forbid("You are not authorized to add movies.");
+            }
             var movie = _movieContext.Titles.Find(showId);
 
             if (movie == null)
