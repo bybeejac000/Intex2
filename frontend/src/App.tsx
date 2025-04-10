@@ -2,6 +2,7 @@ import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
+import TermsPage from "./pages/TermsOfService";
 import RegistrationPage from "./pages/RegistrationPage";
 import MoviesPage from "./pages/MoviesPage";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
@@ -29,6 +30,7 @@ function App() {
           }
         />
         <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
       </Routes>
     </Router>
   );

@@ -1,15 +1,40 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserCircle, faUser, faCog } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faCog } from '@fortawesome/free-solid-svg-icons';
 import { useState, useRef, useEffect } from 'react';
+import ProfilePhoto from '../components/ProfilePhoto/ProfilePhoto';
 
 function Header() {
     const navigate = useNavigate();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [profilePictureId, setProfilePictureId] = useState(0);
     const dropdownRef = useRef<HTMLDivElement>(null);
     let timeoutId: number | undefined;
 
     useEffect(() => {
+        // Fetch full profile to get profilePictureId and auth status.
+        const fetchProfileData = async () => {
+            try {
+                const response = await fetch('https://localhost:5000/account/me', {
+                    credentials: "include"
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setIsLoggedIn(true);
+                    if (data && typeof data.profilePictureId === 'number') {
+                        setProfilePictureId(data.profilePictureId);
+                    }
+                } else {
+                    setIsLoggedIn(false);
+                }
+            } catch (error) {
+                console.error("Error fetching profile in header:", error);
+                setIsLoggedIn(false);
+            }
+        };
+        fetchProfileData();
+
         return () => {
             if (timeoutId) clearTimeout(timeoutId);
         };
@@ -26,6 +51,15 @@ function Header() {
         }, 200);
     };
 
+    // Title click navigates to /movies if logged in, otherwise to home.
+    const handleTitleClick = () => {
+        if (isLoggedIn) {
+            navigate('/movies');
+        } else {
+            navigate('/');
+        }
+    };
+
     return (
         <header className="fixed-top" style={{
             backgroundColor: '#010f1e',
@@ -34,85 +68,96 @@ function Header() {
             zIndex: 1000
         }}>
             <div 
-                onClick={() => navigate('/')} 
-                style={{ cursor: 'pointer' }}
-            >
-                <h1 className="text-start text-light display-6 mb-0" style={{ marginLeft: '25px', fontSize: '1.75rem' }}>CineNiche</h1>
-            </div>
-            <div 
-                ref={dropdownRef}
-                style={{ 
-                    position: 'absolute', 
-                    right: '25px', 
-                    top: '1rem',
-                    cursor: 'pointer'
+                onClick={handleTitleClick} 
+                style={{
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    marginLeft: '25px'
                 }}
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
             >
-                <FontAwesomeIcon 
-                    icon={faUserCircle} 
-                    size="2x" 
-                    color="white" 
-                    style={{
+                <img 
+                    src="/images/CineNiche_Icon.png" 
+                    alt="CineNiche Icon" 
+                    style={{ height: '40px', marginRight: '-5px' }} 
+                />
+                <h1 className="text-start text-light display-6 mb-0" style={{ fontSize: '1.75rem' }}>
+                    CineNiche
+                </h1>
+            </div>
+            {isLoggedIn && (
+                <div 
+                    ref={dropdownRef}
+                    style={{ 
+                        position: 'absolute', 
+                        right: '25px', 
+                        top: '1rem',
+                        cursor: 'pointer'
+                    }}
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
+                >
+                    <div style={{
                         transition: 'transform 0.2s ease',
                         transform: isDropdownOpen ? 'scale(1.1)' : 'scale(1)'
-                    }}
-                />
-                {isDropdownOpen && (
-                    <div 
-                        style={{
-                            position: 'absolute',
-                            top: '100%',
-                            right: 0,
-                            backgroundColor: '#0a1929',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '8px',
-                            padding: '0.5rem 0',
-                            minWidth: '180px',
-                            zIndex: 1001,
-                            marginTop: '8px',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                            animation: 'fadeIn 0.2s ease'
-                        }}
-                        onMouseEnter={handleMouseEnter}
-                        onMouseLeave={handleMouseLeave}
-                    >
-                        <Link 
-                            to="/profile" 
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                padding: '0.75rem 1.25rem',
-                                color: 'white',
-                                textDecoration: 'none',
-                                transition: 'background-color 0.2s ease',
-                                gap: '10px'
-                            }}
-                            className="hover-effect"
-                        >
-                            <FontAwesomeIcon icon={faUser} />
-                            <span>Profile</span>
-                        </Link>
-                        <Link 
-                            to="/admin" 
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                padding: '0.75rem 1.25rem',
-                                color: 'white',
-                                textDecoration: 'none',
-                                transition: 'background-color 0.2s ease',
-                                gap: '10px'
-                            }}
-                            className="hover-effect"
-                        >
-                            <FontAwesomeIcon icon={faCog} />
-                            <span>Admin</span>
-                        </Link>
+                    }}>
+                        <ProfilePhoto pictureId={profilePictureId} size={40} />
                     </div>
-                )}
-            </div>
+                    {isDropdownOpen && (
+                        <div 
+                            style={{
+                                position: 'absolute',
+                                top: '100%',
+                                right: 0,
+                                backgroundColor: '#0a1929',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: '8px',
+                                padding: '0.5rem 0',
+                                minWidth: '180px',
+                                zIndex: 1001,
+                                marginTop: '8px',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                                animation: 'fadeIn 0.2s ease'
+                            }}
+                            onMouseEnter={handleMouseEnter}
+                            onMouseLeave={handleMouseLeave}
+                        >
+                            <Link 
+                                to="/profile" 
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    padding: '0.75rem 1.25rem',
+                                    color: 'white',
+                                    textDecoration: 'none',
+                                    transition: 'background-color 0.2s ease',
+                                    gap: '10px'
+                                }}
+                                className="hover-effect"
+                            >
+                                <FontAwesomeIcon icon={faUser} />
+                                <span>Profile</span>
+                            </Link>
+                            <Link 
+                                to="/admin" 
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    padding: '0.75rem 1.25rem',
+                                    color: 'white',
+                                    textDecoration: 'none',
+                                    transition: 'background-color 0.2s ease',
+                                    gap: '10px'
+                                }}
+                                className="hover-effect"
+                            >
+                                <FontAwesomeIcon icon={faCog} />
+                                <span>Admin</span>
+                            </Link>
+                        </div>
+                    )}
+                </div>
+            )}
             <style>
                 {`
                     .hover-effect:hover {
