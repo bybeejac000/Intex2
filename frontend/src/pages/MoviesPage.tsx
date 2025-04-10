@@ -185,7 +185,7 @@ function MoviesPage() {
         const recommendationsResponse = await fetch(
           `http://44.214.17.52:5000/recommend_user?user_id=${localStorage.getItem(
             "userId"
-          )}&num=50`
+          )}&num=30`
         );
         const recommendationsData = await recommendationsResponse.json();
         const recommendedShowIds = recommendationsData.results;
@@ -193,8 +193,8 @@ function MoviesPage() {
         // Store all recommendation IDs for later paging
         setTotalRecommendations(recommendedShowIds);
 
-        // Now fetch details for all 50 recommendations (or less if there are fewer)
-        const initialShowIds = recommendedShowIds.slice(0, 50);
+        // Now fetch details for all 30 recommendations (or less if there are fewer)
+        const initialShowIds = recommendedShowIds.slice(0, 30);
 
         // Fetch full details for each recommended movie
         const recommendedMovies: Movie[] = [];
@@ -218,7 +218,7 @@ function MoviesPage() {
 
         // Fetch popular movies with high ratings (using popular=true parameter)
         const popularResponse = await fetch(
-          `https://cineniche.click/CineNiche/GetMovies?popular=true&pageSize=30&pageNum=1`,
+          `https://cineniche.click/CineNiche/GetMovies?sortOrder=averagerating_desc&pageSize=30&pageNum=1`,
           {
             method: "GET",
             credentials: "include",
@@ -661,6 +661,7 @@ function MoviesPage() {
                 <div className="spinner-border text-light" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </div>
+                <p style={{ color: 'white', marginTop: '10px' }}>Gathering Your Title Library with Personalized Recommendations!</p>
               </div>
             ) : (
               <>
@@ -718,6 +719,9 @@ function MoviesPage() {
                   <h2 style={{ textAlign: "left" }}>
                     Top Rated Titles on CineNiche Today
                   </h2>
+                  <p style={{ textAlign: "left", fontSize: "0.9rem", color: "#aaa", marginTop: "-5px", marginBottom: "10px" }}>
+                    5 ★ ratings
+                  </p>
                   <div className="movie-row-container">
                     <div className="movie-grid">
                       {popularData.map((movie) => (

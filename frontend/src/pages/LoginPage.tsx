@@ -213,12 +213,19 @@ function LoginPage() {
                     color: "white",
                     padding: "15px 30px",
                     fontSize: "1.2rem",
+                    opacity: cookiesAccepted === null ? "0.6" : "1"
                   }}
+                  disabled={cookiesAccepted === null}
                 >
                   Login
                 </button>
+                {cookiesAccepted === null && (
+                  <p className="text-warning mt-2" style={{ fontSize: "0.9rem" }}>
+                    Please accept or decline the cookie policy to continue
+                  </p>
+                )}
+                {error && <p className="error">{error}</p>}
               </form>
-              {error && <p className="error">{error}</p>}
             </div>
           </div>
         </div>
