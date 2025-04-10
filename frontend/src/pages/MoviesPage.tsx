@@ -142,7 +142,7 @@ function MoviesPage() {
   const fetchMoviesData = async () => {
     try {
       const encodedQuery = encodeURIComponent(
-        "SELECT * FROM movies_titles WHERE release_year > 2020 ORDER BY release_year DESC LIMIT 50"
+        "SELECT * FROM movies_titles WHERE release_year > 2020 ORDER BY release_year DESC LIMIT 30"
       );
       const response = await fetch(
         `http://44.214.17.52:5000/query?query=${encodedQuery}`,
@@ -218,7 +218,7 @@ function MoviesPage() {
 
         // Fetch popular movies with high ratings (using popular=true parameter)
         const popularResponse = await fetch(
-          `https://cineniche.click/CineNiche/GetMovies?popular=true&pageSize=50&pageNum=1`,
+          `https://cineniche.click/CineNiche/GetMovies?popular=true&pageSize=30&pageNum=1`,
           {
             method: "GET",
             credentials: "include",
@@ -231,9 +231,9 @@ function MoviesPage() {
         );
         setPopularData(sortedPopularMovies);
 
-        // Fetch new releases (sort by release year) (50 at once)
+        // Fetch new releases (sort by release year) (30 at once)
         const newReleasesResponse = await fetchMovies(
-          50,
+          30,
           1,
           [],
           "release_year_desc"
@@ -241,7 +241,7 @@ function MoviesPage() {
         setNewReleasesData(newReleasesResponse.movies);
 
         // Fetch all movies (50 at once)
-        const allMoviesResponse = await fetchMovies(50, 1, [], null);
+        const allMoviesResponse = await fetchMovies(30, 1, [], null);
         setAllMoviesData(allMoviesResponse.movies);
       } catch (error) {
         console.error("Error loading movies:", error);
@@ -361,8 +361,8 @@ function MoviesPage() {
     setLoading(true);
     setActiveCategory(category);
     try {
-      // Fetch 50 movies for the selected category
-      const response = await fetchMovies(50, 1, [category], null);
+      // Fetch 30 movies for the selected category
+      const response = await fetchMovies(30, 1, [category], null);
       setAllMoviesData(response.movies);
     } catch (error) {
       console.error("Error loading category movies:", error);
@@ -391,7 +391,7 @@ function MoviesPage() {
             window.removeEventListener("scroll", preventScroll);
           }, 100);
         }
-      }, 50);
+      }, 30);
     }
   };
 
@@ -401,8 +401,8 @@ function MoviesPage() {
     setActiveCategory(null);
     setSelectedCategories([]);
     try {
-      // Fetch 50 movies
-      const response = await fetchMovies(50, 1, [], null);
+      // Fetch 30 movies
+      const response = await fetchMovies(30, 1, [], null);
       setAllMoviesData(response.movies);
     } catch (error) {
       console.error("Error resetting category filter:", error);
@@ -431,7 +431,7 @@ function MoviesPage() {
             window.removeEventListener("scroll", preventScroll);
           }, 100);
         }
-      }, 50);
+      }, 30);
     }
   };
 
