@@ -10,5 +10,6 @@ namespace CineNiche.Data
         public string Zip { get; set; }
         
         public int ProfilePictureId { get; set; } = 0;
+        public int UserRole { get; set; } = 0;
     }
 }

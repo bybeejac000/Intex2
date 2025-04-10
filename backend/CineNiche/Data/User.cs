@@ -41,5 +41,7 @@ namespace CineNiche.Data
         public string state { get; set; }
         [Required]
         public int zip { get; set; }
+        [Required]
+        public int user_role { get; set; }
     }
 }
