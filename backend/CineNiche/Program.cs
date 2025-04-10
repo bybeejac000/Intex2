@@ -60,7 +60,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowFrontend");
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -95,5 +95,6 @@ app.MapGet("/pingauth", (ClaimsPrincipal user) =>
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
 app.Urls.Add($"http://*:{port}");
 
+app.MapGet("/", () => "CineNiche backend is live!");
 
 app.Run();
