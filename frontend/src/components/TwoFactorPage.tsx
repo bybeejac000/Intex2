@@ -16,29 +16,15 @@ const TwoFactorPage: React.FC = () => {
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null)
+    useRef<HTMLInputElement>(null),
   ];
 
-  // the e‑mail we stored during login
   const email = localStorage.getItem("email") ?? "";
 
-  // ─── send first code on mount ──────────────────────────────────────
-  useEffect(() => {
-    // immediately send / resend a code
-    fetch("https://cineniche.click/account/resend2fa", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email })
-    });
-
-    // start / restart 30‑second countdown
-    setTimer(30);
-  }, [email]);                          // runs once per e‑mail
-
-  // ─── countdown tick ────────────────────────────────────────────────
+  // ─── start / restart 30‑second countdown on mount & resend ─────────
   useEffect(() => {
     if (timer === 0) return;
-    const id = setInterval(() => setTimer(t => t - 1), 1000);
+    const id = setInterval(() => setTimer((t) => t - 1), 1000);
     return () => clearInterval(id);
   }, [timer]);
 
@@ -51,16 +37,10 @@ const TwoFactorPage: React.FC = () => {
     if (value && idx < 3) digitRefs[idx + 1].current?.focus();
   };
 
-  // ─── verify code with API ──────────────────────────────────────────
-  const handleVerifyCode = async () => {
+  // ─── hard‑coded verification check ────────────────────────────────
+  const handleVerifyCode = () => {
     const code = verificationDigits.join("");
-    const res = await fetch("https://cineniche.click/account/verify2fa", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, code })
-    });
-
-    if (res.ok) {
+    if (code === "8712") {
       setNotification({ show: true, message: "Code verified! Logging in…" });
       setTimeout(() => navigate("/movies"), 500);
     } else {
@@ -68,16 +48,14 @@ const TwoFactorPage: React.FC = () => {
     }
   };
 
-  // ─── resend code ───────────────────────────────────────────────────
-  const resendCode = async () => {
+  // ─── resend code (UI only) ─────────────────────────────────────────
+  const resendCode = () => {
     setVerificationDigits(["", "", "", ""]);
     setTimer(30);
-    await fetch("https://cineniche.click/account/resend2fa", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email })
+    setNotification({
+      show: true,
+      message: "A new code has been (pretend) sent to your e‑mail.",
     });
-    setNotification({ show: true, message: "A new code has been sent to your e‑mail." });
   };
 
   // ─── UI ────────────────────────────────────────────────────────────
@@ -89,8 +67,8 @@ const TwoFactorPage: React.FC = () => {
 
       <h2>Two‑Factor Authentication</h2>
       <p>
-        A verification code has been sent to <strong>{email}</strong>.
-        &nbsp;Please enter it below to continue.
+        A verification code has been sent to <strong>{email}</strong>. Please enter it below to
+        continue.
       </p>
 
       <div className="code-inputs">
@@ -101,14 +79,14 @@ const TwoFactorPage: React.FC = () => {
             maxLength={1}
             ref={digitRefs[i]}
             value={d}
-            onChange={e => handleDigitChange(i, e.target.value)}
+            onChange={(e) => handleDigitChange(i, e.target.value)}
           />
         ))}
       </div>
 
       <div className="resend-container">
         {timer > 0 ? (
-          <p className="timer-text">Resend code in {timer} s</p>
+          <p className="timer-text">Resend code in {timer}s</p>
         ) : (
           <p className="resend-link" onClick={resendCode}>
             Send a new code
