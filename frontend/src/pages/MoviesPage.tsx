@@ -48,6 +48,7 @@ function MoviesPage() {
   const [newReleasesData, setNewReleasesData] = useState<Movie[]>([]);
   const [allMoviesData, setAllMoviesData] = useState<Movie[]>([]);
   const [throwbackData, setThrowbackData] = useState<Movie[]>([]);
+  const [similarUsersData, setSimilarUsersData] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Search functionality
@@ -208,11 +209,32 @@ function MoviesPage() {
         }
         setRecommendationsData(recommendedMovies);
 
-        // Filter for throwback titles (movies before 2000)
-        const throwbackMovies = recommendedMovies.filter(
-          (movie) => movie.release_year < 2000
+        // // Filter for throwback titles (movies before 2000)
+        // const throwbackMovies = recommendedMovies.filter(
+        //   (movie) => movie.release_year < 2000
+        // );
+        // setThrowbackData(throwbackMovies);
+
+        // Fetch similar users liked movies
+        const similarUsersResponse = await fetch(
+          `https://api.cineniche.click/user_ratings?user_id=${localStorage.getItem(
+            "userId"
+          )}&num=30`
         );
-        setThrowbackData(throwbackMovies);
+        const similarUsersData = await similarUsersResponse.json();
+        const similarUsersShowIds = similarUsersData.results || [];
+
+        // Fetch full details for each similar users' movie
+        const similarUsersMovies: Movie[] = [];
+        for (const showId of similarUsersShowIds.slice(0, 30)) {
+          try {
+            const movieDetails = await fetchMovieById(showId);
+            similarUsersMovies.push(movieDetails);
+          } catch (error) {
+            console.error(`Error fetching details for movie ${showId}:`, error);
+          }
+        }
+        setSimilarUsersData(similarUsersMovies);
 
         setHasMoreRecommendations(false); // No need for load more functionality
 
@@ -840,6 +862,23 @@ function MoviesPage() {
                   <div className="movie-row-container">
                     <div className="movie-grid">
                       {allMoviesData.map((movie) => (
+                        <div key={movie.show_id} className="movie-card">
+                          <MoviePoster movie={movie} />
+                          <p className="movie-title">{movie.title}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+
+                {/* Similar Users Section */}
+                <section id="similarUsers" className="movie-section">
+                  <h2 style={{ textAlign: "left" }}>
+                    Similar Users Have Loved:
+                  </h2>
+                  <div className="movie-row-container">
+                    <div className="movie-grid">
+                      {similarUsersData.map((movie) => (
                         <div key={movie.show_id} className="movie-card">
                           <MoviePoster movie={movie} />
                           <p className="movie-title">{movie.title}</p>
