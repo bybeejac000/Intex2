@@ -28,6 +28,24 @@ namespace CineNiche.Controllers
             _identityContext = identityContext;
         }
 
+        [HttpGet("is-admin")]
+        public IActionResult IsAdmin()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            var user = _identityContext.Users.FirstOrDefault(u => u.Id == userId);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            return Ok(new { isAdmin = user.UserRole == 1 });
+        }
+
         [HttpGet("GetMovies")]
         public IActionResult GetMovies(int pageSize = 10, int pageNum = 1, string? sortOrder = null, [FromQuery] List<string>? categories = null, string? searchTerm = null)
         {
