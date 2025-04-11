@@ -84,7 +84,7 @@ function MovieDetailsPage() {
     try {
       // Fetch recommendations from the API
       const response = await fetch(
-        `http://44.214.17.52:5000/recommend?show_id=${id}&num=5`
+        `https://api.cineniche.click/recommend?show_id=${id}&num=5`
       );
       const data = await response.json();
 
@@ -285,7 +285,7 @@ function MovieDetailsPage() {
     .replace(/[\(\):\'\.\-&?!Ññ%]/g, "")  // Remove parentheses, colons, and dashes
     .replace(/^#+/, "");
   const imageUrl = title
-    ? `http://44.214.17.52/${encodeURIComponent(title)}.jpg`
+    ? `https://api.cineniche.click/posters/${encodeURIComponent(title)}.jpg`
     : "";
 
   return (
@@ -472,7 +472,7 @@ function MovieDetailsPage() {
                         >
                           {!recImageErrors[index] ? (
                             <img 
-                              src={`http://44.214.17.52/${encodeURIComponent(rec.title.replace(/[\(\):\'\.\-&\!\Ñ\ñ/%]/g, '').replace(/^#+/, ''))}.jpg`}
+                              src={`https://api.cineniche.click/posters/${encodeURIComponent(rec.title.replace(/[\(\):\'\.\-&\!\Ñ\ñ/%]/g, '').replace(/^#+/, ''))}.jpg`}
                               alt={rec.title}
                               onError={() => handleRecImageError(index)}
                               style={{ 

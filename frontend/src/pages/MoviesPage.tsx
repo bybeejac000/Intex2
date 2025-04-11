@@ -145,7 +145,7 @@ function MoviesPage() {
         "SELECT * FROM movies_titles WHERE release_year > 2020 ORDER BY release_year DESC LIMIT 30"
       );
       const response = await fetch(
-        `http://44.214.17.52:5000/query?query=${encodedQuery}`,
+        `https://api.cineniche.click/query?query=${encodedQuery}`,
         {
           method: "POST",
         }
@@ -183,7 +183,7 @@ function MoviesPage() {
 
         // Fetch personalized recommendations from recommendation API (get 50 max)
         const recommendationsResponse = await fetch(
-          `http://44.214.17.52:5000/recommend_user?user_id=${localStorage.getItem(
+          `https://api.cineniche.click/recommend_user?user_id=${localStorage.getItem(
             "userId"
           )}&num=30`
         );
@@ -299,7 +299,7 @@ function MoviesPage() {
       .replace(/[\(\):\'\.\-&\!\Ñ\ñ/%]/g, "") // Remove parentheses, colons, and dashes
       .replace(/^#+/, "");
 
-    const imageUrl = `http://44.214.17.52/${encodeURIComponent(title)}.jpg`; // Use encodeURIComponent instead of Uri.EscapeDataString
+    const imageUrl = `https://api.cineniche.click/posters/${encodeURIComponent(title)}.jpg`; // Use encodeURIComponent instead of Uri.EscapeDataString
 
     const [imageError, setImageError] = useState(false);
 
