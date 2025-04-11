@@ -7,12 +7,15 @@ using Microsoft.EntityFrameworkCore;
 using SQLitePCL;
 using System.Security.Claims;
 using System.Security.Policy;
+using Microsoft.AspNetCore.Cors;
+
 
 
 namespace CineNiche.Controllers
 {
-    [Route("[controller]")]
+    [EnableCors("AllowFrontend")]
     [ApiController]
+    [Route("[controller]")]
     [Authorize]
     public class CineNicheController : ControllerBase
     {

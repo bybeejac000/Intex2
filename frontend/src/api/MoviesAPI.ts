@@ -115,6 +115,7 @@ export const deleteMovie = async (showId: string): Promise<void> => {
     const response = await fetch(`${API_URL}/DeleteMovie/${showId}`, {
       ...defaultOptions,
       method: "DELETE",
+      mode: 'cors'
     });
 
     if (!response.ok) {
@@ -173,3 +174,27 @@ export async function fetchNewReleases(): Promise<Movie[]> {
   // pick the right field:
   return json.rows ?? json.data ?? json.results ?? [];
 }
+
+// Submit a rating for a movie
+export const submitRating = async (userId: number, showId: string, rating: number): Promise<any> => {
+  try {
+    const response = await fetch(`${API_URL}/AddRating`, {
+      ...defaultOptions,
+      method: "POST",
+      body: JSON.stringify({
+        user_id: userId,
+        show_id: showId,
+        rating: rating
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to submit rating: ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error submitting rating:", error);
+    throw error;
+  }
+};

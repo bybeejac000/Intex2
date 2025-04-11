@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { Movie } from "../types/Movie";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { fetchMovieById } from "../api/MoviesAPI";
+import { fetchMovieById, submitRating } from "../api/MoviesAPI";
 import AuthorizeView from "../components/AuthorizeView";
 
 interface Recommendation {
@@ -136,30 +136,18 @@ function MovieDetailsPage() {
       
       try {
         // Get user ID from localStorage
-        const userEmail = localStorage.getItem('userId');
+        const userIdStr = localStorage.getItem('userId');
         
-        if (!userEmail) {
+        if (!userIdStr) {
           console.error('Cannot submit rating: User is not logged in');
           setSubmittingRating(false);
           return;
         }
         
-        // Send rating to the new AddRating endpoint
-        const response = await fetch('https://cineniche.click/CineNiche/AddRating', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },// Include cookies for authentication
-          body: JSON.stringify({
-            user_id: parseInt(userEmail), // Convert to number if stored as string
-            show_id: id,
-            rating: userRating
-          })
-        });
+        const userId = parseInt(userIdStr);
         
-        if (!response.ok) {
-          throw new Error(`Error submitting rating: ${response.statusText}`);
-        }
+        // Use the submitRating function from MoviesAPI
+        await submitRating(userId, id || '', userRating);
         
         // Update local state to show the new rating
         if (movie) {

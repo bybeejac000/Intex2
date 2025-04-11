@@ -54,15 +54,15 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend",
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:3000",
-             "https://watch.cineniche.click")
-                  .AllowCredentials()
-                  .AllowAnyMethod()
-                  .AllowAnyHeader();
-        });
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:3000",
+                "https://watch.cineniche.click")
+            .AllowCredentials()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
 });
 
 var app = builder.Build();
