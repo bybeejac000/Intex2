@@ -12,6 +12,9 @@ import PrivacyPage from "./pages/PrivacyPage";
 import AuthorizeView from "./components/AuthorizeView";
 import EmailConfirmationPage from "./pages/EmailConfirmationPage/EmailConfirmationPage";
 import AdminRoute from "./components/AdminRoute";
+import TwoFactorPage from "./components/TwoFactorPage";
+import ContactPage from "./pages/ContactPage";
+import AboutPage from "./pages/AboutPage";
 
 function App() {
   return (
@@ -36,6 +39,9 @@ function App() {
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/confirmEmail" element={<EmailConfirmationPage />} />
+        <Route path="/twofactor" element={<TwoFactorPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path ="/about" element={<AboutPage />} />
       </Routes>
     </Router>
   );

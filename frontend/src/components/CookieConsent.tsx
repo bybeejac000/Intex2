@@ -34,33 +34,31 @@ const CookieConsent = ({ onAccept, onDecline }: CookieConsentProps) => {
     <div 
       style={{
         position: 'fixed',
-        bottom: '20px',
-        left: '0',
+        bottom: '65px',
         right: '0',
-        width: '80%',
-        margin: '0 auto',
+        width: '66.5%', 
         backgroundColor: '#1976d2',
         color: 'white',
         padding: '15px',
         display: 'flex',
-        justifyContent: 'space-between',
+        flexDirection: 'column',
+        justifyContent: 'center',
         alignItems: 'center',
         zIndex: 1000,
         boxShadow: '0 -2px 10px rgba(0,0,0,0.2)',
-        borderRadius: '8px'
       }}
     >
       <div>
-        <p style={{ margin: '0 0 10px 0', fontSize: '16px', textAlign: 'center' }}>
+        <p style={{ margin: '0 0 10px 0', fontSize: '14px', textAlign: 'center' }}>
           <strong>Cookie Notice</strong>
         </p>
-        <p style={{ marginRight: '15px', fontSize: '14px', textAlign: 'center' }}>
+        <p style={{ fontSize: '14px', textAlign: 'center' }}>
           We use cookies to enhance your experience on our website. By clicking "Accept", 
           you agree to the use of cookies for authentication and personalization.
           You can decline non-essential cookies by clicking "Decline".
         </p>
       </div>
-      <div style={{ display: 'flex', gap: '10px' }}>
+      <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
         <button
           onClick={handleAccept}
           style={{

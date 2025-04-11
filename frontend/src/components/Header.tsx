@@ -13,28 +13,32 @@ function Header() {
   let timeoutId: number | undefined;
 
   useEffect(() => {
-    // Fetch full profile to get profilePictureId and auth status.
     const fetchProfileData = async () => {
       try {
         const response = await fetch("https://cineniche.click/account/me", {
           credentials: "include",
         });
+
         if (response.ok) {
           const data = await response.json();
           setIsLoggedIn(true);
           if (data && typeof data.profilePictureId === "number") {
             setProfilePictureId(data.profilePictureId);
           }
+        } else if (response.status === 401) {
+          // Unauthorized - user not logged in (no error needed)
+          setIsLoggedIn(false);
         } else {
+          console.warn(`Profile fetch returned status ${response.status}`);
           setIsLoggedIn(false);
         }
       } catch (error) {
-        console.error("Error fetching profile in header:", error);
+        console.warn("Error fetching profile in header:", error);
         setIsLoggedIn(false);
       }
     };
-    fetchProfileData();
 
+    fetchProfileData();
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
@@ -51,7 +55,6 @@ function Header() {
     }, 200);
   };
 
-  // Title click navigates to /movies if logged in, otherwise to home.
   const handleTitleClick = () => {
     if (isLoggedIn) {
       navigate("/movies");
@@ -62,7 +65,7 @@ function Header() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("https://localhost:5000/account/logout", {
+      const response = await fetch("https://cineniche.click/account/logout", {
         method: "POST",
         credentials: "include",
       });
@@ -71,10 +74,10 @@ function Header() {
         setIsLoggedIn(false);
         navigate("/");
       } else {
-        console.error("Logout failed");
+        console.warn("Logout failed.");
       }
     } catch (error) {
-      console.error("Error during logout:", error);
+      console.warn("Error during logout:", error);
     }
   };
 
@@ -109,6 +112,7 @@ function Header() {
           CineNiche
         </h1>
       </div>
+
       {isLoggedIn && (
         <div
           ref={dropdownRef}
@@ -129,6 +133,7 @@ function Header() {
           >
             <ProfilePhoto pictureId={profilePictureId} size={40} />
           </div>
+
           {isDropdownOpen && (
             <div
               style={{
@@ -205,22 +210,23 @@ function Header() {
           )}
         </div>
       )}
+
       <style>
         {`
-                    .hover-effect:hover {
-                        background-color: rgba(255,255,255,0.1);
-                    }
-                    @keyframes fadeIn {
-                        from {
-                            opacity: 0;
-                            transform: translateY(-10px);
-                        }
-                        to {
-                            opacity: 1;
-                            transform: translateY(0);
-                        }
-                    }
-                `}
+          .hover-effect:hover {
+            background-color: rgba(255,255,255,0.1);
+          }
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+              transform: translateY(-10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `}
       </style>
     </header>
   );

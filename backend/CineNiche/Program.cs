@@ -58,7 +58,7 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy.WithOrigins("http://localhost:3000",
-             "http://cineniche-frontend.s3-website-us-east-1.amazonaws.com")
+             "https://watch.cineniche.click")
                   .AllowCredentials()
                   .AllowAnyMethod()
                   .AllowAnyHeader();

@@ -6,6 +6,7 @@ import "./HomePage.css";
 import ScrollingPosters from "../components/ScrollingPosters";
 import { useNavigate } from "react-router-dom";
 import NotificationModal from "../components/NotificationModal/NotificationModal";
+//import ConfirmationModal from "../components/ConfirmationModal/ConfirmationModal";
 
 function RegistrationPage() {
   const navigate = useNavigate();
@@ -98,7 +99,7 @@ function RegistrationPage() {
     };
 
     try {
-      const response = await fetch("https://localhost:5000/Account/register", {
+      const response = await fetch("https://cineniche.click/Account/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(registrationData),

@@ -25,7 +25,7 @@ jobs:
         with:
           args: --delete  # ✅ no --acl public-read
         env:
-          AWS_S3_BUCKET: cineniche-frontend
+          AWS_S3_BUCKET: watch.cineniche.click
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: us-east-1
