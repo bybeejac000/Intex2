@@ -47,7 +47,7 @@ function MoviesPage() {
   const [popularData, setPopularData] = useState<Movie[]>([]);
   const [newReleasesData, setNewReleasesData] = useState<Movie[]>([]);
   const [allMoviesData, setAllMoviesData] = useState<Movie[]>([]);
-  const [throwbackData, setThrowbackData] = useState<Movie[]>([]);
+  //const [throwbackData, setThrowbackData] = useState<Movie[]>([]);
   const [similarUsersData, setSimilarUsersData] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -771,7 +771,7 @@ function MoviesPage() {
                   </div>
                 </section>
 
-                {/* Throwback Recommendations Section */}
+                {/* Throwback Recommendations Section
                 <section
                   id="throwbackRecommendations"
                   className="movie-section"
@@ -789,7 +789,7 @@ function MoviesPage() {
                       ))}
                     </div>
                   </div>
-                </section>
+                </section> */}
 
                 {/* All Movies Section */}
                 <section id="allMovies" className="movie-section">
