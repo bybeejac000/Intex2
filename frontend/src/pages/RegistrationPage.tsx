@@ -275,17 +275,18 @@ function RegistrationPage() {
               value={formData.password}
               onChange={handleChange}
             />
-            <p
+            <p style={{ fontSize: "0.65rem" }}
               className={
                 formData.password.length > 0 && formData.password.length < 15
                   ? "text-danger"
                   : ""
               }
             >
-              *Password must contain at least 15 characters{" "}
+              *Password must contain at least 15 characters and contain at least one uppercase letter, one lowercase letter, one number{" "}
               {formData.password.length > 0 &&
                 `(${formData.password.length}/15)`}
             </p>
+            <br />
             <h5 className="mb-4">Confirm password</h5>
             <input
               type="password"
