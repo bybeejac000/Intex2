@@ -84,7 +84,7 @@ function MovieDetailsPage() {
     try {
       // Fetch recommendations from the API
       const response = await fetch(
-        `http://44.214.17.52:5000/recommend?show_id=${id}&num=5`
+        `https://api.cineniche.click/recommend?show_id=${id}&num=5`
       );
       const data = await response.json();
 
@@ -134,12 +134,38 @@ function MovieDetailsPage() {
       // Show brief submitting state
       setSubmittingRating(true);
       
-      // Simulate a short delay
-      setTimeout(() => {
-        // Update local rating display
+      try {
+        // Get user ID from localStorage
+        const userEmail = localStorage.getItem('userId');
+        
+        if (!userEmail) {
+          console.error('Cannot submit rating: User is not logged in');
+          setSubmittingRating(false);
+          return;
+        }
+        
+        // Send rating to the new AddRating endpoint
+        const response = await fetch('https://cineniche.click/CineNiche/AddRating', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },// Include cookies for authentication
+          body: JSON.stringify({
+            user_id: parseInt(userEmail), // Convert to number if stored as string
+            show_id: id,
+            rating: userRating
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Error submitting rating: ${response.statusText}`);
+        }
+        
+        // Update local state to show the new rating
         if (movie) {
           const newNumRatings = (movie.numRatings || 0) + 1;
           const newAvgRating = (((movie.averageRating || 0) * (movie.numRatings || 0)) + userRating) / newNumRatings;
+          
           setMovie({
             ...movie,
             numRatings: newNumRatings,
@@ -154,11 +180,17 @@ function MovieDetailsPage() {
         setSubmittingRating(false);
         setRatingSubmitted(true);
         
+        // Show success message
+        console.log("Rating submitted successfully!");
+        
         // Reset rating after a delay
         setTimeout(() => {
           setRatingSubmitted(false);
-        }, 500);
-      }, 300);
+        }, 2000);
+      } catch (error) {
+        console.error('Error submitting rating:', error);
+        setSubmittingRating(false);
+      }
     };
     
     return (
@@ -285,7 +317,7 @@ function MovieDetailsPage() {
     .replace(/[\(\):\'\.\-&?!Ññ%]/g, "")  // Remove parentheses, colons, and dashes
     .replace(/^#+/, "");
   const imageUrl = title
-    ? `http://44.214.17.52/${encodeURIComponent(title)}.jpg`
+    ? `https://api.cineniche.click/posters/${encodeURIComponent(title)}.jpg`
     : "";
 
   return (
@@ -472,7 +504,7 @@ function MovieDetailsPage() {
                         >
                           {!recImageErrors[index] ? (
                             <img 
-                              src={`http://44.214.17.52/${encodeURIComponent(rec.title.replace(/[\(\):\'\.\-&\!\Ñ\ñ/%]/g, '').replace(/^#+/, ''))}.jpg`}
+                              src={`https://api.cineniche.click/posters/${encodeURIComponent(rec.title.replace(/[\(\):\'\.\-&\!\Ñ\ñ/%]/g, '').replace(/^#+/, ''))}.jpg`}
                               alt={rec.title}
                               onError={() => handleRecImageError(index)}
                               style={{ 

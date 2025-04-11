@@ -11,6 +11,7 @@ import AdminPage from "./pages/AdminPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import AuthorizeView from "./components/AuthorizeView";
 import EmailConfirmationPage from "./pages/EmailConfirmationPage/EmailConfirmationPage";
+import AdminRoute from "./components/AdminRoute";
 import TwoFactorPage from "./components/TwoFactorPage";
 import ContactPage from "./pages/ContactPage";
 import AboutPage from "./pages/AboutPage";
@@ -29,7 +30,9 @@ function App() {
           path="/admin"
           element={
             <AuthorizeView>
-              <AdminPage />
+              <AdminRoute>
+                <AdminPage />
+              </AdminRoute>
             </AuthorizeView>
           }
         />
