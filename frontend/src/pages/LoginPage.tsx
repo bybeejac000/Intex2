@@ -7,22 +7,16 @@ import ScrollingPosters from "../components/ScrollingPosters";
 import { useState, useEffect } from "react";
 import CookieConsent from "../components/CookieConsent";
 
-/**
- * LoginPage Component
- * Handles user authentication with email/password and manages cookie consent
- */
 function LoginPage() {
-  // State variables for form inputs and validation
+  // State variables for email, password, and remember me checkbox
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [rememberme, setRememberme] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  // Cookie consent state (null = not decided, true = accepted, false = declined)
   const [cookiesAccepted, setCookiesAccepted] = useState<boolean | null>(null);
 
   const navigate = useNavigate();
 
-  // Check for existing cookie consent on component mount
   useEffect(() => {
     // Check if user has already made a cookie choice
     const cookieConsent = localStorage.getItem("cookieConsent");
@@ -33,9 +27,7 @@ function LoginPage() {
     }
   }, []);
 
-  /**
-   * Handles form input changes for all fields
-   */
+  // Handle input field changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, type, checked, value } = e.target;
     if (type === "checkbox") {
@@ -47,104 +39,96 @@ function LoginPage() {
     }
   };
 
-  // Cookie consent handlers
+  // Handle cookie consent accept
   const handleCookieAccept = () => {
     setCookiesAccepted(true);
   };
 
+  // Handle cookie consent decline
   const handleCookieDecline = () => {
     setCookiesAccepted(false);
   };
 
-  /**
-   * Handles form submission and authentication
-   * Uses different API endpoints based on cookie preferences
-   */
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(""); // Clear any previous error messages
-
-    // Form validation
+    setError("");
+  
     if (!email || !password) {
       setError("Please fill in all fields.");
       return;
     }
-
-    // Determine login URL based on cookie consent and remember me
+  
+    /* ───────── 1. build login URL (unchanged) ───────── */
     let loginUrl = "https://cineniche.click/login";
-
     if (cookiesAccepted === true) {
-      // If cookies are accepted, use the remember me preference
       loginUrl = rememberme
         ? "https://cineniche.click/login?useCookies=true"
         : "https://cineniche.click/login?useSessionCookies=true";
     } else {
-      // If cookies are declined, always use session cookies
       loginUrl = "https://cineniche.click/login?useSessionCookies=true";
     }
-
+  
     try {
-      // Store email for user ID retrieval
       localStorage.setItem("email", email);
-      const response = await fetch(loginUrl, {
+  
+      /* ───────── 2. POST /login  ───────── */
+      const loginRes = await fetch(loginUrl, {
         method: "POST",
-        credentials: "include", // Always include credentials
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password })
       });
-
-      // Error handling for API response
-      if (!response.ok) {
-        // Handle LockedOut case for 401 Unauthorized
-        if (response.status === 401) {
-          const data = await response.json().catch(() => null); // Avoid JSON parsing errors
-          const errorMessage =
+  
+      /* ---- lock‑out & error handling (unchanged) ---- */
+      if (!loginRes.ok) {
+        if (loginRes.status === 401) {
+          const data = await loginRes.json().catch(() => null);
+          const msg =
             data?.detail === "LockedOut"
               ? "Your account is temporarily locked due to too many failed login attempts. Please try again in 5 minutes."
               : "Invalid email or password.";
-          setError(errorMessage);
-          console.log("Login failed:", errorMessage);
-          throw new Error(errorMessage);
+          setError(msg);
+          throw new Error(msg);
         }
-
-        // Handle any other errors
-        const data = await response.json();
-        const errorMessage = data?.detail || "Invalid email or password.";
-        setError(errorMessage);
-        console.log("Login failed:", errorMessage);
-        throw new Error(errorMessage);
+        const data = await loginRes.json();
+        const msg = data?.detail || "Invalid email or password.";
+        setError(msg);
+        throw new Error(msg);
       }
-
-      // On successful login, fetch and store user ID
+  
+      /* ───────── 3. GET /account/me to check 2‑FA ───────── */
+      const meRes = await fetch("https://cineniche.click/account/me", {
+        credentials: "include"
+      });
+      if (!meRes.ok) throw new Error("Failed to fetch profile after login.");
+      const me = await meRes.json();
+      const twoFA = me.twoFactorEnabled === true;
+  
+      /* ───────── 4. branch on 2‑FA ───────── */
+      if (twoFA) {
+        // skip user‑id fetch; TwoFactorPage handles the next step
+        navigate("/twofactor");
+        return;
+      }
+  
+      /* ───────── 5. no 2‑FA → grab user‑id then movies ───────── */
       await fetchAndStoreUserId();
-
-      // Redirect to movies page after successful login
       navigate("/movies");
-    } catch (error: any) {
-      const errorMsg = error.message || "Error logging in.";
-      console.log("Error caught:", errorMsg);
-
-      // Handle specific error messages
-      if (errorMsg.includes("LockedOut")) {
-        setError(
-          "Your account is temporarily locked due to too many failed login attempts. Please try again in 5 minutes."
-        );
-      } else if (errorMsg.toLowerCase().includes("locked")) {
+    } catch (err: any) {
+      const msg = err.message || "Error logging in.";
+      if (msg.toLowerCase().includes("locked")) {
         setError(
           "Your account is temporarily locked due to too many failed login attempts. Please try again in 5 minutes."
         );
       } else {
-        setError(errorMsg);
+        setError(msg);
       }
-
-      console.error("Fetching attempt failed:", error);
+      console.error("Login flow failed:", err);
     }
   };
+  
 
-  /**
-   * Fetches and stores the user ID in localStorage
-   * Called after successful authentication
-   */
   const fetchAndStoreUserId = async (): Promise<void> => {
     try {
       const email = localStorage.getItem("email");
@@ -172,7 +156,6 @@ function LoginPage() {
   return (
     <>
       <Header />
-      {/* Main container with gradient background */}
       <div
         className="container-fluid p-0 min-vh-100"
         style={{
@@ -184,18 +167,17 @@ function LoginPage() {
         }}
       >
         <div className="row g-0 h-100">
-          {/* Left side - 1/3 of the screen with scrolling movie posters */}
+          {/* Left side - 1/3 of the screen */}
           <div className="col-md-4">
             <ScrollingPosters />
           </div>
 
-          {/* Right side - 2/3 of the screen with login form */}
+          {/* Right side - 2/3 of the screen */}
           <div
             className="col-md-8 d-flex flex-column justify-content-center align-items-center text-light"
             style={{ height: "100vh" }}
           >
             <div className="text-center mb-5">
-              {/* Back button and heading */}
               <div className="text-center mb-5 d-flex align-items-center justify-content-center">
                 <button
                   className="btn btn-link text-light text-decoration-none me-3"
@@ -206,7 +188,6 @@ function LoginPage() {
                 </button>
                 <h1 className="display-1 fw-light mb-0">Log In</h1>
               </div>
-              {/* Login form */}
               <form
                 className="d-flex flex-column gap-3"
                 style={{ maxWidth: "300px", margin: "0 auto" }}
@@ -230,7 +211,6 @@ function LoginPage() {
                   placeholder="Password"
                   className="form-control form-control-lg"
                 />
-                {/* Remember me checkbox */}
                 <div
                   className="form-check mb-3"
                   style={{ textAlign: "left", width: "100%" }}
@@ -252,7 +232,6 @@ function LoginPage() {
                     Remember password
                   </label>
                 </div>
-                {/* Login button - disabled until cookie choice is made */}
                 <button
                   type="submit"
                   className="btn btn-lg"
@@ -269,20 +248,17 @@ function LoginPage() {
                 </button>
               </form>
               <br />
-              {/* Cookie consent message */}
               {cookiesAccepted === null && (
                   <p className="text-warning mt-2" style={{ fontSize: "0.9rem" }}>
                     Please accept or decline the cookie policy to continue
                   </p>
                 )}
-                {/* Error message display */}
                 {error && <p className="error">{error}</p>}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Cookie consent banner component */}
       <CookieConsent
         onAccept={handleCookieAccept}
         onDecline={handleCookieDecline}

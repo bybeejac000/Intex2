@@ -32,3 +32,4 @@ package-lock.json
 .vscode/
 
 .DS_Store
+backend/CineNiche/appsettings.Development.json
