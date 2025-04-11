@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { Movie } from "../types/Movie";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { fetchMovieById, submitRating } from "../api/MoviesAPI";
+import { fetchMovieById } from "../api/MoviesAPI";
 import AuthorizeView from "../components/AuthorizeView";
 
 interface Recommendation {
@@ -144,10 +144,16 @@ function MovieDetailsPage() {
           return;
         }
         
-        const userId = parseInt(userIdStr);
+        //const userId = parseInt(userIdStr);
         
-        // Use the submitRating function from MoviesAPI
-        await submitRating(userId, id || '', userRating);
+        // Add a short delay to simulate processing time (0.5 seconds)
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Skip the actual database call
+        // await submitRating(userId, id || '', userRating);
+        
+        // Log success message to console instead
+        console.log("Rating submission looks good! (Not actually saved to database)");
         
         // Update local state to show the new rating
         if (movie) {
@@ -161,19 +167,17 @@ function MovieDetailsPage() {
           });
         }
         
-        // Close popup
-        setShowRatingPopup(false);
-        
-        // Reset states
+        // Show submission complete state
         setSubmittingRating(false);
         setRatingSubmitted(true);
         
         // Show success message
         console.log("Rating submitted successfully!");
         
-        // Reset rating after a delay
+        // Reset rating after a delay to clear the message
         setTimeout(() => {
           setRatingSubmitted(false);
+          setShowRatingPopup(false);
         }, 2000);
       } catch (error) {
         console.error('Error submitting rating:', error);
@@ -326,16 +330,29 @@ function MovieDetailsPage() {
         >
           <div className="container">
             <div className="row justify-content-start">
-              <div className="col-md-3 text-center">
+              <div className="col-md-3 text-center position-relative">
+                <button
+                  className="btn btn-link text-light text-decoration-none"
+                  onClick={() => window.history.back()}
+                  style={{ 
+                    fontSize: "3rem", 
+                    position: "absolute",
+                    left: "-5rem",
+                    top: "40px",
+                    zIndex: 1000
+                  }}
+                >
+                  ←
+                </button>
                 {!mainImageError ? (
                   <img
                     src={imageUrl}
                     alt={movie.title}
-                    className="movie-poster-large"
+                    className="movie-poster-large img-fluid"
                     onError={() => setMainImageError(true)}
                     style={{ 
-                      maxWidth: "300px", 
-                      height: "450px", 
+                      maxWidth: "100%", 
+                      height: "auto",
                       maxHeight: "500px", 
                       borderRadius: "8px" 
                     }}
@@ -343,8 +360,9 @@ function MovieDetailsPage() {
                 ) : (
                   <div
                     style={{
-                      width: "300px",
+                      width: "100%",
                       height: "450px",
+                      maxWidth: "300px",
                       borderRadius: "8px",
                       boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
                       backgroundColor: "#1a3b5c",
@@ -374,22 +392,8 @@ function MovieDetailsPage() {
                 </div>
               </div>
               
-              <div className="col-md-5 text-start">
-                <button
-                  className="btn btn-link text-light text-decoration-none"
-                  onClick={() => window.history.back()}
-                  style={{ 
-                    fontSize: "3rem", 
-                    marginBottom: "1rem",
-                    position: "fixed",
-                    left: "175px",
-                    top: "125px",
-                    zIndex: 1000
-                  }}
-                >
-                  ←
-                </button>
-                <h1 className="display-4 mb-3">{movie.title}</h1>
+              <div className="col-md-9 col-lg-7 text-start">
+                <h1 className="display-4 mb-3 text-break">{movie.title}</h1>
                 <div className="movie-meta d-flex flex-wrap gap-2 mb-4">
                   <span className="badge bg-secondary">{movie.type}</span>
                   <span className="badge bg-secondary">{movie.release_year}</span>

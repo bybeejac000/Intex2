@@ -4,6 +4,12 @@ import './ProfilePage.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
+
+
+duplcate page, see profile page in the ProfilePage folder
+
+
+
 const ProfilePage = () => {
   return (
     <>

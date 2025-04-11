@@ -8,10 +8,21 @@ import { useNavigate } from "react-router-dom";
 import NotificationModal from "../components/NotificationModal/NotificationModal";
 //import ConfirmationModal from "../components/ConfirmationModal/ConfirmationModal";
 
+/**
+ * RegistrationPage Component
+ * 
+ * A multi-step registration form that collects user information, creates an account,
+ * and verifies the user's email with a verification code.
+ * 
+ * The registration process consists of 9 steps:
+ * 1-7: Collecting user information (name, location, contact, credentials)
+ * 8: Review information and agree to terms
+ * 9: Enter verification code sent to email
+ */
 function RegistrationPage() {
   const navigate = useNavigate();
 
-  // Steps 1-8: Registration fields, including confirmPassword and agreed (checkbox)
+  // Form data state to store all user registration information
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -24,14 +35,15 @@ function RegistrationPage() {
     agreed: false,
   });
 
-  // Step 9: 4-digit verification code entry
+  // State for the 4-digit verification code at step 9
   const [verificationDigits, setVerificationDigits] = useState([
     "",
     "",
     "",
     "",
   ]);
-  // Refs for the 4 input boxes
+  
+  // Refs for the 4 verification code input boxes to enable auto-focus
   const digitRefs = [
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
@@ -39,16 +51,19 @@ function RegistrationPage() {
     useRef<HTMLInputElement>(null),
   ];
 
-  // The step can go from 1 to 9
+  // Current step in the registration process (1-9)
   const [step, setStep] = useState(1);
 
-  // State for notification modals (replaces alerts)
+  // State for displaying notification modals instead of alerts
   const [notification, setNotification] = useState({
     show: false,
     message: "",
   });
 
-  // Handle changes for any registration field
+  /**
+   * Updates form data state when input fields change
+   * Handles both text inputs and checkbox (for terms agreement)
+   */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     if (type === "checkbox") {
@@ -59,7 +74,10 @@ function RegistrationPage() {
     }
   };
 
-  // Intercept Enter key presses to avoid unwanted form submission
+  /**
+   * Prevents form submission when Enter key is pressed
+   * Instead advances to next step when appropriate
+   */
   const handleFormKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -71,7 +89,10 @@ function RegistrationPage() {
     }
   };
 
-  // Advance to the next step. If step 7, check password length.
+  /**
+   * Advances to the next step in the registration process
+   * Includes validation for password length at step 7
+   */
   const handleNext = () => {
     if (step === 7 && formData.password.length < 15) {
       setNotification({
@@ -85,7 +106,11 @@ function RegistrationPage() {
     }
   };
 
-  // Submit registration on step 8
+  /**
+   * Handles form submission at step 8
+   * Sends registration data to the server API
+   * Moves to verification step on success
+   */
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const registrationData = {
@@ -106,6 +131,7 @@ function RegistrationPage() {
       });
 
       if (response.ok) {
+        // Store email temporarily for verification step
         localStorage.setItem("pendingRegistrationEmail", formData.email);
         setNotification({
           show: true,
@@ -130,7 +156,10 @@ function RegistrationPage() {
     }
   };
 
-  // Handling each verification digit box for step 9
+  /**
+   * Handles input changes for the verification code digits
+   * Automatically focuses the next input box when a digit is entered
+   */
   const handleDigitChange = (index: number, value: string) => {
     if (value.length > 1) return;
     const newDigits = [...verificationDigits];
@@ -142,7 +171,10 @@ function RegistrationPage() {
     }
   };
 
-  // Hardcoded "0000" for verification code
+  /**
+   * Verifies the entered code against hardcoded "0000"
+   * Navigates to movies page on success
+   */
   const handleVerifyCode = () => {
     const codeEntered = verificationDigits.join("");
     if (codeEntered === "0000") {
@@ -157,6 +189,7 @@ function RegistrationPage() {
     }
   };
 
+  // Common button style used throughout the form
   const buttonStyle = {
     backgroundColor: "#1976d2",
     color: "white",
@@ -169,10 +202,13 @@ function RegistrationPage() {
     alignItems: "center",
   };
 
-  // Renders each step's UI
+  /**
+   * Renders the appropriate UI for the current registration step
+   * Each step focuses on a specific piece of information
+   */
   const renderStep = () => {
     switch (step) {
-      // Steps 1–7: user inputs
+      // Step 1: First name
       case 1:
         return (
           <div className="mb-3">
@@ -187,6 +223,7 @@ function RegistrationPage() {
             />
           </div>
         );
+      // Step 2: Last name
       case 2:
         return (
           <div className="mb-3">
@@ -201,6 +238,7 @@ function RegistrationPage() {
             />
           </div>
         );
+      // Step 3: Zip code
       case 3:
         return (
           <div className="mb-3">
@@ -215,6 +253,7 @@ function RegistrationPage() {
             />
           </div>
         );
+      // Step 4: State
       case 4:
         return (
           <div className="mb-3">
@@ -229,6 +268,7 @@ function RegistrationPage() {
             />
           </div>
         );
+      // Step 5: Phone number
       case 5:
         return (
           <div className="mb-3">
@@ -243,6 +283,7 @@ function RegistrationPage() {
             />
           </div>
         );
+      // Step 6: Email address
       case 6:
         return (
           <div className="mb-3">
@@ -257,6 +298,7 @@ function RegistrationPage() {
             />
           </div>
         );
+      // Step 7: Password creation and confirmation
       case 7:
         return (
           <div className="mb-3">
@@ -314,7 +356,7 @@ function RegistrationPage() {
             </p>
           </div>
         );
-      // Step 8: final confirmation + "agreed" checkbox
+      // Step 8: Review information and agree to terms
       case 8:
         return (
           <div className="text-center">
@@ -378,7 +420,7 @@ function RegistrationPage() {
             </button>
           </div>
         );
-      // Step 9: verification code
+      // Step 9: Email verification with 4-digit code
       case 9:
         return (
           <div className="mb-3 text-center">
@@ -435,7 +477,10 @@ function RegistrationPage() {
 
   return (
     <>
+      {/* Header component for site navigation */}
       <Header />
+      
+      {/* Main container with gradient background */}
       <div
         className="container-fluid p-0 min-vh-100"
         style={{
@@ -448,13 +493,17 @@ function RegistrationPage() {
         }}
       >
         <div className="row g-0 h-100">
+          {/* Left column with scrolling movie posters */}
           <div className="col-md-4">
             <ScrollingPosters />
           </div>
+          
+          {/* Right column with registration form */}
           <div
             className="col-md-8 d-flex flex-column justify-content-center align-items-center text-light"
             style={{ height: "100vh" }}
           >
+            {/* Page title with back button */}
             <div
               className="text-center mb-5 d-flex align-items-center justify-content-center"
               style={{ paddingTop: "100px" }}
@@ -472,14 +521,20 @@ function RegistrationPage() {
             </div>
             <br />
             <br />
+            
+            {/* Registration form that adapts based on current step */}
             <form
               className="d-flex flex-column gap-3"
               style={{ maxWidth: "300px", margin: "0 auto" }}
               onSubmit={handleSubmit}
               onKeyDown={handleFormKeyDown}
             >
+              {/* Current step form content */}
               {renderStep()}
+              
+              {/* Navigation buttons */}
               <div className="d-flex justify-content-center gap-3">
+                {/* Back button only on confirmation step */}
                 {step === 8 && (
                   <button
                     type="submit"
@@ -502,6 +557,8 @@ function RegistrationPage() {
                     Go Back and Edit
                   </button>
                 )}
+                
+                {/* Next button for steps 1-7 */}
                 {step < 8 && (
                   <button
                     type="button"
@@ -512,6 +569,8 @@ function RegistrationPage() {
                   </button>
                 )}
               </div>
+              
+              {/* Progress indicator */}
               <div className="mt-3">
                 <p>Step {step} of 9</p>
                 <div className="progress" style={{ marginBottom: "100px" }}>
@@ -529,9 +588,11 @@ function RegistrationPage() {
           </div>
         </div>
       </div>
+      
+      {/* Footer component */}
       <Footer />
 
-      {/* Notification Modal */}
+      {/* Notification Modal for alerts and messages */}
       {notification.show && (
         <NotificationModal
           message={notification.message}

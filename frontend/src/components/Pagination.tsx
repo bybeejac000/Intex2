@@ -96,7 +96,6 @@ const Pagination = ({
 
       <div className="d-flex align-items-center ms-3">
         <label className="me-2" style={{ color: '#FFFFFF', fontWeight: '250', textAlign: 'center', display: 'block' }}>
-          Results per page:
           <select
             className="form-select ms-2"
             value={pageSize}

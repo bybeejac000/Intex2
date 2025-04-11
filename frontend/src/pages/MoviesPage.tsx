@@ -140,6 +140,7 @@ function MoviesPage() {
       setShowCategoryFilter(false);
     }
   };
+
   const fetchMoviesData = async () => {
     try {
       const encodedQuery = encodeURIComponent(
@@ -157,9 +158,10 @@ function MoviesPage() {
       }
       const data = await response.json();
       console.log("Fetched new release data:", data);
-      setNewReleasesData(data); // data should be an array of Movie objects
+      return data; // Return instead of setting state
     } catch (error) {
       console.error("Error fetching data:", error);
+      return [];
     }
   };
   // Fetch data on component mounts
@@ -254,13 +256,8 @@ function MoviesPage() {
         setPopularData(sortedPopularMovies);
 
         // Fetch new releases (sort by release year) (30 at once)
-        const newReleasesResponse = await fetchMovies(
-          30,
-          1,
-          [],
-          "release_year_desc"
-        );
-        setNewReleasesData(newReleasesResponse.movies);
+        const newReleasesData = await fetchMoviesData();
+        setNewReleasesData(newReleasesData);
 
         // Fetch all movies (50 at once)
         const allMoviesResponse = await fetchMovies(30, 1, [], null);
@@ -582,25 +579,6 @@ function MoviesPage() {
                 </svg>
                 {isExpanded && <span>New Releases</span>}
               </div>
-              <div
-                className="nav-item"
-                onClick={() => {
-                  const section = document.querySelector("#allMovies");
-                  if (section) section.scrollIntoView({ behavior: "smooth" });
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  fill="currentColor"
-                  className="bi bi-film"
-                  viewBox="0 0 16 16"
-                >
-                  <path d="M0 1a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V1zm4 0v6h8V1H4zm8 8H4v6h8V9zM1 1v2h2V1H1zm2 3H1v2h2V4zM1 7v2h2V7H1zm2 3H1v2h2v-2zm-2 3v2h2v-2H1zM15 1h-2v2h2V1zm-2 3v2h2V4h-2zm2 3h-2v2h2V7zm-2 3v2h2v-2h-2zm2 3h-2v2h2v-2z" />
-                </svg>
-                {isExpanded && <span>All Movies</span>}
-              </div>
 
               {/* Category Filter Button */}
               <div
@@ -618,6 +596,26 @@ function MoviesPage() {
                   <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z" />
                 </svg>
                 {isExpanded && <span>Filter by Genre</span>}
+              </div>
+
+              <div
+                className="nav-item"
+                onClick={() => {
+                  const section = document.querySelector("#allMovies");
+                  if (section) section.scrollIntoView({ behavior: "smooth" });
+                }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  fill="currentColor"
+                  className="bi bi-film"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M0 1a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V1zm4 0v6h8V1H4zm8 8H4v6h8V9zM1 1v2h2V1H1zm2 3H1v2h2V4zM1 7v2h2V7H1zm2 3H1v2h2v-2zm-2 3v2h2v-2H1zM15 1h-2v2h2V1zm-2 3v2h2V4h-2zm2 3h-2v2h2V7zm-2 3v2h2v-2h-2zm2 3h-2v2h2v-2z" />
+                </svg>
+                {isExpanded && <span>Similar Users</span>}
               </div>
 
               {/* Category Filter Dropdown */}

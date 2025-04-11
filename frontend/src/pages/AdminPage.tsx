@@ -1,3 +1,8 @@
+/**
+ * AdminMoviesPage - Administrator interface for movie database management
+ * Provides functionality for viewing, sorting, filtering, adding, editing, and deleting movies
+ * with pagination support and business analytics features
+ */
 import { useEffect, useState } from "react";
 import { Movie } from "../types/Movie";
 import { deleteMovie, fetchMovies } from "../api/MoviesAPI";
@@ -10,18 +15,19 @@ import Footer from "../components/Footer";
 import AuthorizeView from "../components/AuthorizeView";
 
 const AdminMoviesPage = () => {
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [pageSize, setPageSize] = useState<number>(10);
-  const [pageNum, setPageNum] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(0);
-  const [sortOrder, setSortOrder] = useState<string | null>(null);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  // State management for movie data and UI controls
+  const [movies, setMovies] = useState<Movie[]>([]); // Stores the current page of movies
+  const [error, setError] = useState<string | null>(null); // Error message if API request fails
+  const [loading, setLoading] = useState(true); // Loading indicator for API requests
+  const [pageSize, setPageSize] = useState<number>(10); // Number of movies per page
+  const [pageNum, setPageNum] = useState<number>(1); // Current page number
+  const [totalPages, setTotalPages] = useState<number>(0); // Total number of pages
+  const [sortOrder, setSortOrder] = useState<string | null>(null); // Current sort order
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]); // Selected genre filters
+  const [searchTerm, setSearchTerm] = useState<string>(""); // Current search input
+  const [searchQuery, setSearchQuery] = useState<string>(""); // Submitted search query
 
-  // Fetch movies on page change, sort change, and page size change
+  // Fetch movies when filter parameters change
   useEffect(() => {
     const loadMovies = async () => {
       try {
@@ -44,6 +50,10 @@ const AdminMoviesPage = () => {
     loadMovies();
   }, [pageSize, pageNum, sortOrder, selectedCategories, searchQuery]);
 
+  /**
+   * Handles movie deletion with confirmation
+   * @param show_id - The unique ID of the movie to delete
+   */
   const handleDelete = async (show_id: string) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this movie?"
@@ -58,12 +68,17 @@ const AdminMoviesPage = () => {
     }
   };
 
+  /**
+   * Submits the search form and updates the search query
+   * @param e - Form submission event
+   */
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPageNum(1); // Reset to first page when searching
     setSearchQuery(searchTerm); // Use the entered search term when submitting the form
   };
 
+  // Display loading or error states
   if (loading) return <p>Loading Movies...</p>;
   if (error) return <p className="text-red-500">Error: {error}</p>;
 
@@ -71,6 +86,7 @@ const AdminMoviesPage = () => {
     <>
       <AuthorizeView>
         <Header />
+        {/* Main container with gradient background */}
         <div
           className="container-fluid min-vh-100"
           style={{
@@ -81,6 +97,7 @@ const AdminMoviesPage = () => {
               "linear-gradient(135deg, #000810 00%, #00294D 70%)",
           }}
         >
+          {/* Page title section */}
           <div className="d-flex justify-content-center align-items-center pt-5">
             <button
               className="btn btn-link text-light text-decoration-none me-3"
@@ -100,6 +117,8 @@ const AdminMoviesPage = () => {
               respective information and reviews.
             </h5>
           </div>
+          
+          {/* Add new movie button */}
           <button
             className="btn"
             data-bs-toggle="modal"
@@ -118,7 +137,7 @@ const AdminMoviesPage = () => {
           <br />
 
           <div className="row">
-            {/* Left Column - Filters */}
+            {/* Left Column - Filters and search options */}
             <div className="col-md-3">
               <div
                 className="card shadow"
@@ -161,6 +180,7 @@ const AdminMoviesPage = () => {
                     )}
                   </form>
 
+                  {/* Sort options section */}
                   <h3
                     className="card-title h5 mb-3"
                     style={{ color: "#00294D" }}
@@ -190,6 +210,7 @@ const AdminMoviesPage = () => {
                       Sort Z → A
                     </button>
                     <br />
+                    {/* Business analytics sorting options */}
                     <h3
                     className="card-title h5 mb-3"
                     style={{ color: "#00294D" }}
@@ -226,13 +247,15 @@ const AdminMoviesPage = () => {
                     </button>
                   </div>
 
+                  {/* Genre filter checkboxes */}
                   <h3
                     className="card-title h5 mb-3"
-                    style={{ color: "#00294D" }}
+                    style={{ color: "#00294D", textAlign: 'center' }}
                   >
                     Filter by Categories
                   </h3>
-                  <div className="form-check mb-2">
+                  {/* Action & Adventure filter */}
+                  <div className="form-check mb-2" style={{ textAlign: 'left' }}>
                     <input
                       className="form-check-input"
                       type="checkbox"
@@ -257,7 +280,8 @@ const AdminMoviesPage = () => {
                     </label>
                   </div>
                   
-                  <div className="form-check mb-2">
+                  {/* Comedy filter */}
+                  <div className="form-check mb-2" style={{ textAlign: 'left' }}>
                     <input
                       className="form-check-input"
                       type="checkbox"
@@ -286,7 +310,8 @@ const AdminMoviesPage = () => {
                     </label>
                   </div>
 
-                  <div className="form-check mb-2">
+                  {/* Drama filter */}
+                  <div className="form-check mb-2" style={{ textAlign: 'left' }}>
                     <input
                       className="form-check-input"
                       type="checkbox"
@@ -316,7 +341,8 @@ const AdminMoviesPage = () => {
                     </label>
                   </div>
 
-                  <div className="form-check mb-2">
+                  {/* Documentary filter */}
+                  <div className="form-check mb-2" style={{ textAlign: 'left' }}>
                     <input
                       className="form-check-input"
                       type="checkbox"
@@ -344,7 +370,8 @@ const AdminMoviesPage = () => {
                     </label>
                   </div>
 
-                  <div className="form-check mb-2">
+                  {/* Kids & Family filter */}
+                  <div className="form-check mb-2" style={{ textAlign: 'left' }}>
                     <input
                       className="form-check-input"
                       type="checkbox"
@@ -370,7 +397,8 @@ const AdminMoviesPage = () => {
                     </label>
                   </div>
 
-                  <div className="form-check mb-2">
+                  {/* Thriller & Horror filter */}
+                  <div className="form-check mb-2" style={{ textAlign: 'left' }}>
                     <input
                       className="form-check-input"
                       type="checkbox"
@@ -396,7 +424,8 @@ const AdminMoviesPage = () => {
                     </label>
                   </div>
 
-                  <div className="form-check mb-2">
+                  {/* International filter */}
+                  <div className="form-check mb-2" style={{ textAlign: 'left' }}>
                     <input
                       className="form-check-input"
                       type="checkbox"
@@ -435,8 +464,14 @@ const AdminMoviesPage = () => {
                     </label>
                   </div>
 
+                  {/* Page size selector */}
                   <div className="mt-4">
-                    <label className="form-label">Results per page:</label>
+                  <h3
+                    className="card-title h5 mb-3"
+                    style={{ color: "#00294D", textAlign: 'center' }}
+                  >
+                    Results Per Page
+                  </h3>
                     <select
                       className="form-select"
                       value={pageSize}
@@ -454,7 +489,7 @@ const AdminMoviesPage = () => {
               </div>
             </div>
 
-            {/* Right Column - Movie List */}
+            {/* Right Column - Movie list display with actions */}
             <div className="col-md-9">
               {movies.length === 0 ? (
                 <div className="alert alert-info">
@@ -509,6 +544,7 @@ const AdminMoviesPage = () => {
                 ))
               )}
 
+              {/* Pagination controls */}
               <div className="mt-4">
                 <Pagination
                   currentPage={pageNum}
@@ -521,7 +557,7 @@ const AdminMoviesPage = () => {
             </div>
           </div>
 
-          {/* Add Movie Modal */}
+          {/* Modal for adding a new movie */}
           <div
             className="modal fade"
             id="addMovieModal"
@@ -555,6 +591,7 @@ const AdminMoviesPage = () => {
                 <div className="modal-body">
                   <NewMovieForm
                     onSuccess={() => {
+                      // Close modal and refresh movie list after successful add
                       const modalElement =
                         document.getElementById("addMovieModal");
                       if (modalElement) {
@@ -570,6 +607,7 @@ const AdminMoviesPage = () => {
                       ).then((data) => setMovies(data.movies));
                     }}
                     onCancel={() => {
+                      // Just close the modal on cancel
                       const modalElement =
                         document.getElementById("addMovieModal");
                       if (modalElement) {
@@ -583,7 +621,7 @@ const AdminMoviesPage = () => {
             </div>
           </div>
 
-          {/* Info Modals */}
+          {/* Modals for displaying detailed movie information */}
           {movies.map((m) => (
             <div
               key={`modal-${m.show_id}`}
@@ -615,6 +653,7 @@ const AdminMoviesPage = () => {
                     ></button>
                   </div>
                   <div className="modal-body">
+                    {/* Display all movie details */}
                     <p>
                       <strong>Show ID:</strong> {m.show_id}
                     </p>
@@ -649,6 +688,7 @@ const AdminMoviesPage = () => {
                     <div>
                       <strong>Genre{"(s)"}:</strong>
                       <ul className="list-unstyled mb-0">
+                        {/* Dynamically list all genres (properties with value 1) */}
                         {Object.keys(m).map((key) => {
                           if (
                             key !== "show_id" &&
@@ -682,7 +722,7 @@ const AdminMoviesPage = () => {
             </div>
           ))}
 
-          {/* Edit Movie Modal */}
+          {/* Modals for editing existing movies */}
           {movies.map((m) => (
             <div
               key={`edit-modal-${m.show_id}`}
@@ -719,6 +759,7 @@ const AdminMoviesPage = () => {
                     <EditMovieForm
                       movie={m}
                       onSuccess={() => {
+                        // Close modal and refresh movie list after successful edit
                         const modalElement = document.getElementById(
                           `editMovieModal${m.show_id}`
                         );
@@ -735,6 +776,7 @@ const AdminMoviesPage = () => {
                         ).then((data) => setMovies(data.movies));
                       }}
                       onCancel={() => {
+                        // Just close the modal on cancel
                         const modalElement = document.getElementById(
                           `editMovieModal${m.show_id}`
                         );

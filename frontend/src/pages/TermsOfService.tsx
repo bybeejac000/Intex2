@@ -3,9 +3,14 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "./PrivacyPage.css";
 
+/**
+ * Terms of Service page component
+ * Displays the platform's terms and conditions with navigable sections
+ */
 const TermsPage = () => {
   const navigate = useNavigate();
 
+  // Define sections for the sidebar navigation
   const sections = [
     { id: "introduction", title: "Introduction" },
     { id: "acceptance", title: "Acceptance of Terms" },
@@ -19,14 +24,20 @@ const TermsPage = () => {
     { id: "contact", title: "How to Contact Us" },
   ];
 
+  // Navigate back to previous page
   const handleBack = () => {
     navigate(-1);
   };
 
+  // Handle print functionality
   const handlePrint = () => {
     window.print();
   };
 
+  /**
+   * Scrolls the page to the specified section
+   * @param id - The ID of the section to scroll to
+   */
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -45,13 +56,14 @@ const TermsPage = () => {
   return (
     <>
       <Header />
+      {/* Spacer to prevent content from being hidden under fixed header */}
       <div style={{ height: '50px' }} />
       <div className="privacy-container">
         <button className="back-button" onClick={handleBack}>
           &#8592; Back
         </button>
 
-        {/* Sidebar */}
+        {/* Sidebar navigation menu */}
         <aside className="privacy-sidebar">
           <h2>Contents</h2>
           <ul>
@@ -68,10 +80,11 @@ const TermsPage = () => {
           </button>
         </aside>
 
-        {/* Main Content */}
+        {/* Main content with Terms of Service sections */}
         <main className="privacy-main">
           <h1 className="policy-title">CineNiche Terms of Service</h1>
 
+          {/* Terms of Service content organized by sections */}
           <section id="introduction">
             <h2 className="section-title">Introduction</h2>
             <p>
@@ -146,7 +159,7 @@ const TermsPage = () => {
               Disclaimer & Limitation of Liability
             </h2>
             <p>
-              CineNiche is provided “as is” without warranties of any kind. We
+              CineNiche is provided "as is" without warranties of any kind. We
               do not guarantee uninterrupted service or freedom from errors. In
               no event shall CineNiche or its contributors be liable for any
               damages arising out of your use of the service.

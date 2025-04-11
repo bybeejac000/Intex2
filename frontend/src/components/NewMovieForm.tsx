@@ -204,44 +204,322 @@ const NewMovieForm = ({ onSuccess, onCancel }: NewMovieFormProps) => {
       </div>
 
       {/* Categories */}
-      <div className="mb-4">
-        <h3 style={{ color: '#00294D', marginBottom: '1rem' }}>Categories</h3>
+      <div className="mb-4" style={{ textAlign: 'left' }}>
+        <h3 style={{ color: '#00294D', marginBottom: '1rem', textAlign: 'center' }}>Categories</h3>
         <div className="row g-2">
-          {Object.keys(formData)
-            .filter(key => 
-              key !== "show_id" &&
-              key !== "title" &&
-              key !== "director" &&
-              key !== "cast" &&
-              key !== "country" &&
-              key !== "release_year" &&
-              key !== "rating" &&
-              key !== "duration" &&
-              key !== "description" &&
-              key !== "type"
-            )
-            .map((key) => (
-              <div key={key} className="col-md-3 col-sm-4 col-6">
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    name={key}
-                    id={key}
-                    checked={formData[key as keyof Movie] === 1}
-                    onChange={handleChange}
-                    style={{ borderColor: '#1976d2' }}
-                  />
-                  <label 
-                    className="form-check-label" 
-                    htmlFor={key}
-                    style={{ color: '#00294D', fontWeight: '500', textAlign: 'left', paddingLeft: '10px', paddingTop: '2px' }}
-                  >
-                    {key.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
-                  </label>
-                </div>
-              </div>
-            ))}
+          {/* Action & Adventure */}
+          <div className="col-md-4">
+            <div className="form-check mb-2">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="actionAdventureCheck"
+                checked={formData.action === 1 || formData.adventure === 1 || formData.tv_action === 1}
+                onChange={() => {
+                  const newValue = !(formData.action === 1 && formData.adventure === 1 && formData.tv_action === 1) ? 1 : 0;
+                  setFormData({
+                    ...formData,
+                    action: newValue,
+                    adventure: newValue,
+                    tv_action: newValue
+                  });
+                }}
+              />
+              <label className="form-check-label" htmlFor="actionAdventureCheck">
+                Action & Adventure
+              </label>
+            </div>
+          </div>
+
+          {/* Comedy */}
+          <div className="col-md-4" style={{ textAlign: 'left' }}>
+            <div className="form-check mb-2">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="comedyCheck"
+                checked={formData.comedies === 1 || formData.comedies_romantic_movies === 1 || 
+                        formData.tv_comedies === 1 || formData.talk_shows_tv_comedies === 1 ||
+                        formData.comedies_international_movies === 1 || formData.comedies_dramas_international_movies === 1}
+                onChange={() => {
+                  const newValue = !(formData.comedies === 1 && formData.comedies_romantic_movies === 1 && 
+                                    formData.tv_comedies === 1 && formData.talk_shows_tv_comedies === 1 &&
+                                    formData.comedies_international_movies === 1 && formData.comedies_dramas_international_movies === 1) ? 1 : 0;
+                  setFormData({
+                    ...formData,
+                    comedies: newValue,
+                    comedies_romantic_movies: newValue,
+                    tv_comedies: newValue,
+                    talk_shows_tv_comedies: newValue,
+                    comedies_international_movies: newValue,
+                    comedies_dramas_international_movies: newValue
+                  });
+                }}
+              />
+              <label className="form-check-label" htmlFor="comedyCheck">
+                Comedy
+              </label>
+            </div>
+          </div>
+
+          {/* Drama */}
+          <div className="col-md-4">
+            <div className="form-check mb-2">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="dramaCheck"
+                checked={formData.dramas === 1 || formData.dramas_romantic_movies === 1 || 
+                        formData.tv_dramas === 1 || formData.dramas_international_movies === 1 ||
+                        formData.comedies_dramas_international_movies === 1 || 
+                        formData.international_tv_shows_romantic_tv_shows_tv_dramas === 1}
+                onChange={() => {
+                  const newValue = !(formData.dramas === 1 && formData.dramas_romantic_movies === 1 && 
+                                    formData.tv_dramas === 1 && formData.dramas_international_movies === 1 &&
+                                    formData.comedies_dramas_international_movies === 1 && 
+                                    formData.international_tv_shows_romantic_tv_shows_tv_dramas === 1) ? 1 : 0;
+                  setFormData({
+                    ...formData,
+                    dramas: newValue,
+                    dramas_romantic_movies: newValue,
+                    tv_dramas: newValue,
+                    dramas_international_movies: newValue,
+                    comedies_dramas_international_movies: newValue,
+                    international_tv_shows_romantic_tv_shows_tv_dramas: newValue
+                  });
+                }}
+              />
+              <label className="form-check-label" htmlFor="dramaCheck">
+                Drama
+              </label>
+            </div>
+          </div>
+
+          {/* Documentaries */}
+          <div className="col-md-4">
+            <div className="form-check mb-2">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="documentaryCheck"
+                checked={formData.documentaries === 1 || formData.documentaries_international_movies === 1 || 
+                        formData.docuseries === 1 || formData.crime_tv_shows_docuseries === 1 ||
+                        formData.british_tv_shows_docuseries_international_tv_shows === 1}
+                onChange={() => {
+                  const newValue = !(formData.documentaries === 1 && formData.documentaries_international_movies === 1 && 
+                                    formData.docuseries === 1 && formData.crime_tv_shows_docuseries === 1 &&
+                                    formData.british_tv_shows_docuseries_international_tv_shows === 1) ? 1 : 0;
+                  setFormData({
+                    ...formData,
+                    documentaries: newValue,
+                    documentaries_international_movies: newValue,
+                    docuseries: newValue,
+                    crime_tv_shows_docuseries: newValue,
+                    british_tv_shows_docuseries_international_tv_shows: newValue
+                  });
+                }}
+              />
+              <label className="form-check-label" htmlFor="documentaryCheck">
+                Documentaries
+              </label>
+            </div>
+          </div>
+
+          {/* Kids & Family */}
+          <div className="col-md-4">
+            <div className="form-check mb-2">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="familyCheck"
+                checked={formData.children === 1 || formData.family_movies === 1 || 
+                        formData.kids_tv === 1}
+                onChange={() => {
+                  const newValue = !(formData.children === 1 && formData.family_movies === 1 && 
+                                    formData.kids_tv === 1) ? 1 : 0;
+                  setFormData({
+                    ...formData,
+                    children: newValue,
+                    family_movies: newValue,
+                    kids_tv: newValue
+                  });
+                }}
+              />
+              <label className="form-check-label" htmlFor="familyCheck">
+                Kids & Family
+              </label>
+            </div>
+          </div>
+
+          {/* Thriller & Horror */}
+          <div className="col-md-4">
+            <div className="form-check mb-2">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="thrillerCheck"
+                checked={formData.thrillers === 1 || formData.horror_movies === 1 || 
+                        formData.international_movies_thrillers === 1}
+                onChange={() => {
+                  const newValue = !(formData.thrillers === 1 && formData.horror_movies === 1 && 
+                                    formData.international_movies_thrillers === 1) ? 1 : 0;
+                  setFormData({
+                    ...formData,
+                    thrillers: newValue,
+                    horror_movies: newValue,
+                    international_movies_thrillers: newValue
+                  });
+                }}
+              />
+              <label className="form-check-label" htmlFor="thrillerCheck">
+                Thriller & Horror
+              </label>
+            </div>
+          </div>
+
+          {/* International */}
+          <div className="col-md-4">
+            <div className="form-check mb-2">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="internationalCheck"
+                checked={formData.international_movies_thrillers === 1 || 
+                        formData.comedies_international_movies === 1 || 
+                        formData.dramas_international_movies === 1 || 
+                        formData.documentaries_international_movies === 1 ||
+                        formData.anime_series_international_tv_shows === 1 ||
+                        formData.british_tv_shows_docuseries_international_tv_shows === 1 ||
+                        formData.international_tv_shows_romantic_tv_shows_tv_dramas === 1 ||
+                        formData.language_tv_shows === 1}
+                onChange={() => {
+                  const newValue = !(formData.international_movies_thrillers === 1 && 
+                                    formData.comedies_international_movies === 1 && 
+                                    formData.dramas_international_movies === 1 && 
+                                    formData.documentaries_international_movies === 1 &&
+                                    formData.anime_series_international_tv_shows === 1 &&
+                                    formData.british_tv_shows_docuseries_international_tv_shows === 1 &&
+                                    formData.international_tv_shows_romantic_tv_shows_tv_dramas === 1 &&
+                                    formData.language_tv_shows === 1) ? 1 : 0;
+                  setFormData({
+                    ...formData,
+                    international_movies_thrillers: newValue,
+                    comedies_international_movies: newValue,
+                    dramas_international_movies: newValue,
+                    documentaries_international_movies: newValue,
+                    anime_series_international_tv_shows: newValue,
+                    british_tv_shows_docuseries_international_tv_shows: newValue,
+                    international_tv_shows_romantic_tv_shows_tv_dramas: newValue,
+                    language_tv_shows: newValue
+                  });
+                }}
+              />
+              <label className="form-check-label" htmlFor="internationalCheck">
+                International
+              </label>
+            </div>
+          </div>
+
+          {/* Other categories */}
+          <div className="col-md-4">
+            <div className="form-check mb-2">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="fantasyCheck"
+                checked={formData.fantasy === 1}
+                onChange={() => {
+                  setFormData({
+                    ...formData,
+                    fantasy: formData.fantasy === 0 ? 1 : 0
+                  });
+                }}
+              />
+              <label className="form-check-label" htmlFor="fantasyCheck">
+                Fantasy
+              </label>
+            </div>
+          </div>
+          
+          <div className="col-md-4">
+            <div className="form-check mb-2">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="musicalsCheck"
+                checked={formData.musicals === 1}
+                onChange={() => {
+                  setFormData({
+                    ...formData,
+                    musicals: formData.musicals === 0 ? 1 : 0
+                  });
+                }}
+              />
+              <label className="form-check-label" htmlFor="musicalsCheck">
+                Musicals
+              </label>
+            </div>
+          </div>
+          
+          <div className="col-md-4">
+            <div className="form-check mb-2">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="natureCheck"
+                checked={formData.nature_tv === 1}
+                onChange={() => {
+                  setFormData({
+                    ...formData,
+                    nature_tv: formData.nature_tv === 0 ? 1 : 0
+                  });
+                }}
+              />
+              <label className="form-check-label" htmlFor="natureCheck">
+                Nature TV
+              </label>
+            </div>
+          </div>
+          
+          <div className="col-md-4">
+            <div className="form-check mb-2">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="realityCheck"
+                checked={formData.reality_tv === 1}
+                onChange={() => {
+                  setFormData({
+                    ...formData,
+                    reality_tv: formData.reality_tv === 0 ? 1 : 0
+                  });
+                }}
+              />
+              <label className="form-check-label" htmlFor="realityCheck">
+                Reality TV
+              </label>
+            </div>
+          </div>
+          
+          <div className="col-md-4">
+            <div className="form-check mb-2">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="spiritualityCheck"
+                checked={formData.spirituality === 1}
+                onChange={() => {
+                  setFormData({
+                    ...formData,
+                    spirituality: formData.spirituality === 0 ? 1 : 0
+                  });
+                }}
+              />
+              <label className="form-check-label" htmlFor="spiritualityCheck">
+                Spirituality
+              </label>
+            </div>
+          </div>
         </div>
       </div>
 

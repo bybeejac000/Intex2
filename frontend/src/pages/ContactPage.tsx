@@ -1,30 +1,42 @@
 // ContactPage.tsx
-//import React from 'react';
+// This component displays the Contact page containing contact information and a brief message
+
 import { useNavigate } from 'react-router-dom';
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import "./PrivacyPage.css";
+import "./PrivacyPage.css"; // Using the same styling as the Privacy page
 
+/**
+ * ContactPage component displays company contact information
+ * along with a brief message about the company's commitment to user experience
+ */
 const ContactPage = () => {
+  // Initialize navigation hook for page navigation
   const navigate = useNavigate();
 
+  // Handler to navigate back to the previous page
   const handleBack = () => {
     navigate(-1);
   };
 
+  // Handler to print the current page
   const handlePrint = () => {
     window.print();
   };
 
   return (
     <>
+      {/* Page header component */}
       <Header />
+      {/* Spacing element to provide margin below header */}
       <div style={{ height: '50px' }} />
       <div className="privacy-container">
+        {/* Back navigation button */}
         <button className="back-button" onClick={handleBack}>
           ← Back
         </button>
 
+        {/* Sidebar with contact information */}
         <aside className="privacy-sidebar">
           <h2>Contact Info</h2>
           <ul>
@@ -37,11 +49,13 @@ const ContactPage = () => {
               </span>
             </li>
           </ul>
+          {/* Print page button */}
           <button className="print-button" onClick={handlePrint}>
             Print
           </button>
         </aside>
 
+        {/* Main content area */}
         <main className="privacy-main">
           <h1 className="policy-title">Contact CineNiche</h1>
           <p>
@@ -52,6 +66,7 @@ const ContactPage = () => {
           </p>
         </main>
       </div>
+      {/* Page footer component */}
       <Footer />
     </>
   );
