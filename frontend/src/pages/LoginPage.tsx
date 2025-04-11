@@ -52,82 +52,82 @@ function LoginPage() {
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(""); // Clear any previous error messages
-
+    setError("");
+  
     if (!email || !password) {
       setError("Please fill in all fields.");
       return;
     }
-
-    // Determine login URL based on cookie consent and remember me
+  
+    /* ───────── 1. build login URL (unchanged) ───────── */
     let loginUrl = "https://cineniche.click/login";
-
     if (cookiesAccepted === true) {
-      // If cookies are accepted, use the remember me preference
       loginUrl = rememberme
         ? "https://cineniche.click/login?useCookies=true"
         : "https://cineniche.click/login?useSessionCookies=true";
     } else {
-      // If cookies are declined, always use session cookies
       loginUrl = "https://cineniche.click/login?useSessionCookies=true";
     }
-
+  
     try {
       localStorage.setItem("email", email);
-      const response = await fetch(loginUrl, {
+  
+      /* ───────── 2. POST /login  ───────── */
+      const loginRes = await fetch(loginUrl, {
         method: "POST",
-        credentials: "include", // Always include credentials
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password })
       });
-
-      // Check if the response status indicates an error
-      if (!response.ok) {
-        // Handle LockedOut case for 401 Unauthorized
-        if (response.status === 401) {
-          const data = await response.json().catch(() => null); // Avoid JSON parsing errors
-          const errorMessage =
+  
+      /* ---- lock‑out & error handling (unchanged) ---- */
+      if (!loginRes.ok) {
+        if (loginRes.status === 401) {
+          const data = await loginRes.json().catch(() => null);
+          const msg =
             data?.detail === "LockedOut"
               ? "Your account is temporarily locked due to too many failed login attempts. Please try again in 5 minutes."
               : "Invalid email or password.";
-          setError(errorMessage);
-          console.log("Login failed:", errorMessage);
-          throw new Error(errorMessage);
+          setError(msg);
+          throw new Error(msg);
         }
-
-        // Handle any other errors
-        const data = await response.json();
-        const errorMessage = data?.detail || "Invalid email or password.";
-        setError(errorMessage);
-        console.log("Login failed:", errorMessage);
-        throw new Error(errorMessage);
+        const data = await loginRes.json();
+        const msg = data?.detail || "Invalid email or password.";
+        setError(msg);
+        throw new Error(msg);
       }
-
-      // Always fetch user ID regardless of cookie preference
+  
+      /* ───────── 3. GET /account/me to check 2‑FA ───────── */
+      const meRes = await fetch("https://cineniche.click/account/me", {
+        credentials: "include"
+      });
+      if (!meRes.ok) throw new Error("Failed to fetch profile after login.");
+      const me = await meRes.json();
+      const twoFA = me.twoFactorEnabled === true;
+  
+      /* ───────── 4. branch on 2‑FA ───────── */
+      if (twoFA) {
+        // skip user‑id fetch; TwoFactorPage handles the next step
+        navigate("/twofactor");
+        return;
+      }
+  
+      /* ───────── 5. no 2‑FA → grab user‑id then movies ───────── */
       await fetchAndStoreUserId();
-
       navigate("/movies");
-    } catch (error: any) {
-      const errorMsg = error.message || "Error logging in.";
-      console.log("Error caught:", errorMsg);
-
-      if (errorMsg.includes("LockedOut")) {
-        setError(
-          "Your account is temporarily locked due to too many failed login attempts. Please try again in 5 minutes."
-        );
-      } else if (errorMsg.toLowerCase().includes("locked")) {
+    } catch (err: any) {
+      const msg = err.message || "Error logging in.";
+      if (msg.toLowerCase().includes("locked")) {
         setError(
           "Your account is temporarily locked due to too many failed login attempts. Please try again in 5 minutes."
         );
       } else {
-        setError(errorMsg);
+        setError(msg);
       }
-
-      console.error("Fetching attempt failed:", error);
-      // setError(error.message || "Error logging in.");
-      // console.error("Fetching attempt failed:", error);
+      console.error("Login flow failed:", err);
     }
   };
+  
 
   const fetchAndStoreUserId = async (): Promise<void> => {
     try {

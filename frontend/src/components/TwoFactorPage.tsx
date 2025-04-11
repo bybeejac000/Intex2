@@ -7,96 +7,108 @@ import "./TwoFactorPage.css";
 
 const TwoFactorPage: React.FC = () => {
   const navigate = useNavigate();
+
+  // ─── state ─────────────────────────────────────────────────────────
   const [verificationDigits, setVerificationDigits] = useState(["", "", "", ""]);
+  const [notification, setNotification] = useState({ show: false, message: "" });
+  const [timer, setTimer] = useState(30);
   const digitRefs = [
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null)
   ];
-  const [notification, setNotification] = useState({ show: false, message: "" });
-  const [timer, setTimer] = useState(30);
 
-  // Start countdown timer
+  // the e‑mail we stored during login
+  const email = localStorage.getItem("email") ?? "";
+
+  // ─── send first code on mount ──────────────────────────────────────
   useEffect(() => {
-    if (timer <= 0) return;
-    const intervalId = setInterval(() => {
-      setTimer((prev) => {
-        if (prev <= 1) {
-          clearInterval(intervalId);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(intervalId);
+    // immediately send / resend a code
+    fetch("https://cineniche.click/account/resend2fa", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
+
+    // start / restart 30‑second countdown
+    setTimer(30);
+  }, [email]);                          // runs once per e‑mail
+
+  // ─── countdown tick ────────────────────────────────────────────────
+  useEffect(() => {
+    if (timer === 0) return;
+    const id = setInterval(() => setTimer(t => t - 1), 1000);
+    return () => clearInterval(id);
   }, [timer]);
 
-  // Retrieve email from localStorage
-  const email = localStorage.getItem("email") || "";
-
-  const handleDigitChange = (index: number, value: string) => {
+  // ─── input helpers ────────────────────────────────────────────────
+  const handleDigitChange = (idx: number, value: string) => {
     if (value.length > 1) return;
-    const newDigits = [...verificationDigits];
-    newDigits[index] = value;
-    setVerificationDigits(newDigits);
-    if (value.length === 1 && index < 3) {
-      digitRefs[index + 1].current?.focus();
-    }
+    const next = [...verificationDigits];
+    next[idx] = value;
+    setVerificationDigits(next);
+    if (value && idx < 3) digitRefs[idx + 1].current?.focus();
   };
 
-  // Hardcoded verification code "0000"
-  const handleVerifyCode = () => {
-    const codeEntered = verificationDigits.join("");
-    if (codeEntered === "0000") {
-      setNotification({ show: true, message: "2FA Verified! Logging in..." });
-      setTimeout(() => {
-        navigate("/movies");
-      }, 500);
+  // ─── verify code with API ──────────────────────────────────────────
+  const handleVerifyCode = async () => {
+    const code = verificationDigits.join("");
+    const res = await fetch("https://cineniche.click/account/verify2fa", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, code })
+    });
+
+    if (res.ok) {
+      setNotification({ show: true, message: "Code verified! Logging in…" });
+      setTimeout(() => navigate("/movies"), 500);
     } else {
       setNotification({ show: true, message: "Invalid code. Please try again." });
     }
   };
 
-  // Resend code: reset inputs and timer (and eventually call backend)
-  const resendCode = () => {
+  // ─── resend code ───────────────────────────────────────────────────
+  const resendCode = async () => {
     setVerificationDigits(["", "", "", ""]);
     setTimer(30);
-    setNotification({ show: true, message: "A new code has been sent to your email." });
-    // TODO: Trigger actual resend logic when backend is integrated.
+    await fetch("https://cineniche.click/account/resend2fa", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
+    setNotification({ show: true, message: "A new code has been sent to your e‑mail." });
   };
 
+  // ─── UI ────────────────────────────────────────────────────────────
   return (
     <div className="twofactor-container">
-      {/* Back Button using FontAwesomeIcon */}
-      <button
-        className="back-button"
-        onClick={() => navigate("/login")}
-      >
+      <button className="back-button" onClick={() => navigate("/login")}>
         <FontAwesomeIcon icon={faArrowLeft} style={{ color: "white", fontSize: "2.25rem" }} />
       </button>
 
-      <h2>Two Factor Authentication</h2>
+      <h2>Two‑Factor Authentication</h2>
       <p>
-        A verification code has been sent to <strong>{email}</strong>. Please enter it below to continue.
+        A verification code has been sent to <strong>{email}</strong>.
+        &nbsp;Please enter it below to continue.
       </p>
 
       <div className="code-inputs">
-        {verificationDigits.map((_, index) => (
+        {verificationDigits.map((d, i) => (
           <input
-            key={index}
+            key={i}
             type="text"
             maxLength={1}
-            ref={digitRefs[index]}
-            value={verificationDigits[index]}
-            onChange={(e) => handleDigitChange(index, e.target.value)}
+            ref={digitRefs[i]}
+            value={d}
+            onChange={e => handleDigitChange(i, e.target.value)}
           />
         ))}
       </div>
 
       <div className="resend-container">
         {timer > 0 ? (
-          <p className="timer-text">Resend code in {timer} seconds</p>
+          <p className="timer-text">Resend code in {timer} s</p>
         ) : (
           <p className="resend-link" onClick={resendCode}>
             Send a new code
