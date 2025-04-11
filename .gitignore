@@ -11,7 +11,7 @@ obj/
 *.pdb
 *.log
 *.tlog
-
+__pycache__/
 # Ignore build files
 backend/CineNiche/obj/
 
