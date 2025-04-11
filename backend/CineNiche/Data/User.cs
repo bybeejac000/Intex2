@@ -8,7 +8,7 @@ namespace CineNiche.Data
     {
         [Key]
         [Required]
-        public int user_id { get; set; }
+        public string user_id { get; set; }
         [Required]
         public string name { get; set; }
         [Required]

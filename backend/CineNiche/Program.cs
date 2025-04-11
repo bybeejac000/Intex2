@@ -53,7 +53,6 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-app.UseCors("AllowFrontend");
 /*
 using (var scope = app.Services.CreateScope())
 {
@@ -81,8 +80,21 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-app.UseAuthentication();
+app.UseHttpsRedirection();     
+app.UseCors("AllowFrontend"); 
+// Middleware to ensure OPTIONS preflight returns 200
+app.Use(async (context, next) =>
+{
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.StatusCode = 200;
+        await context.Response.CompleteAsync();
+        return;
+    }
+
+    await next();
+});
+app.UseAuthentication();       // Now auth works with cookies
 app.UseAuthorization();
 
 app.MapControllers();
