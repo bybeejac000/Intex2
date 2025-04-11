@@ -158,7 +158,7 @@ export async function fetchNewReleases(): Promise<Movie[]> {
     ORDER BY release_year DESC
     LIMIT 50
   `;
-  const res = await fetch("http://44.214.17.52:5000/query", {
+  const res = await fetch("https://api.cineniche.click/query", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query: sql }),
