@@ -16,16 +16,23 @@ import TwoFactorPage from "./components/TwoFactorPage";
 import ContactPage from "./pages/ContactPage";
 import AboutPage from "./pages/AboutPage";
 
+/**
+ * App component serves as the main routing container for the application.
+ * It defines all available routes and their corresponding components.
+ */
 function App() {
   return (
     <Router>
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registration" element={<RegistrationPage />} />
         <Route path="/movies" element={<MoviesPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/movie/:id" element={<MovieDetailsPage />} />
+        
+        {/* Protected admin route with authorization checks */}
         <Route
           path="/admin"
           element={
@@ -36,12 +43,14 @@ function App() {
             </AuthorizeView>
           }
         />
+        
+        {/* Information pages */}
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/confirmEmail" element={<EmailConfirmationPage />} />
         <Route path="/twofactor" element={<TwoFactorPage />} />
         <Route path="/contact" element={<ContactPage />} />
-        <Route path ="/about" element={<AboutPage />} />
+        <Route path="/about" element={<AboutPage />} />
       </Routes>
     </Router>
   );

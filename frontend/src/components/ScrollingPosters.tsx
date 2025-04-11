@@ -1,6 +1,7 @@
 import React from 'react';
 import './ScrollingPosters.css';
 
+// Component props interface for ScrollingPosters
 interface ScrollingPostersProps {
     images?: {
         src: string;
@@ -8,6 +9,7 @@ interface ScrollingPostersProps {
     }[];
 }
 
+// Default movie posters that will be used if no images are provided
 const defaultPosters = [
     { src: '/images/posters/dearJohn.jpeg', alt: "Dear John" },
     { src: '/images/posters/Twisters.png', alt: "Twisters" },
@@ -24,15 +26,21 @@ const defaultPosters = [
     // Add more default images here
 ];
 
+/**
+ * ScrollingPosters Component
+ * Creates a vertically scrolling display of movie posters
+ * CSS animations handle the continuous scrolling effect
+ */
 const ScrollingPosters: React.FC<ScrollingPostersProps> = ({ images = defaultPosters }) => {
     return (
         <div className="poster-container" style={{ height: '100vh', overflow: 'hidden' }}>
             <div className="scrolling-posters">
                 <div className="poster-column">
+                    {/* First set of posters */}
                     {images.map((image, index) => (
                         <img key={index} src={image.src} alt={image.alt} />
                     ))}
-                    {/* Duplicate posters for seamless scrolling */}
+                    {/* Duplicate posters for seamless infinite scrolling effect */}
                     {images.map((image, index) => (
                         <img key={`duplicate-${index}`} src={image.src} alt={image.alt} />
                     ))}

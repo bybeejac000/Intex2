@@ -1,3 +1,7 @@
+/**
+ * PrivacyPage component - Displays the privacy policy for CineNiche
+ * Includes a navigation sidebar, section links, and detailed policy content
+ */
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -6,6 +10,7 @@ import "./PrivacyPage.css";
 const PrivacyPage = () => {
   const navigate = useNavigate();
 
+  // Define all policy sections for sidebar navigation
   const sections = [
     { id: "introduction", title: "Introduction" },
     { id: "dataCollection", title: "What Data Do We Collect?" },
@@ -24,14 +29,20 @@ const PrivacyPage = () => {
     { id: "authority", title: "How to Contact the Appropriate Authority" },
   ];
 
+  // Navigate back to previous page
   const handleBack = () => {
     navigate(-1);
   };
 
+  // Print the current page
   const handlePrint = () => {
     window.print();
   };
 
+  /**
+   * Scroll to a specific section with smooth animation
+   * Includes offset for fixed header
+   */
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -50,13 +61,14 @@ const PrivacyPage = () => {
   return (
     <>
       <Header />
+      {/* Spacer to prevent content from being hidden under fixed header */}
       <div style={{ height: '50px' }} />
       <div className="privacy-container">
         <button className="back-button" onClick={handleBack}>
           &#8592; Back
         </button>
 
-        {/* Sidebar! */}
+        {/* Sidebar navigation with quick links to each section */}
         <aside className="privacy-sidebar">
           <h2>Contents</h2>
           <ul>
@@ -73,10 +85,11 @@ const PrivacyPage = () => {
           </button>
         </aside>
 
-        {/* Content of the Privacy Policy! */}
+        {/* Main content area with all privacy policy sections */}
         <main className="privacy-main">
           <h1 className="policy-title">CineNiche Privacy Policy</h1>
 
+          {/* Introduction section */}
           <section id="introduction">
             <h2 className="section-title">Introduction</h2>
             <p>
@@ -91,6 +104,7 @@ const PrivacyPage = () => {
             </p>
           </section>
 
+          {/* Data collection details */}
           <section id="dataCollection">
             <h2 className="section-title">What Data Do We Collect?</h2>
             <p>CineNiche collects the following types of personal data:</p>
@@ -122,6 +136,7 @@ const PrivacyPage = () => {
             </ul>
           </section>
 
+          {/* Data collection methods */}
           <section id="dataCollectionMethod">
             <h2 className="section-title">How Do We Collect Your Data?</h2>
             <p>We collect data directly from you when you:</p>
@@ -139,6 +154,7 @@ const PrivacyPage = () => {
             </p>
           </section>
 
+          {/* Data usage information */}
           <section id="dataUsage">
             <h2 className="section-title">How Will We Use Your Data?</h2>
             <p>We use your data to:</p>
@@ -166,6 +182,7 @@ const PrivacyPage = () => {
             </p>
           </section>
 
+          {/* Data storage and security */}
           <section id="dataStorage">
             <h2 className="section-title">How Do We Store Your Data?</h2>
             <p>
@@ -181,6 +198,7 @@ const PrivacyPage = () => {
             </p>
           </section>
 
+          {/* Marketing practices */}
           <section id="marketing">
             <h2 className="section-title">Marketing</h2>
             <p>
@@ -190,6 +208,7 @@ const PrivacyPage = () => {
             </p>
           </section>
 
+          {/* User data rights */}
           <section id="dataRights">
             <h2 className="section-title">
               What Are Your Data Protection Rights?
@@ -228,6 +247,7 @@ const PrivacyPage = () => {
             <p>We have one month to respond to such requests.</p>
           </section>
 
+          {/* Cookie information */}
           <section id="cookies">
             <h2 className="section-title">What Are Cookies?</h2>
             <p>
@@ -246,6 +266,7 @@ const PrivacyPage = () => {
             </p>
           </section>
 
+          {/* Cookie usage */}
           <section id="cookiesUsage">
             <h2 className="section-title">How Do We Use Cookies?</h2>
             <p>We use cookies to:</p>
@@ -256,6 +277,7 @@ const PrivacyPage = () => {
             </ul>
           </section>
 
+          {/* Cookie types */}
           <section id="cookieTypes">
             <h2 className="section-title">What Types of Cookies Do We Use?</h2>
             <p>We use:</p>
@@ -272,6 +294,7 @@ const PrivacyPage = () => {
             <p>We do not use advertising or third-party tracking cookies.</p>
           </section>
 
+          {/* Cookie management */}
           <section id="cookieManagement">
             <h2 className="section-title">How to Manage Cookies</h2>
             <p>
@@ -281,6 +304,7 @@ const PrivacyPage = () => {
             </p>
           </section>
 
+          {/* Third-party websites */}
           <section id="thirdParty">
             <h2 className="section-title">
               Privacy Policies of Other Websites
@@ -293,6 +317,7 @@ const PrivacyPage = () => {
             </p>
           </section>
 
+          {/* Policy update information */}
           <section id="policyChanges">
             <h2 className="section-title">Changes to Our Privacy Policy</h2>
             <p>
@@ -301,6 +326,7 @@ const PrivacyPage = () => {
             </p>
           </section>
 
+          {/* Contact information */}
           <section id="contact">
             <h2 className="section-title">How to Contact Us</h2>
             <p>For any questions or data requests, please contact:</p>
@@ -315,6 +341,7 @@ const PrivacyPage = () => {
             </p>
           </section>
 
+          {/* Authority contact information */}
           <section id="authority">
             <h2 className="section-title">
               How to Contact the Appropriate Authority
@@ -332,5 +359,5 @@ const PrivacyPage = () => {
   );
 };
 
-// Explore the PrivacyPage class
+// Export the PrivacyPage component
 export default PrivacyPage;

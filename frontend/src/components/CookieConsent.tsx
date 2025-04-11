@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 
+/**
+ * Cookie consent banner component that displays a notification to users
+ * allowing them to accept or decline cookies on the website.
+ */
 interface CookieConsentProps {
   onAccept: () => void;
   onDecline: () => void;
@@ -10,12 +14,14 @@ const CookieConsent = ({ onAccept, onDecline }: CookieConsentProps) => {
 
   useEffect(() => {
     // Check if the user has already made a cookie choice
+    // Only show the banner if no previous choice is stored
     const cookieChoice = localStorage.getItem('cookieConsent');
     if (!cookieChoice) {
       setVisible(true);
     }
   }, []);
 
+  // Store user's consent choice and trigger the appropriate callback
   const handleAccept = () => {
     localStorage.setItem('cookieConsent', 'accepted');
     setVisible(false);
@@ -28,6 +34,7 @@ const CookieConsent = ({ onAccept, onDecline }: CookieConsentProps) => {
     onDecline();
   };
 
+  // Don't render anything if the banner shouldn't be visible
   if (!visible) return null;
 
   return (
@@ -44,7 +51,7 @@ const CookieConsent = ({ onAccept, onDecline }: CookieConsentProps) => {
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: 1000,
+        zIndex: 1000,  // Ensure banner appears above other content
         boxShadow: '0 -2px 10px rgba(0,0,0,0.2)',
       }}
     >

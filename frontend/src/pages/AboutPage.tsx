@@ -1,4 +1,7 @@
 // AboutPage.tsx
+// This component renders the About page for CineNiche, displaying the company's mission,
+// technology stack, and information about the INTEX 2025 project.
+
 //import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from "../components/Header";
@@ -8,10 +11,12 @@ import "./PrivacyPage.css";
 const AboutPage = () => {
   const navigate = useNavigate();
 
+  // Navigation function to return to previous page
   const handleBack = () => {
     navigate(-1);
   };
 
+  // Function to trigger browser print dialog
   const handlePrint = () => {
     window.print();
   };
@@ -19,15 +24,18 @@ const AboutPage = () => {
   return (
     <>
       <Header />
+      {/* Spacer div for layout */}
       <div style={{ height: '50px' }} />
       <div className="privacy-container">
         <button className="back-button" onClick={handleBack}>
           ← Back
         </button>
 
+        {/* Sidebar with navigation links and print button */}
         <aside className="privacy-sidebar">
           <h2>Quick Links</h2>
           <ul>
+            {/* Smooth scroll navigation to page sections */}
             <li><button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Our Mission</button></li>
             <li><button onClick={() => window.scrollTo({ top: 300, behavior: 'smooth' })}>Technology</button></li>
             <li><button onClick={() => window.scrollTo({ top: 600, behavior: 'smooth' })}>INTEX 2025</button></li>
@@ -37,8 +45,11 @@ const AboutPage = () => {
           </button>
         </aside>
 
+        {/* Main content area with company information sections */}
         <main className="privacy-main">
           <h1 className="policy-title">About CineNiche</h1>
+          
+          {/* Mission statement section */}
           <section>
             <h2 className="section-title">Our Mission</h2>
             <p>
@@ -49,6 +60,7 @@ const AboutPage = () => {
             </p>
           </section>
 
+          {/* Technology overview section */}
           <section>
             <h2 className="section-title">Technology</h2>
             <p>
@@ -56,6 +68,7 @@ const AboutPage = () => {
             </p>
           </section>
 
+          {/* INTEX 2025 project description */}
           <section>
             <h2 className="section-title">INTEX 2025 Project</h2>
             <p>
