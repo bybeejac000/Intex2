@@ -27,7 +27,6 @@ function LoginPage() {
     }
   }, []);
 
-
   // Handle input field changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, type, checked, value } = e.target;
@@ -82,14 +81,26 @@ function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
-      let data = null;
-      const contentLength = response.headers.get("content-length");
-      if (contentLength && parseInt(contentLength, 10) > 0) {
-        data = await response.json();
-      }
-
+      // Check if the response status indicates an error
       if (!response.ok) {
-        throw new Error(data?.message || "Invalid email or password.");
+        // Handle LockedOut case for 401 Unauthorized
+        if (response.status === 401) {
+          const data = await response.json().catch(() => null); // Avoid JSON parsing errors
+          const errorMessage =
+            data?.detail === "LockedOut"
+              ? "Your account is temporarily locked due to too many failed login attempts. Please try again in 5 minutes."
+              : "Invalid email or password.";
+          setError(errorMessage);
+          console.log("Login failed:", errorMessage);
+          throw new Error(errorMessage);
+        }
+
+        // Handle any other errors
+        const data = await response.json();
+        const errorMessage = data?.detail || "Invalid email or password.";
+        setError(errorMessage);
+        console.log("Login failed:", errorMessage);
+        throw new Error(errorMessage);
       }
 
       // Always fetch user ID regardless of cookie preference
@@ -97,8 +108,24 @@ function LoginPage() {
 
       navigate("/movies");
     } catch (error: any) {
-      setError(error.message || "Error logging in.");
+      const errorMsg = error.message || "Error logging in.";
+      console.log("Error caught:", errorMsg);
+
+      if (errorMsg.includes("LockedOut")) {
+        setError(
+          "Your account is temporarily locked due to too many failed login attempts. Please try again in 5 minutes."
+        );
+      } else if (errorMsg.toLowerCase().includes("locked")) {
+        setError(
+          "Your account is temporarily locked due to too many failed login attempts. Please try again in 5 minutes."
+        );
+      } else {
+        setError(errorMsg);
+      }
+
       console.error("Fetching attempt failed:", error);
+      // setError(error.message || "Error logging in.");
+      // console.error("Fetching attempt failed:", error);
     }
   };
 
@@ -218,6 +245,7 @@ function LoginPage() {
                   Login
                 </button>
               </form>
+              <br />
               {error && <p className="error">{error}</p>}
             </div>
           </div>
